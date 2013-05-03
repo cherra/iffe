@@ -6,6 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <!-- css -------------------------------------------------------------------- -->
   <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap.css" rel="stylesheet">
+  <style type="text/css">
+      body{
+          padding-top: 50px;
+      }
+      
+       @media (max-width: 980px) {
+        .pagination{
+            margin: 5px 0;
+        }
+      }
+      
+  </style>
+  <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
   <link href="<?php echo asset_url(); ?>jqueryui/css/flick/jquery-ui-1.10.1.custom.min.css" rel="stylesheet">
   <?php 
     if (isset($css)) {
@@ -37,50 +50,7 @@
         }
       }
     ?>
-    
-  <style type="text/css">
-      .contenedor-principal {
-        padding-top: 50px;
-        padding-bottom: 40px;
-      }
-
-      .sidebar-nav {
-        padding: 9px 0;
-      }
-      
-      .page-header{
-        margin: 10px 0 10px;
-        padding-bottom: 5px;
-      }
-
-      .pagination{
-        margin: 5px 0;
-      }
-
-      .navbar-fixed-top{
-        margin-bottom: 10px;
-      }
-
-      /* Tablets y mobiles*/
-      @media (max-width: 980px) {
-        .contenedor-principal {
-          padding-top: 0px;
-          padding-bottom: 10px;
-        }
-          
-        /* Enable use of floated navbar text */
-        .navbar-text.pull-right {
-          float: none;
-          padding-left: 5px;
-          padding-right: 5px;
-        }
-        
-        .sidebar-nav{
-            margin-bottom: 5px;
-        }
-      }
-      
-    </style>
+  
   <!-- Fav, touch icons -->
   <link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo asset_url(); ?>bootstrap/ico/apple-touch-icon-144-precomposed.png">
   <link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo asset_url(); ?>bootstrap/ico/apple-touch-icon-114-precomposed.png">
