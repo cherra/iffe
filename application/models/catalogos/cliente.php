@@ -25,8 +25,8 @@ class Cliente extends CI_Model {
  	* Cantidad de registros por pagina
  	* ***********************************************************************
  	*/
- 	function get_paged_list($limit = 10, $offset = 0) {
-        $this->db->order_by('id_cliente','desc');
+    function get_paged_list($limit = 10, $offset = 0) {
+        $this->db->order_by('id','desc');
         return $this->db->get($this->tbl_clientes, $limit, $offset);
     }
 
@@ -36,7 +36,7 @@ class Cliente extends CI_Model {
     * ***********************************************************************
     */
     function get_by_id($id) {
-        $this->db->where('id_cliente', $id);
+        $this->db->where('id', $id);
         return $this->db->get($this->tbl_clientes);
     }
 
@@ -66,7 +66,7 @@ class Cliente extends CI_Model {
     * ***********************************************************************
     */
     function update($id, $cliente) {
-        $this->db->where('id_cliente', $id);
+        $this->db->where('id', $id);
         $this->db->update($this->tbl_clientes, $cliente);
     }
 
@@ -76,7 +76,7 @@ class Cliente extends CI_Model {
     * ***********************************************************************
     */
     function delete($id) {
-        $this->db->where('id_cliente', $id);
+        $this->db->where('id', $id);
         $this->db->delete($this->tbl_clientes);
     }
 
@@ -99,128 +99,6 @@ class Cliente extends CI_Model {
         }    
     }
     
-    /**
-    * ***********************************************************************
-    * Cantidad de registros por pagina de dependientes
-    * ***********************************************************************
-    */
-    function get_paged_list_dependientes($id_cliente, $limit = null, $offset = 0) {
-        $this->db->where('id_cliente', $id_cliente);
-        $this->db->order_by('nombres','asc');
-        return $this->db->get($this->tbl_dependientes, $limit, $offset);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Obtiene el número total de dependientes registrados
-    * ***********************************************************************
-    */
-    function count_all_dependientes($id_cliente) {
-        $this->db->where('id_cliente', $id_cliente);
-        return $this->db->count_all($this->tbl_dependientes);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Get dependiente por id
-    * ***********************************************************************
-    */
-    function get_by_id_dependiente($id) {
-        $this->db->where('id', $id);
-        return $this->db->get($this->tbl_dependientes);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Guardar dependiente
-    * ***********************************************************************
-    */
-    function save_dependiente($dependiente) {
-        $this->db->insert($this->tbl_dependientes, $dependiente);
-        return $this->db->insert_id();
-    }
-    
-    /**
-    * ***********************************************************************
-    * Actualizar dependiente por id
-    * ***********************************************************************
-    */
-    function update_dependiente($id, $dependiente) {
-        $this->db->where('id', $id);
-        $this->db->update($this->tbl_dependientes, $dependiente);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Eliminar dependiente por id
-    * ***********************************************************************
-    */
-    function delete_dependiente($id) {
-        $this->db->where('id', $id);
-        $this->db->delete($this->tbl_dependientes);
-    }
-    
-    
-    /**
-    * ***********************************************************************
-    * Cantidad de registros por pagina de referencias
-    * ***********************************************************************
-    */
-    function get_paged_list_referencias($id_cliente, $limit = null, $offset = 0) {
-        $this->db->where('id_cliente', $id_cliente);
-        $this->db->order_by('nombres','asc');
-        return $this->db->get($this->tbl_referencias, $limit, $offset);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Obtiene el número total de dependientes registrados
-    * ***********************************************************************
-    */
-    function count_all_referencias($id_cliente) {
-        $this->db->where('id_cliente', $id_cliente);
-        return $this->db->count_all($this->tbl_referencias);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Get dependiente por id
-    * ***********************************************************************
-    */
-    function get_by_id_referencia($id) {
-        $this->db->where('id', $id);
-        return $this->db->get($this->tbl_referencias);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Guardar dependiente
-    * ***********************************************************************
-    */
-    function save_referencia($referencia) {
-        $this->db->insert($this->tbl_referencias, $referencia);
-        return $this->db->insert_id();
-    }
-    
-    /**
-    * ***********************************************************************
-    * Actualizar dependiente por id
-    * ***********************************************************************
-    */
-    function update_referencia($id, $referencia) {
-        $this->db->where('id', $id);
-        $this->db->update($this->tbl_referencias, $referencia);
-    }
-    
-    /**
-    * ***********************************************************************
-    * Eliminar dependiente por id
-    * ***********************************************************************
-    */
-    function delete_referencia($id) {
-        $this->db->where('id', $id);
-        $this->db->delete($this->tbl_referencias);
-    }
 }
 
 ?>

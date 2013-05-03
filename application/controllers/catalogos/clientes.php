@@ -16,9 +16,9 @@ class Clientes extends CI_Controller {
         parent::__construct();
     }
     
-    public function clientes($offset = 0) {
+    public function lista($offset = 0) {
     	
-    	$this->load->model('ventas/cliente', 'f');
+    	$this->load->model('catalogos/cliente', 'f');
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
@@ -26,7 +26,7 @@ class Clientes extends CI_Controller {
     	
     	// generar paginacion
     	$this->load->library('pagination');
-    	$config['base_url'] = site_url('ventas/catalogos/clientes');
+    	$config['base_url'] = site_url('catalogos/clientes');
     	$config['total_rows'] = $this->f->count_all();
     	$config['per_page'] = $page_limit;
     	$config['uri_segment'] = 4;
@@ -46,17 +46,15 @@ class Clientes extends CI_Controller {
                     array('data' => $cliente->apellido_materno, 'class' => 'hidden-phone'),
                     array('data' => $cliente->telefono, 'class' => 'hidden-phone'),
                     array('data' => $cliente->celular, 'class' => 'hidden-phone'),
-                    anchor('ventas/catalogos/clientes_referencias/' . $cliente->id_cliente, '<i class="icon-certificate"></i>', array('class' => 'btn btn-small', 'title' => 'Referencias')),
-                    anchor('ventas/catalogos/clientes_dependientes/' . $cliente->id_cliente, '<i class="icon-home"></i>', array('class' => 'btn btn-small', 'title' => 'Dependientes')),
-                    anchor('ventas/catalogos/clientes_update/' . $cliente->id_cliente, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
-                    array('data' => anchor('ventas/catalogos/clientes_delete/' . $cliente->id_cliente, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
+                    anchor('catalogos/clientes/update/' . $cliente->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
+                    array('data' => anchor('catalogos/clientes/delete/' . $cliente->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
     		);
     	}
     	$data['table'] = $this->table->generate();
     	$data['titulo'] = 'Clientes <small>Lista</small>';
-    	$data['link_add'] = anchor('ventas/catalogos/clientes_add','<i class="icon-plus"></i> Agregar cliente', array('class' => 'btn'));
+    	$data['link_add'] = anchor('catalogos/clientes/add','<i class="icon-plus"></i> Agregar cliente', array('class' => 'btn'));
     	
-    	$this->load->view('ventas/clientes/lista', $data);
+    	$this->load->view('catalogos/clientes/lista', $data);
     }
     
     /**
@@ -66,20 +64,20 @@ class Clientes extends CI_Controller {
      * @author: bravoteam
      *
      */
-    public function clientes_add() {
-    	$this->load->model('ventas/cliente', 'f');
+    public function add() {
+    	$this->load->model('catalogos/cliente', 'f');
     
     	$data['js'] = array(asset_url() . 'js/jquery.validation.js');
     	$data['titulo'] = 'Clientes <small>Alta</small>';
-    	$data['link_back'] = anchor('ventas/catalogos/clientes/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+    	$data['link_back'] = anchor('catalogos/clientes/lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
     
     	$data['mensaje'] = '';
-    	$data['action'] = site_url('ventas/catalogos/clientes_add');
+    	$data['action'] = site_url('catalogos/clientes/add');
     	if ( ($cliente = $this->input->post()) ) {
     		$this->f->save($cliente);
     		$data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro nuevo</div>';
     	} 
-        $this->load->view('ventas/clientes/formulario', $data);
+        $this->load->view('catalogos/clientes/formulario', $data);
     }
     
     /**
@@ -90,19 +88,19 @@ class Clientes extends CI_Controller {
      *
      * @param int $id
      */
-    public function clientes_update($id) {
+    public function update($id) {
     	if (!isset($id)) {
-    		redirect(site_url('ventas/catalogos/clientes/'));
+    		redirect(site_url('catalogos/clientes/lista'));
     	}
     	
     	$id = floatval($id);
     	
     	$data['titulo'] = 'Clientes <small>Modificar</small>';
-    	$data['link_back'] = anchor('ventas/catalogos/clientes/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+    	$data['link_back'] = anchor('catalogos/clientes/lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
     	$data['mensaje'] = '';
-    	$data['action'] = site_url('ventas/catalogos/clientes_update') . '/' . $id;
+    	$data['action'] = site_url('catalogos/clientes/update') . '/' . $id;
     	 
-    	$this->load->model('ventas/cliente', 'f');
+    	$this->load->model('catalogos/cliente', 'f');
     	$cliente = $this->f->get_by_id($id)->row();
     	$data['cliente'] = $cliente;
     	if ( ($cliente = $this->input->post()) ) {
@@ -110,7 +108,7 @@ class Clientes extends CI_Controller {
     		$data['cliente'] = (object)$cliente;
     		$data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro modificado</div>';
     	}
-        $this->load->view('ventas/clientes/formulario', $data);
+        $this->load->view('catalogos/clientes/formulario', $data);
     }
     
     /**
@@ -121,16 +119,16 @@ class Clientes extends CI_Controller {
      *
      * @param int $id
      */
-    public function clientes_delete($id) {
+    public function delete($id) {
     	if (!isset($id)) {
-    		redirect(site_url('ventas/catalogos/clientes/'));
+    		redirect(site_url('catalogos/clientes/lista'));
     	}
     	
     	$id = floatval($id);
     	
-    	$this->load->model('ventas/cliente', 'f');
+    	$this->load->model('catalogos/cliente', 'f');
     	$this->f->delete($id);
-    	redirect(site_url('ventas/catalogos/clientes/'));
+    	redirect(site_url('catalogos/clientes/lista'));
     }
 
     /**
@@ -139,10 +137,10 @@ class Clientes extends CI_Controller {
      * -------------------------------------------------------------------------
      * 
      */
-    public function clientes_autocompletar() {
+    public function autocompletar() {
         $query = $this->input->post('q', true);
         if (isset($query)) {
-            $this->load->model('ventas/cliente', 'c');
+            $this->load->model('catalogos/cliente', 'c');
             $clientes = $this->c->get_by_query($query);
             if ($clientes != false) {
                 echo json_encode($clientes);
