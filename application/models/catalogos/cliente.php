@@ -3,8 +3,6 @@
 class Cliente extends CI_Model {
     
 	private $tbl_clientes = 'Clientes'; 
-        private $tbl_dependientes = 'ClienteDependientes'; 
-        private $tbl_referencias = 'ClienteReferencias'; 
 
     function __construct() {
     	parent::__construct();

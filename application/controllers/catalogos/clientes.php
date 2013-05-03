@@ -88,12 +88,10 @@ class Clientes extends CI_Controller {
      *
      * @param int $id
      */
-    public function update($id) {
-    	if (!isset($id)) {
+    public function update($id = null) {
+    	if (empty($id)) {
     		redirect(site_url('catalogos/clientes/lista'));
     	}
-    	
-    	$id = floatval($id);
     	
     	$data['titulo'] = 'Clientes <small>Modificar</small>';
     	$data['link_back'] = anchor('catalogos/clientes/lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
@@ -123,9 +121,6 @@ class Clientes extends CI_Controller {
     	if (!isset($id)) {
     		redirect(site_url('catalogos/clientes/lista'));
     	}
-    	
-    	$id = floatval($id);
-    	
     	$this->load->model('catalogos/cliente', 'f');
     	$this->f->delete($id);
     	redirect(site_url('catalogos/clientes/lista'));
@@ -138,19 +133,19 @@ class Clientes extends CI_Controller {
      * 
      */
     public function autocompletar() {
-        $query = $this->input->post('q', true);
-        if (isset($query)) {
-            $this->load->model('catalogos/cliente', 'c');
-            $clientes = $this->c->get_by_query($query);
-            if ($clientes != false) {
-                echo json_encode($clientes);
+        if($this->input->is_ajax_request()){
+            if (($query = $this->input->post('q', true))){
+                $this->load->model('catalogos/cliente', 'c');
+                if ( ($clientes = $this->c->get_by_query($query)) ) {
+                    echo json_encode($clientes);
+                }
+                else {
+                    echo json_encode(false);    
+                }
             }
             else {
-                echo json_encode(false);    
+                echo json_encode(false);
             }
-        }
-        else {
-            echo json_encode(false);
         }
     }
 }
