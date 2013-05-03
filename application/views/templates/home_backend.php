@@ -16,6 +16,13 @@
             margin: 5px 0;
         }
       }
+      
+        .map-viewport{ position:relative; width:400px; height:300px; border:1px solid black; overflow:hidden; margin:0 0 20px 0;}
+        .level{ position:absolute; left:0; top:0; z-index:10;}
+        .selected-level{ z-index:20; }
+        #map-1{ width:800px; height:600px; position:absolute; left:0; top:0; }
+        img{max-width: none !important;}
+        
     </style>
   <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
   <?php 
@@ -32,6 +39,7 @@
   
   <!-- js ---------------------------------------------------------------------- -->
     <script src="<?php echo asset_url(); ?>js/jquery.js"></script>
+    <script src="<?php echo asset_url(); ?>jqueryui/js/jqueryui.js"></script>
     <script src="<?php echo asset_url(); ?>bootstrap/js/bootstrap.min.js"></script>
     <script src="<?php echo asset_url(); ?>js/alertas.js"></script>
     <?php 
