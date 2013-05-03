@@ -61,7 +61,7 @@
 <body>
 
 <!-- menu-top ---------------------------------------------------------------- -->
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
       <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -75,7 +75,7 @@
       ?>
       <div class="nav-collapse collapse">
         <p class="navbar-text pull-right hidden-phone">
-          <i class="icon-user"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(Salir)','class="navbar-link"'); ?>
+          <i class="icon-user icon-white"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(Salir)','class="navbar-link"'); ?>
         </p>
         <ul class="nav">
           <?php
@@ -119,7 +119,7 @@
                     <li <?php 
                     // Si el link es igual al URI quiere decir que es la opción seleccionada
                     // y se marca como activa para resaltarla
-                    if( strpos(current_url(), $link) ) 
+                    if( strpos(current_url(), $metodo->folder.'/'.$metodo->class) ) 
                         echo 'class="active"'; 
                     ?>><?php echo anchor($link, '<i class="'.$metodo->icon.'"></i> '.$metodo->nombre) ?></li>
             <?php

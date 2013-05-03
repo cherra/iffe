@@ -59,7 +59,7 @@
 <body>
 
 <!-- menu-top ---------------------------------------------------------------- -->
-<div class="navbar navbar-fixed-top">
+<div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
       <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -73,7 +73,7 @@
       ?>
       <div class="nav-collapse collapse">
         <p class="navbar-text pull-right hidden-phone">
-          <i class="icon-user"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(logout)','class="navbar-link"'); ?>
+          <i class="icon-user icon-white"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(logout)','class="navbar-link"'); ?>
         </p>
         <ul class="nav">
             <?php
