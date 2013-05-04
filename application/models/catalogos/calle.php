@@ -1,8 +1,8 @@
 <?php
 
-class Manzana extends CI_Model {
+class Calle extends CI_Model {
     
-	private $tbl_manzanas = 'Manzanas'; 
+	private $tbl = 'Calles'; 
 
     function __construct() {
     	parent::__construct();
@@ -14,9 +14,8 @@ class Manzana extends CI_Model {
  	* Cantidad de registros
  	* ***********************************************************************
  	*/
-    function count_all($id_fraccionamiento) {
-        $this->db->where('id_fraccionamiento', $id_fraccionamiento);
-        return $this->db->count_all_results($this->tbl_manzanas);
+    function count_all() {
+        return $this->db->count_all_results($this->tbl);
     }
 
     /**
@@ -24,10 +23,12 @@ class Manzana extends CI_Model {
     * Cantidad de registros por pagina
     * ***********************************************************************
     */
-    function get_paged_list($id_fraccionamiento, $limit = null, $offset = 0) {
-        $this->db->where('id_fraccionamiento', $id_fraccionamiento);
-        $this->db->order_by('descripcion','asc');
-        return $this->db->get($this->tbl_manzanas, $limit, $offset);
+    function get_paged_list($limit = null, $offset = 0) {
+        $this->db->select('c.*, COUNT(m.id) as modulos');
+        $this->db->join('Modulos m','c.id = m.id_calle','left');
+        $this->db->group_by('c.id');
+        $this->db->order_by('c.nombre','asc');
+        return $this->db->get($this->tbl.' c', $limit, $offset);
     }
 
     /**
@@ -35,11 +36,9 @@ class Manzana extends CI_Model {
      * Obtener todos
      * ***********************************************************************
      */
-    function get_all($id_fraccionamiento = null) {
-    	if (!empty($id_fraccionamiento))
-    		$this->db->where('id_fraccionamiento', $id_fraccionamiento);
-    	$this->db->order_by('descripcion','asc');
-    	return $this->db->get($this->tbl_manzanas);
+    function get_all() {
+    	$this->db->order_by('nombre','asc');
+    	return $this->db->get($this->tbl);
     }
     
     /**
@@ -48,8 +47,8 @@ class Manzana extends CI_Model {
     * ***********************************************************************
     */
     function get_by_id($id) {
-        $this->db->where('id_manzana', $id);
-        return $this->db->get($this->tbl_manzanas);
+        $this->db->where('id', $id);
+        return $this->db->get($this->tbl);
     }
 
     /**
@@ -57,8 +56,8 @@ class Manzana extends CI_Model {
     * Alta de fraccionamiento
     * ***********************************************************************
     */
-    function save($manzana) {
-        $this->db->insert($this->tbl_manzanas, $manzana);
+    function save($datos) {
+        $this->db->insert($this->tbl, $datos);
         return $this->db->insert_id();
     }
 
@@ -67,9 +66,9 @@ class Manzana extends CI_Model {
     * Actualizar manzana por id
     * ***********************************************************************
     */
-    function update($id, $manzana) {
-        $this->db->where('id_manzana', $id);
-        $this->db->update($this->tbl_manzanas, $manzana);
+    function update($id, $datos) {
+        $this->db->where('id', $id);
+        $this->db->update($this->tbl, $datos);
     }
 
     /**
@@ -78,8 +77,8 @@ class Manzana extends CI_Model {
     * ***********************************************************************
     */
     function delete($id) {
-        $this->db->where('id_manzana', $id);
-        $this->db->delete($this->tbl_manzanas);
+        $this->db->where('id', $id);
+        $this->db->delete($this->tbl);
     }
 
 }
