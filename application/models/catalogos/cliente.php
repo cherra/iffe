@@ -2,12 +2,7 @@
 
 class Cliente extends CI_Model {
     
-	private $tbl_clientes = 'Clientes'; 
-
-    function __construct() {
-    	parent::__construct();
-        $this->load->database();
-    }
+    private $tbl_clientes = 'Clientes'; 
 
  	/**
  	* ***********************************************************************
@@ -23,7 +18,7 @@ class Cliente extends CI_Model {
  	* Cantidad de registros por pagina
  	* ***********************************************************************
  	*/
-    function get_paged_list($limit = 10, $offset = 0) {
+    function get_paged_list($limit = null, $offset = 0) {
         $this->db->order_by('id','desc');
         return $this->db->get($this->tbl_clientes, $limit, $offset);
     }
