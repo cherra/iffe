@@ -49,9 +49,9 @@ class Calles extends CI_Controller{
             $this->table->add_row(
                 $r->nombre, 
                 array('data' => $r->descripcion, 'class' => 'hidden-phone'),
-                array('data' => $r->modulos, 'class' => 'hidden-phone'),
+                $r->modulos,
                 array('data' => number_format($r->precio_base,2,'.',','), 'class' => 'hidden-phone'),
-                anchor('catalogos/modulos/lista/' . $r->id, '<i class="icon-eye-open"></i>', array('class' => 'btn btn-small', 'title' => 'Ver módulos')),
+                anchor('catalogos/calles/modulos/' . $r->id, '<i class="icon-eye-open"></i>', array('class' => 'btn btn-small', 'title' => 'Ver módulos')),
                 anchor('catalogos/calles/update/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Editar')),
                 array('data' => anchor('catalogos/calles/delete/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
             );
@@ -164,17 +164,17 @@ class Calles extends CI_Controller{
             $this->table->set_empty('&nbsp;');
             $tmpl = array ( 'table_open' => '<table class="' . $this->config->item('tabla_css') . '" >' );
             $this->table->set_template($tmpl);
-            $this->table->set_heading('Número', array('data' => 'Medidas', 'class' => 'hidden-phone'), 'Precio', 'Categoría', 'Tipo');
+            $this->table->set_heading('Núm.', array('data' => 'Medidas', 'class' => 'hidden-phone'), 'Precio', 'Cat.', 'Tipo');
 
             foreach ($lista as $r) {
                 $this->table->add_row(
                     $r->numero,
-                    $r->frente.'x'.$r->fondo,
+                    array('data' => $r->frente.'x'.$r->fondo, 'class' => 'hidden-phone'),
                     number_format($r->precio,2,'.',','),
                     ucfirst($r->categoria),
                     ucfirst($r->tipo),
                     anchor('catalogos/calles/modulos_update/' . $r->id_calle . '/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
-                    anchor('catalogos/calles/modulos_delete/' . $r->id_calle . '/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small'))
+                    array('data' => anchor('catalogos/calles/modulos_delete/' . $r->id_calle . '/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
                 );
             }
 
