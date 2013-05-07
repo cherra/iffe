@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 03-05-2013 a las 19:34:14
+-- Tiempo de generación: 07-05-2013 a las 10:27:25
 -- Versión del servidor: 5.5.30
 -- Versión de PHP: 5.4.4-14
 
@@ -26,6 +26,7 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `Adjuntos`
 --
 
+DROP TABLE IF EXISTS `Adjuntos`;
 CREATE TABLE IF NOT EXISTS `Adjuntos` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `id_pasoproceso` int(11) NOT NULL,
@@ -60,13 +61,14 @@ INSERT INTO `Adjuntos` (`id`, `id_pasoproceso`, `path`, `file_name`, `descripcio
 -- Estructura de tabla para la tabla `Calles`
 --
 
+DROP TABLE IF EXISTS `Calles`;
 CREATE TABLE IF NOT EXISTS `Calles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(200) NOT NULL,
   `descripcion` varchar(350) NOT NULL,
   `precio_base` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
 
 --
 -- Volcado de datos para la tabla `Calles`
@@ -82,13 +84,14 @@ INSERT INTO `Calles` (`id`, `nombre`, `descripcion`, `precio_base`) VALUES
 -- Estructura de tabla para la tabla `Categorias`
 --
 
+DROP TABLE IF EXISTS `Categorias`;
 CREATE TABLE IF NOT EXISTS `Categorias` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(64) NOT NULL,
   `descripcion` varchar(128) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -96,8 +99,11 @@ CREATE TABLE IF NOT EXISTS `Categorias` (
 -- Estructura de tabla para la tabla `Clientes`
 --
 
+DROP TABLE IF EXISTS `Clientes`;
 CREATE TABLE IF NOT EXISTS `Clientes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_concesion` int(11) NOT NULL,
+  `id_giro` int(11) NOT NULL,
   `nombre` varchar(128) NOT NULL,
   `apellido_paterno` varchar(128) NOT NULL,
   `apellido_materno` varchar(128) NOT NULL,
@@ -112,16 +118,18 @@ CREATE TABLE IF NOT EXISTS `Clientes` (
   `telefono` varchar(10) NOT NULL,
   `celular` varchar(10) NOT NULL,
   `email` varchar(128) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `id_giro` (`id_giro`),
+  KEY `id_concesion` (`id_concesion`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 --
 -- Volcado de datos para la tabla `Clientes`
 --
 
-INSERT INTO `Clientes` (`id`, `nombre`, `apellido_paterno`, `apellido_materno`, `calle`, `numero_interior`, `numero_exterior`, `colonia`, `ciudad`, `estado`, `rfc`, `curp`, `telefono`, `celular`, `email`) VALUES
-(2, 'Carlos', 'Maldonado', '', '', '', '', '', '', '', '', '', '', '', ''),
-(3, 'Jorge', 'González', 'Becerra', 'Leon Felipe', '', '37', 'Lomas Verdes', 'Colima', 'Colima', '', '', '3121361900', '', '');
+INSERT INTO `Clientes` (`id`, `id_concesion`, `id_giro`, `nombre`, `apellido_paterno`, `apellido_materno`, `calle`, `numero_interior`, `numero_exterior`, `colonia`, `ciudad`, `estado`, `rfc`, `curp`, `telefono`, `celular`, `email`) VALUES
+(2, 1, 1, 'Carlos', 'Maldonado', 'Orozco', 'Calzada del Campesion', '', '265', 'San Pablo', 'Colima', 'Colima', '', '', '3123131234', '', ''),
+(3, 0, 0, 'Jorge', 'González', 'Becerra', 'Leon Felipe', '', '37', 'Lomas Verdes', 'Colima', 'Colima', '', '', '3121361900', '', '');
 
 -- --------------------------------------------------------
 
@@ -129,11 +137,20 @@ INSERT INTO `Clientes` (`id`, `nombre`, `apellido_paterno`, `apellido_materno`, 
 -- Estructura de tabla para la tabla `Concesiones`
 --
 
+DROP TABLE IF EXISTS `Concesiones`;
 CREATE TABLE IF NOT EXISTS `Concesiones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(128) NOT NULL,
+  `descripcion` varchar(256) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+
+--
+-- Volcado de datos para la tabla `Concesiones`
+--
+
+INSERT INTO `Concesiones` (`id`, `nombre`, `descripcion`) VALUES
+(1, 'Restaurante', 'Prueba de');
 
 -- --------------------------------------------------------
 
@@ -141,6 +158,7 @@ CREATE TABLE IF NOT EXISTS `Concesiones` (
 -- Estructura de tabla para la tabla `Configuracion`
 --
 
+DROP TABLE IF EXISTS `Configuracion`;
 CREATE TABLE IF NOT EXISTS `Configuracion` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `key` varchar(128) NOT NULL,
@@ -169,6 +187,7 @@ INSERT INTO `Configuracion` (`id`, `key`, `valor`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `ContratoAdjuntos`
 --
 
+DROP TABLE IF EXISTS `ContratoAdjuntos`;
 CREATE TABLE IF NOT EXISTS `ContratoAdjuntos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_contrato` int(11) NOT NULL,
@@ -194,6 +213,7 @@ INSERT INTO `ContratoAdjuntos` (`id`, `id_contrato`, `id_adjunto`) VALUES
 -- Estructura de tabla para la tabla `ContratoModulos`
 --
 
+DROP TABLE IF EXISTS `ContratoModulos`;
 CREATE TABLE IF NOT EXISTS `ContratoModulos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_contrato` int(11) NOT NULL,
@@ -208,6 +228,7 @@ CREATE TABLE IF NOT EXISTS `ContratoModulos` (
 -- Estructura de tabla para la tabla `Contratos`
 --
 
+DROP TABLE IF EXISTS `Contratos`;
 CREATE TABLE IF NOT EXISTS `Contratos` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `id_cliente` int(10) unsigned NOT NULL,
@@ -235,11 +256,20 @@ INSERT INTO `Contratos` (`id`, `id_cliente`, `id_usuario`, `numero`, `fecha`, `f
 -- Estructura de tabla para la tabla `Giros`
 --
 
+DROP TABLE IF EXISTS `Giros`;
 CREATE TABLE IF NOT EXISTS `Giros` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(128) NOT NULL,
+  `descripcion` varchar(256) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+
+--
+-- Volcado de datos para la tabla `Giros`
+--
+
+INSERT INTO `Giros` (`id`, `nombre`, `descripcion`) VALUES
+(1, 'Comida', 'Prueba');
 
 -- --------------------------------------------------------
 
@@ -247,6 +277,7 @@ CREATE TABLE IF NOT EXISTS `Giros` (
 -- Estructura de tabla para la tabla `Modulos`
 --
 
+DROP TABLE IF EXISTS `Modulos`;
 CREATE TABLE IF NOT EXISTS `Modulos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_calle` int(11) NOT NULL,
@@ -277,6 +308,7 @@ INSERT INTO `Modulos` (`id`, `id_calle`, `id_categoria`, `descripcion`, `frente`
 -- Estructura de tabla para la tabla `Permisos`
 --
 
+DROP TABLE IF EXISTS `Permisos`;
 CREATE TABLE IF NOT EXISTS `Permisos` (
   `id_permiso` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `permKey` varchar(50) NOT NULL,
@@ -289,7 +321,7 @@ CREATE TABLE IF NOT EXISTS `Permisos` (
   `icon` varchar(32) NOT NULL,
   PRIMARY KEY (`id_permiso`),
   UNIQUE KEY `permKey` (`permKey`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=33 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=41 ;
 
 --
 -- Volcado de datos para la tabla `Permisos`
@@ -325,7 +357,15 @@ INSERT INTO `Permisos` (`id_permiso`, `permKey`, `nombre`, `folder`, `submenu`, 
 (29, 'calles/modulos', 'Módulos', 'catalogos', '', 'calles', 'modulos', 1, 'icon-list'),
 (30, 'calles/modulos_add', 'calles/modulos_add', 'catalogos', '', 'calles', 'modulos_add', 0, ''),
 (31, 'calles/modulos_update', 'calles/modulos_update', 'catalogos', '', 'calles', 'modulos_update', 0, ''),
-(32, 'calles/modulos_delete', 'calles/modulos_delete', 'catalogos', '', 'calles', 'modulos_delete', 0, '');
+(32, 'calles/modulos_delete', 'calles/modulos_delete', 'catalogos', '', 'calles', 'modulos_delete', 0, ''),
+(33, 'clientes/giros_lista', 'Giros', 'catalogos', '', 'clientes', 'giros_lista', 1, 'icon-list'),
+(34, 'clientes/giros_add', 'clientes/giros_add', 'catalogos', '', 'clientes', 'giros_add', 0, ''),
+(35, 'clientes/giros_update', 'clientes/giros_update', 'catalogos', '', 'clientes', 'giros_update', 0, ''),
+(36, 'clientes/giros_delete', 'clientes/giros_delete', 'catalogos', '', 'clientes', 'giros_delete', 0, ''),
+(37, 'clientes/concesiones_lista', 'Concesiones', 'catalogos', '', 'clientes', 'concesiones_lista', 1, 'icon-list'),
+(38, 'clientes/concesiones_add', 'clientes/concesiones_add', 'catalogos', '', 'clientes', 'concesiones_add', 0, ''),
+(39, 'clientes/concesiones_update', 'clientes/concesiones_update', 'catalogos', '', 'clientes', 'concesiones_update', 0, ''),
+(40, 'clientes/concesiones_delete', 'clientes/concesiones_delete', 'catalogos', '', 'clientes', 'concesiones_delete', 0, '');
 
 -- --------------------------------------------------------
 
@@ -333,6 +373,7 @@ INSERT INTO `Permisos` (`id_permiso`, `permKey`, `nombre`, `folder`, `submenu`, 
 -- Estructura de tabla para la tabla `PermisosRol`
 --
 
+DROP TABLE IF EXISTS `PermisosRol`;
 CREATE TABLE IF NOT EXISTS `PermisosRol` (
   `id_permisorol` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id_rol` bigint(20) NOT NULL,
@@ -349,6 +390,7 @@ CREATE TABLE IF NOT EXISTS `PermisosRol` (
 -- Estructura de tabla para la tabla `PermisosUsuario`
 --
 
+DROP TABLE IF EXISTS `PermisosUsuario`;
 CREATE TABLE IF NOT EXISTS `PermisosUsuario` (
   `id_permisousuario` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `id_usuario` bigint(20) NOT NULL,
@@ -365,6 +407,7 @@ CREATE TABLE IF NOT EXISTS `PermisosUsuario` (
 -- Estructura de tabla para la tabla `Roles`
 --
 
+DROP TABLE IF EXISTS `Roles`;
 CREATE TABLE IF NOT EXISTS `Roles` (
   `id_rol` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(20) NOT NULL,
@@ -387,6 +430,7 @@ INSERT INTO `Roles` (`id_rol`, `nombre`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `RolesUsuario`
 --
 
+DROP TABLE IF EXISTS `RolesUsuario`;
 CREATE TABLE IF NOT EXISTS `RolesUsuario` (
   `id_rolusuario` int(11) NOT NULL,
   `id_usuario` bigint(20) NOT NULL,
@@ -408,6 +452,7 @@ INSERT INTO `RolesUsuario` (`id_rolusuario`, `id_usuario`, `id_rol`, `fecha`) VA
 -- Estructura de tabla para la tabla `Usuarios`
 --
 
+DROP TABLE IF EXISTS `Usuarios`;
 CREATE TABLE IF NOT EXISTS `Usuarios` (
   `id_usuario` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `nombre` varchar(128) NOT NULL,
@@ -415,7 +460,7 @@ CREATE TABLE IF NOT EXISTS `Usuarios` (
   `password` varchar(64) NOT NULL,
   `activo` enum('s','n') NOT NULL DEFAULT 's',
   PRIMARY KEY (`id_usuario`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Volcado de datos para la tabla `Usuarios`
