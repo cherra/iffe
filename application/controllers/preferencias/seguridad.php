@@ -22,7 +22,7 @@ class Seguridad extends CI_Controller{
     
     public function permisos_lista( $offset = '0' ){
         
-        $this->load->model('preferencias/permiso','p');
+        $this->load->model('permiso','p');
         $this->titulo = "Permisos";
         
         // Si se registró la variable flash 'pdf' en la sesión se omite la paginación
@@ -79,7 +79,7 @@ class Seguridad extends CI_Controller{
 	*/
     public function permiso_update() {
 
-        $this->load->model('preferencias/permiso','p');
+        $this->load->model('permiso','p');
         $this->titulo = "Permisos";
 
         if (!$this->uri->segment(4)) {
@@ -122,14 +122,14 @@ class Seguridad extends CI_Controller{
         
         $id = floatval($id);
         
-        $this->load->model('preferencias/permiso', 'p');
+        $this->load->model('permiso', 'p');
         $this->p->delete($id);
         redirect(site_url('preferencias/seguridad/permisos_lista/'));
     }
     
     public function roles_lista(){
         
-        $this->load->model('preferencias/rol','c');
+        $this->load->model('rol','c');
         $this->titulo = "Roles";
         
         // obtener offset
@@ -187,7 +187,7 @@ class Seguridad extends CI_Controller{
                 'descripcion' => $this->input->post('descripcion', true)
             );
             
-            $this->load->model('preferencias/rol', 'r');
+            $this->load->model('rol', 'r');
             $this->r->save($rol);
             
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro nuevo</div>';
@@ -197,7 +197,7 @@ class Seguridad extends CI_Controller{
     
     public function rol_update( $id ) {
 
-        $this->load->model('preferencias/rol','r');
+        $this->load->model('rol','r');
         $this->titulo = "Roles";
         
         if (empty($id)) {
@@ -236,15 +236,15 @@ class Seguridad extends CI_Controller{
         
         $id = floatval($id);
         
-        $this->load->model('preferencias/rol', 'r');
+        $this->load->model('rol', 'r');
         $this->r->delete($id);
         redirect(site_url('preferencias/seguridad/roles_lista/'));
     }
     
     public function rol_permisos( $id ) {
 
-        $this->load->model('preferencias/rol','r');
-        $this->load->model('preferencias/permiso','p');
+        $this->load->model('rol','r');
+        $this->load->model('permiso','p');
         $this->titulo = "Roles";
         
         if (empty($id)) {
@@ -303,7 +303,7 @@ class Seguridad extends CI_Controller{
     
     public function usuarios_lista(){
         
-        $this->load->model('preferencias/usuario','u');
+        $this->load->model('usuario','u');
         $this->titulo = "Usuarios";
         
         // obtener offset
@@ -351,7 +351,7 @@ class Seguridad extends CI_Controller{
     
     public function usuario_update() {
 
-        $this->load->model('preferencias/usuario','u');
+        $this->load->model('usuario','u');
         $this->titulo = "Usuarios";
 
         if (!$this->uri->segment(4)) {
@@ -414,7 +414,7 @@ class Seguridad extends CI_Controller{
                 'activo' => $this->input->post('activo', true)
             );
             
-            $this->load->model('preferencias/usuario', 'u');
+            $this->load->model('usuario', 'u');
             $this->u->save($usuario);
             
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro nuevo</div>';
@@ -429,15 +429,15 @@ class Seguridad extends CI_Controller{
         
         $id = floatval($id);
         
-        $this->load->model('preferencias/usuario', 'u');
+        $this->load->model('usuario', 'u');
         $this->u->delete($id);
         redirect(site_url('preferencias/seguridad/usuarios_lista/'));
     }
     
     public function usuario_permisos( $id ) {
 
-        $this->load->model('preferencias/usuario','u');
-        $this->load->model('preferencias/permiso','p');
+        $this->load->model('usuario','u');
+        $this->load->model('permiso','p');
         $this->titulo = "Permisos";
         
         if (empty($id)) {

@@ -27,7 +27,7 @@ class Calles extends CI_Controller{
        
             // obtener datos
         $this->config->load("pagination");
-        $this->load->model('catalogos/calle', 'm');
+        $this->load->model('calle', 'm');
         $page_limit = $this->config->item("per_page");
         $lista = $this->m->get_paged_list($page_limit, $offset)->result();
 
@@ -75,7 +75,7 @@ class Calles extends CI_Controller{
         $data['action'] = site_url('catalogos/calles/add/');
 	
         if ( ($datos = $this->input->post()) ) {
-           	$this->load->model('catalogos/calle', 'm');
+           	$this->load->model('calle', 'm');
            	$this->m->save($datos);
                 $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro exitoso</div>';
         }
@@ -99,7 +99,7 @@ class Calles extends CI_Controller{
         $data['mensaje'] = '';
         $data['action'] = site_url('catalogos/calles/update') . '/' . $id;
         
-        $this->load->model('catalogos/calle', 'm');
+        $this->load->model('calle', 'm');
         $registro = $this->m->get_by_id($id)->row();
         $data['datos'] = $registro;
         
@@ -122,7 +122,7 @@ class Calles extends CI_Controller{
             redirect('catalogos/calles/lista');
         }
 
-        $this->load->model('catalogos/calle', 'm');
+        $this->load->model('calle', 'm');
         $this->m->delete($id);
         redirect('catalogos/calles/lista');
     }
@@ -136,7 +136,7 @@ class Calles extends CI_Controller{
      */
     public function modulos($id_calle = null, $offset = 0) {
 
-        $this->load->model('catalogos/calle', 'c');
+        $this->load->model('calle', 'c');
         
         $data['link_add'] = '';
         
@@ -147,7 +147,7 @@ class Calles extends CI_Controller{
 
             // obtener datos
             $this->config->load("pagination");
-            $this->load->model('catalogos/modulo', 'm');
+            $this->load->model('modulo', 'm');
             $page_limit = $this->config->item("per_page");
             $lista = $this->m->get_paged_list($id_calle, $page_limit, $offset)->result();
 
@@ -197,7 +197,7 @@ class Calles extends CI_Controller{
             redirect('catalogos/calles/modulos/');
         }
         
-        $this->load->model('catalogos/calle', 'c');
+        $this->load->model('calle', 'c');
         $data['calle'] = (object)$this->c->get_by_id($id_calle)->row();
 
         $data['titulo'] = 'Módulos <small>Alta</small>';
@@ -206,7 +206,7 @@ class Calles extends CI_Controller{
         $data['action'] = site_url('catalogos/calles/modulos_add/' . $id_calle);
 	
         if( ($datos = $this->input->post()) ){
-            $this->load->model('catalogos/modulo', 'm');
+            $this->load->model('modulo', 'm');
             $datos['id_calle'] = $id_calle;
             $this->m->save($datos);
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro exitoso</div>';
@@ -232,11 +232,11 @@ class Calles extends CI_Controller{
         $data['mensaje'] = '';
         $data['action'] = site_url('catalogos/calles/modulos_update/') . '/' . $id_calle . '/' . $id;
         
-        $this->load->model('catalogos/calle', 'c');
+        $this->load->model('calle', 'c');
         $calle = $this->c->get_by_id($id_calle)->row();
         $data['calle'] = $calle;
         
-        $this->load->model('catalogos/modulo', 'm');
+        $this->load->model('modulo', 'm');
         $modulo = $this->m->get_by_id($id)->row();
         $data['datos'] = $modulo;
         
@@ -261,7 +261,7 @@ class Calles extends CI_Controller{
             redirect('catalogos/calles/modulos/');
         }
 
-        $this->load->model('catalogos/modulo', 'm');
+        $this->load->model('modulo', 'm');
         $this->m->delete($id);
         redirect('catalogos/calles/modulos/' . '/' . $id_calle);
     }

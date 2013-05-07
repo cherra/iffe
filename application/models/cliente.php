@@ -79,7 +79,7 @@ class Cliente extends CI_Model {
     * ***********************************************************************
     */
     function get_by_query($query) {
-        $sql = "SELECT id_cliente, concat(nombre, ' ', apellido_paterno, ' ', apellido_materno) as nombre 
+        $sql = "SELECT id, concat(nombre, ' ', apellido_paterno, ' ', apellido_materno) as nombre 
                 FROM Clientes 
                 WHERE concat(nombre, ' ', apellido_paterno, ' ', apellido_materno) like '%" . $query . "%';";
         $query = $this->db->query($sql);

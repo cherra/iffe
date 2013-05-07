@@ -36,13 +36,13 @@ class Modulo extends CI_Model {
     * ***********************************************************************
     */
     function get_disponibles($id_calle){
-        $this->db->select($this->tbl.'.*, cm.id_modulo AS contrato');
+        $this->db->select('m.*, cm.id_modulo AS contrato');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
         $this->db->join('Contratos c','cm.id_contrato = c.id','left');
         $this->db->where('m.id_calle', $id_calle);
         $this->db->having('contrato IS NULL');
         $this->db->order_by('m.numero');
-        return $this->db->get($this->tbl);
+        return $this->db->get($this->tbl.' m');
     }
     
  

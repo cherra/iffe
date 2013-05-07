@@ -18,7 +18,7 @@ class Clientes extends CI_Controller {
     
     public function lista($offset = 0) {
     	
-    	$this->load->model('catalogos/cliente', 'f');
+    	$this->load->model('cliente', 'f');
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
@@ -65,9 +65,9 @@ class Clientes extends CI_Controller {
      *
      */
     public function add() {
-    	$this->load->model('catalogos/cliente', 'f');
-        $this->load->model('catalogos/giro', 'g');
-        $this->load->model('catalogos/concesion', 'c');
+    	$this->load->model('cliente', 'f');
+        $this->load->model('giro', 'g');
+        $this->load->model('concesion', 'c');
         
         $data['giros'] = $this->g->get_all()->result();
         $data['concesiones'] = $this->c->get_all()->result();
@@ -98,9 +98,9 @@ class Clientes extends CI_Controller {
     		redirect(site_url('catalogos/clientes/lista'));
     	}
     	
-        $this->load->model('catalogos/giro', 'g');
-        $this->load->model('catalogos/concesion', 'c');
-        $this->load->model('catalogos/cliente', 'f');
+        $this->load->model('giro', 'g');
+        $this->load->model('concesion', 'c');
+        $this->load->model('cliente', 'f');
         
         $cliente = $this->f->get_by_id($id)->row();
     	$data['datos'] = $cliente;
@@ -131,7 +131,7 @@ class Clientes extends CI_Controller {
     	if (!isset($id)) {
     		redirect(site_url('catalogos/clientes/lista'));
     	}
-    	$this->load->model('catalogos/cliente', 'f');
+    	$this->load->model('cliente', 'f');
     	$this->f->delete($id);
     	redirect(site_url('catalogos/clientes/lista'));
     }
@@ -145,7 +145,7 @@ class Clientes extends CI_Controller {
     public function autocompletar() {
         if($this->input->is_ajax_request()){
             if (($query = $this->input->post('q', true))){
-                $this->load->model('catalogos/cliente', 'c');
+                $this->load->model('cliente', 'c');
                 if ( ($clientes = $this->c->get_by_query($query)) ) {
                     echo json_encode($clientes);
                 }
@@ -167,7 +167,7 @@ class Clientes extends CI_Controller {
     
     public function giros_lista($offset = 0) {
     	
-    	$this->load->model('catalogos/giro', 'f');
+    	$this->load->model('giro', 'f');
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
@@ -211,7 +211,7 @@ class Clientes extends CI_Controller {
      *
      */
     public function giros_add() {
-    	$this->load->model('catalogos/giro', 'f');
+    	$this->load->model('giro', 'f');
     
     	$data['titulo'] = 'Giros <small>Alta</small>';
     	$data['link_back'] = anchor('catalogos/clientes/giros_lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
@@ -243,7 +243,7 @@ class Clientes extends CI_Controller {
     	$data['mensaje'] = '';
     	$data['action'] = site_url('catalogos/clientes/giros_update') . '/' . $id;
     	 
-    	$this->load->model('catalogos/giro', 'f');
+    	$this->load->model('giro', 'f');
     	$datos = $this->f->get_by_id($id)->row();
     	$data['datos'] = $datos;
     	if ( ($datos = $this->input->post()) ) {
@@ -266,7 +266,7 @@ class Clientes extends CI_Controller {
     	if (!isset($id)) {
     		redirect(site_url('catalogos/clientes/giros_lista'));
     	}
-    	$this->load->model('catalogos/giro', 'f');
+    	$this->load->model('giro', 'f');
     	$this->f->delete($id);
     	redirect(site_url('catalogos/clientes/giros_lista'));
     }
@@ -280,7 +280,7 @@ class Clientes extends CI_Controller {
     
     public function concesiones_lista($offset = 0) {
     	
-    	$this->load->model('catalogos/concesion', 'f');
+    	$this->load->model('concesion', 'f');
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
@@ -323,7 +323,7 @@ class Clientes extends CI_Controller {
      *
      */
     public function concesiones_add() {
-    	$this->load->model('catalogos/concesion', 'f');
+    	$this->load->model('concesion', 'f');
     
     	$data['titulo'] = 'Concesiones <small>Alta</small>';
     	$data['link_back'] = anchor('catalogos/clientes/concesiones_lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
@@ -354,7 +354,7 @@ class Clientes extends CI_Controller {
     	$data['mensaje'] = '';
     	$data['action'] = site_url('catalogos/clientes/concesiones_update') . '/' . $id;
     	 
-    	$this->load->model('catalogos/concesion', 'f');
+    	$this->load->model('concesion', 'f');
     	$datos = $this->f->get_by_id($id)->row();
     	$data['datos'] = $datos;
     	if ( ($datos = $this->input->post()) ) {
@@ -376,7 +376,7 @@ class Clientes extends CI_Controller {
     	if (!isset($id)) {
     		redirect(site_url('catalogos/clientes/concesiones_lista'));
     	}
-    	$this->load->model('catalogos/concesion', 'f');
+    	$this->load->model('concesion', 'f');
     	$this->f->delete($id);
     	redirect(site_url('catalogos/clientes/concesiones_lista'));
     }

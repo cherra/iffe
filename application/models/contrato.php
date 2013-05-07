@@ -7,6 +7,7 @@
 class Contrato extends CI_Model{
     
     private $tbl = 'Contratos'; 
+    private $tbl_contrato_modulos = 'ContratoModulos'; 
     private $tbl_adjuntos_contrato = 'ContratoAdjuntos';
     private $tbl_adjuntos = 'Adjuntos';
     
@@ -25,13 +26,13 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select($this->tbl.".*, Fraccionamientos.descripcion AS fraccionamiento, Manzanas.descripcion AS manzana, Lotes.descripcion AS lote, CONCAT(Clientes.nombre,' ',Clientes.apellido_paterno,' ',Clientes.apellido_materno) AS cliente, Usuarios.nombre AS vendedor", false);
+        $this->db->select($this->tbl.".*, Calles.nombre AS calle, Modulos.numero AS modulo, 
+            CONCAT(Clientes.nombre,' ',Clientes.apellido_paterno,' ',Clientes.apellido_materno) AS cliente ", false);
+        $this->db->join($this->tbl_contrato_modulos,$this->tbl.'.id = '.$this->tbl_contrato_modulos.'.id_contrato');
+        $this->db->join('Modulos', $this->tbl_contrato_modulos.'.id_modulo = Modulos.id');
         $this->db->join('Usuarios',$this->tbl.'.id_usuario = Usuarios.id_usuario');
-        $this->db->join('Apartados',$this->tbl.'.id_apartado = Apartados.id_apartado','left');
-        $this->db->join('Clientes',$this->tbl.'.id_cliente = Clientes.id_cliente');
-        $this->db->join('Lotes', $this->tbl.'.id_lote = Lotes.id_lote');
-        $this->db->join('Manzanas','Lotes.id_manzana = Manzanas.id_manzana');
-        $this->db->join('Fraccionamientos','Manzanas.id_fraccionamiento = Fraccionamientos.id_fraccionamiento');
+        $this->db->join('Clientes',$this->tbl.'.id_cliente = Clientes.id');
+        $this->db->join('Calles','Modulos.id_calle = Calles.id');
         
         $this->db->order_by('fecha','asc');
         return $this->db->get($this->tbl,$limit, $offset);
@@ -140,14 +141,6 @@ class Contrato extends CI_Model{
             return true;
     }
 
-    /**
-    * ***********************************************************************
-    * Alta de contrato proceso
-    * ***********************************************************************
-    */
-    function save_proceso($id, $datos) {
-        $this->db->insert('ContratosProcesos', $datos);
-    }
 }
 
 ?>
