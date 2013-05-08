@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 07-05-2013 a las 10:27:25
+-- Tiempo de generación: 08-05-2013 a las 14:13:28
 -- Versión del servidor: 5.5.30
 -- Versión de PHP: 5.4.4-14
 
@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS `Calles` (
 --
 
 INSERT INTO `Calles` (`id`, `nombre`, `descripcion`, `precio_base`) VALUES
-(6, 'La Estancia', 'Sur', 4422.32),
-(7, 'La Estancia', 'Norte', 4422.32);
+(6, 'La Estancia Sur', 'Sur', 4422.32),
+(7, 'La Estancia Norte', 'Norte', 4422.32);
 
 -- --------------------------------------------------------
 
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `Configuracion` (
   `valor` varchar(128) NOT NULL,
   `descripcion` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
 
 --
 -- Volcado de datos para la tabla `Configuracion`
@@ -179,7 +179,8 @@ INSERT INTO `Configuracion` (`id`, `key`, `valor`, `descripcion`) VALUES
 (10, 'plano', 'plano.jpg', 'Nombre de archivo del plano de instalaciones de la feria'),
 (11, 'imagenes', 'img/', 'Carpeta donde se guardan las imagenes para el sistema'),
 (12, 'plano50', 'plano50.jpg', 'Nombre de archivo para el plano al 50% de su tamaño real'),
-(13, 'plano75', 'plano75.jpg', 'Nombre de archivo para el plano al 75% de su tamaño real');
+(13, 'plano75', 'plano75.jpg', 'Nombre de archivo para el plano al 75% de su tamaño real'),
+(14, 'contrato_vencimiento', '15', 'Vencimiento de contratos');
 
 -- --------------------------------------------------------
 
@@ -253,6 +254,23 @@ INSERT INTO `Contratos` (`id`, `id_cliente`, `id_usuario`, `numero`, `fecha`, `f
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `Ferias`
+--
+
+DROP TABLE IF EXISTS `Ferias`;
+CREATE TABLE IF NOT EXISTS `Ferias` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(128) NOT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date NOT NULL,
+  `observaciones` varchar(256) NOT NULL,
+  `activa` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `Giros`
 --
 
@@ -321,7 +339,7 @@ CREATE TABLE IF NOT EXISTS `Permisos` (
   `icon` varchar(32) NOT NULL,
   PRIMARY KEY (`id_permiso`),
   UNIQUE KEY `permKey` (`permKey`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=41 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=54 ;
 
 --
 -- Volcado de datos para la tabla `Permisos`
@@ -365,7 +383,12 @@ INSERT INTO `Permisos` (`id_permiso`, `permKey`, `nombre`, `folder`, `submenu`, 
 (37, 'clientes/concesiones_lista', 'Concesiones', 'catalogos', '', 'clientes', 'concesiones_lista', 1, 'icon-list'),
 (38, 'clientes/concesiones_add', 'clientes/concesiones_add', 'catalogos', '', 'clientes', 'concesiones_add', 0, ''),
 (39, 'clientes/concesiones_update', 'clientes/concesiones_update', 'catalogos', '', 'clientes', 'concesiones_update', 0, ''),
-(40, 'clientes/concesiones_delete', 'clientes/concesiones_delete', 'catalogos', '', 'clientes', 'concesiones_delete', 0, '');
+(40, 'clientes/concesiones_delete', 'clientes/concesiones_delete', 'catalogos', '', 'clientes', 'concesiones_delete', 0, ''),
+(45, 'operacion', 'operacion', 'operacion', '', 'operacion', 'index', 0, ''),
+(49, 'informes', 'informes', 'informes', '', 'informes', 'index', 1, ''),
+(50, 'ferias/contratos', 'Contratos', 'operacion', '', 'ferias', 'contratos', 1, 'icon-list'),
+(51, 'ferias/contratos_add', 'ferias/contratos_add', 'operacion', '', 'ferias', 'contratos_add', 0, ''),
+(53, 'ferias/ferias_lista', 'Ferias', 'operacion', '', 'ferias', 'ferias_lista', 1, 'icon-list');
 
 -- --------------------------------------------------------
 
