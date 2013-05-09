@@ -10,11 +10,13 @@
  *
  * @author cherra
  */
-class Calles extends CI_Controller{
+class Ferias extends CI_Controller{
     
     function __construct() {
         parent::__construct();
     }
+    
+    
     
     /**
      * -------------------------------------------------------------------------
@@ -23,7 +25,7 @@ class Calles extends CI_Controller{
      * 
      * @param int $offset
      */
-    public function lista($offset = 0) {
+    public function calles($offset = 0) {
        
             // obtener datos
         $this->config->load("pagination");
@@ -33,7 +35,7 @@ class Calles extends CI_Controller{
 
         // generar paginacion
         $this->load->library('pagination');
-        $config['base_url'] = site_url('catalogos/calles/lista');
+        $config['base_url'] = site_url('catalogos/ferias/calles');
         $config['total_rows'] = $this->m->count_all();
         $config['uri_segment'] = 4;
         $this->pagination->initialize($config);
@@ -51,14 +53,14 @@ class Calles extends CI_Controller{
                 array('data' => $r->descripcion, 'class' => 'hidden-phone'),
                 $r->modulos,
                 array('data' => number_format($r->precio_base,2,'.',','), 'class' => 'hidden-phone'),
-                anchor('catalogos/calles/modulos/' . $r->id, '<i class="icon-eye-open"></i>', array('class' => 'btn btn-small', 'title' => 'Ver módulos')),
-                anchor('catalogos/calles/update/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Editar')),
-                array('data' => anchor('catalogos/calles/delete/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
+                anchor('catalogos/ferias/modulos/' . $r->id, '<i class="icon-eye-open"></i>', array('class' => 'btn btn-small', 'title' => 'Ver módulos')),
+                anchor('catalogos/ferias/calles_update/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Editar')),
+                array('data' => anchor('catalogos/ferias/calles_delete/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
             );
         }
 
         $data['table'] = $this->table->generate();
-        $data['link_add'] = anchor('catalogos/calles/add/','<i class="icon-plus"></i> Agregar calle', array('class' => 'btn'));
+        $data['link_add'] = anchor('catalogos/ferias/calles_add/','<i class="icon-plus"></i> Agregar calle', array('class' => 'btn'));
         $data['titulo'] = 'Calles <small>Listado</small>';
         $this->load->view('catalogos/calles/lista', $data);
     }
@@ -68,11 +70,11 @@ class Calles extends CI_Controller{
      * Calles - Agregar
      * -------------------------------------------------------------------------
      */
-    public function add() {
+    public function calles_add() {
         $data['titulo'] = 'Calles <small>Alta</small>';
-        $data['link_back'] = anchor('catalogos/calles/lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('catalogos/ferias/calles','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('catalogos/calles/add/');
+        $data['action'] = site_url('catalogos/ferias/calles_add/');
 	
         if ( ($datos = $this->input->post()) ) {
            	$this->load->model('calle', 'm');
@@ -88,16 +90,16 @@ class Calles extends CI_Controller{
      * -------------------------------------------------------------------------
      * @param int $id
      */
-    public function update($id = null) {
+    public function calles_update($id = null) {
 
         if (empty($id)) {
-            redirect('catalogos/calles/lista');
+            redirect('catalogos/ferias/calles');
         }
 
         $data['titulo'] = 'Calles <small>Modificar</small>';
-        $data['link_back'] = anchor('catalogos/calles/lista/','<li class="icon-arrow-left"></li> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('catalogos/ferias/calles/','<li class="icon-arrow-left"></li> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('catalogos/calles/update') . '/' . $id;
+        $data['action'] = site_url('catalogos/ferias/calles_update') . '/' . $id;
         
         $this->load->model('calle', 'm');
         $registro = $this->m->get_by_id($id)->row();
@@ -117,14 +119,12 @@ class Calles extends CI_Controller{
      * -------------------------------------------------------------------------
      * @param int $id
      */
-    public function delete($id = null) {
-        if (empty($id)) {
-            redirect('catalogos/calles/lista');
+    public function calles_delete($id = null) {
+        if (!empty($id)) {
+            $this->load->model('calle', 'm');
+            $this->m->delete($id);
         }
-
-        $this->load->model('calle', 'm');
-        $this->m->delete($id);
-        redirect('catalogos/calles/lista');
+        redirect('catalogos/ferias/calles');
     }
     
     /**
@@ -153,7 +153,7 @@ class Calles extends CI_Controller{
 
             // generar paginacion
             $this->load->library('pagination');
-            $config['base_url'] = site_url('catalogos/calles/modulos');
+            $config['base_url'] = site_url('catalogos/ferias/modulos');
             $config['total_rows'] = $this->m->count_all($id_calle);
             $config['uri_segment'] = 6;
             $this->pagination->initialize($config);
@@ -173,15 +173,15 @@ class Calles extends CI_Controller{
                     number_format($r->precio,2,'.',','),
                     ucfirst($r->categoria),
                     ucfirst($r->tipo),
-                    anchor('catalogos/calles/modulos_update/' . $r->id_calle . '/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
-                    array('data' => anchor('catalogos/calles/modulos_delete/' . $r->id_calle . '/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
+                    anchor('catalogos/ferias/modulos_update/' . $r->id_calle . '/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
+                    array('data' => anchor('catalogos/ferias/modulos_delete/' . $r->id_calle . '/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
                 );
             }
 
             $data['table'] = $this->table->generate();
-            $data['link_add'] = anchor('catalogos/calles/modulos_add/' . $id_calle,'<i class="icon-plus"></i> Agregar lote', array('class' => 'btn'));
+            $data['link_add'] = anchor('catalogos/ferias/modulos_add/' . $id_calle,'<i class="icon-plus"></i> Agregar lote', array('class' => 'btn'));
         }
-        $data['link_back'] = anchor('catalogos/calles/lista','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('catalogos/ferias/calles','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['titulo'] = 'Módulos <small>Listado</small>';
         $this->load->view('catalogos/modulos/lista', $data);
     }
@@ -194,16 +194,16 @@ class Calles extends CI_Controller{
      */
     public function modulos_add($id_calle = null) {
         if (empty($id_calle)) {
-            redirect('catalogos/calles/modulos/');
+            redirect('catalogos/ferias/modulos/');
         }
         
         $this->load->model('calle', 'c');
         $data['calle'] = (object)$this->c->get_by_id($id_calle)->row();
 
         $data['titulo'] = 'Módulos <small>Alta</small>';
-        $data['link_back'] = anchor('catalogos/calles/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('catalogos/ferias/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('catalogos/calles/modulos_add/' . $id_calle);
+        $data['action'] = site_url('catalogos/ferias/modulos_add/' . $id_calle);
 	
         if( ($datos = $this->input->post()) ){
             $this->load->model('modulo', 'm');
@@ -224,13 +224,13 @@ class Calles extends CI_Controller{
     public function modulos_update($id_calle = null, $id = null) {
 
         if ( empty($id_calle) || empty($id) ) {
-            redirect('catalogos/calles/modulos/');
+            redirect('catalogos/ferias/modulos/');
         }
         
         $data['titulo'] = 'Módulos <small>Modificar</small>';
-        $data['link_back'] = anchor('catalogos/calles/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('catalogos/ferias/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('catalogos/calles/modulos_update/') . '/' . $id_calle . '/' . $id;
+        $data['action'] = site_url('catalogos/ferias/modulos_update/') . '/' . $id_calle . '/' . $id;
         
         $this->load->model('calle', 'c');
         $calle = $this->c->get_by_id($id_calle)->row();
@@ -258,12 +258,12 @@ class Calles extends CI_Controller{
      */
     public function modulos_delete($id_calle = null, $id = null) {
         if ( empty($id_calle) || empty($id) ) {
-            redirect('catalogos/calles/modulos/');
+            redirect('catalogos/ferias/modulos/');
         }
 
         $this->load->model('modulo', 'm');
         $this->m->delete($id);
-        redirect('catalogos/calles/modulos/' . '/' . $id_calle);
+        redirect('catalogos/ferias/modulos/' . '/' . $id_calle);
     }
 }
 

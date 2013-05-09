@@ -191,7 +191,7 @@
 <script>
     $(document).ready(function(){
         
-        $('input[type="text"]').attr('autocomplete', 'off');
+        //$('input[type="text"]').attr('autocomplete', 'off');
         
         $('#form').validate({
             rules: {

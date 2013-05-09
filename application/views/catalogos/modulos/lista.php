@@ -37,7 +37,7 @@
 
 $(function () {
 
-	var url = "<?php echo site_url('catalogos/calles/modulos') . '/'; ?>";
+	var url = "<?php echo site_url('catalogos/ferias/modulos') . '/'; ?>";
 	var id_m = $('#id_calle');
 
 	id_m.change(function () {
