@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 08-05-2013 a las 14:13:28
+-- Tiempo de generación: 09-05-2013 a las 11:28:11
 -- Versión del servidor: 5.5.30
 -- Versión de PHP: 5.4.4-14
 
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `Calles` (
   `descripcion` varchar(350) NOT NULL,
   `precio_base` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
 
 --
 -- Volcado de datos para la tabla `Calles`
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `Concesiones` (
   `nombre` varchar(128) NOT NULL,
   `descripcion` varchar(256) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Volcado de datos para la tabla `Concesiones`
@@ -254,23 +254,6 @@ INSERT INTO `Contratos` (`id`, `id_cliente`, `id_usuario`, `numero`, `fecha`, `f
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `Ferias`
---
-
-DROP TABLE IF EXISTS `Ferias`;
-CREATE TABLE IF NOT EXISTS `Ferias` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(128) NOT NULL,
-  `fecha_inicio` date NOT NULL,
-  `fecha_fin` date NOT NULL,
-  `observaciones` varchar(256) NOT NULL,
-  `activa` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `Giros`
 --
 
@@ -280,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `Giros` (
   `nombre` varchar(128) NOT NULL,
   `descripcion` varchar(256) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Volcado de datos para la tabla `Giros`
@@ -310,7 +293,7 @@ CREATE TABLE IF NOT EXISTS `Modulos` (
   `tipo` enum('intermedio','esquina','otro') NOT NULL DEFAULT 'intermedio',
   PRIMARY KEY (`id`),
   KEY `id_categoria` (`id_categoria`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=12 ;
 
 --
 -- Volcado de datos para la tabla `Modulos`
@@ -319,6 +302,32 @@ CREATE TABLE IF NOT EXISTS `Modulos` (
 INSERT INTO `Modulos` (`id`, `id_calle`, `id_categoria`, `descripcion`, `frente`, `fondo`, `numero`, `categoria`, `coordenadas`, `precio`, `tipo`) VALUES
 (9, 6, 0, '', 4.00, 4.00, '1', 'local', '', 4422.32, 'esquina'),
 (10, 6, 0, '', 4.00, 4.00, '2', 'local', '', 4422.32, 'intermedio');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `Periodos`
+--
+
+DROP TABLE IF EXISTS `Periodos`;
+CREATE TABLE IF NOT EXISTS `Periodos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(128) NOT NULL,
+  `fecha_inicio` date NOT NULL,
+  `fecha_fin` date NOT NULL,
+  `observaciones` varchar(256) NOT NULL,
+  `activo` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+
+--
+-- Volcado de datos para la tabla `Periodos`
+--
+
+INSERT INTO `Periodos` (`id`, `nombre`, `fecha_inicio`, `fecha_fin`, `observaciones`, `activo`) VALUES
+(1, 'Feria 2012', '2012-11-02', '2012-11-18', '', 0),
+(2, 'Feria 2011', '2011-11-04', '2011-11-20', '', 0),
+(3, 'Feria 2013', '2013-11-01', '2013-11-17', '', 1);
 
 -- --------------------------------------------------------
 
@@ -339,7 +348,7 @@ CREATE TABLE IF NOT EXISTS `Permisos` (
   `icon` varchar(32) NOT NULL,
   PRIMARY KEY (`id_permiso`),
   UNIQUE KEY `permKey` (`permKey`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=54 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=66 ;
 
 --
 -- Volcado de datos para la tabla `Permisos`
@@ -368,14 +377,6 @@ INSERT INTO `Permisos` (`id_permiso`, `permKey`, `nombre`, `folder`, `submenu`, 
 (22, 'seguridad/permiso_delete', 'seguridad/permiso_delete', 'preferencias', '', 'seguridad', 'permiso_delete', 0, ''),
 (23, 'clientes/update', 'clientes/update', 'catalogos', '', 'clientes', 'update', 0, ''),
 (24, 'clientes/delete', 'clientes/delete', 'catalogos', '', 'clientes', 'delete', 0, ''),
-(25, 'calles/lista', 'Calles', 'catalogos', '', 'calles', 'lista', 1, 'icon-list'),
-(26, 'calles/add', 'calles/add', 'catalogos', '', 'calles', 'add', 0, ''),
-(27, 'calles/update', 'calles/update', 'catalogos', '', 'calles', 'update', 0, ''),
-(28, 'calles/delete', 'calles/delete', 'catalogos', '', 'calles', 'delete', 0, ''),
-(29, 'calles/modulos', 'Módulos', 'catalogos', '', 'calles', 'modulos', 1, 'icon-list'),
-(30, 'calles/modulos_add', 'calles/modulos_add', 'catalogos', '', 'calles', 'modulos_add', 0, ''),
-(31, 'calles/modulos_update', 'calles/modulos_update', 'catalogos', '', 'calles', 'modulos_update', 0, ''),
-(32, 'calles/modulos_delete', 'calles/modulos_delete', 'catalogos', '', 'calles', 'modulos_delete', 0, ''),
 (33, 'clientes/giros_lista', 'Giros', 'catalogos', '', 'clientes', 'giros_lista', 1, 'icon-list'),
 (34, 'clientes/giros_add', 'clientes/giros_add', 'catalogos', '', 'clientes', 'giros_add', 0, ''),
 (35, 'clientes/giros_update', 'clientes/giros_update', 'catalogos', '', 'clientes', 'giros_update', 0, ''),
@@ -388,7 +389,19 @@ INSERT INTO `Permisos` (`id_permiso`, `permKey`, `nombre`, `folder`, `submenu`, 
 (49, 'informes', 'informes', 'informes', '', 'informes', 'index', 1, ''),
 (50, 'ferias/contratos', 'Contratos', 'operacion', '', 'ferias', 'contratos', 1, 'icon-list'),
 (51, 'ferias/contratos_add', 'ferias/contratos_add', 'operacion', '', 'ferias', 'contratos_add', 0, ''),
-(53, 'ferias/ferias_lista', 'Ferias', 'operacion', '', 'ferias', 'ferias_lista', 1, 'icon-list');
+(53, 'ferias/ferias_lista', 'Ferias', 'operacion', '', 'ferias', 'ferias_lista', 1, 'icon-list'),
+(54, 'ferias/calles', 'Calles', 'catalogos', '', 'ferias', 'calles', 1, 'icon-list'),
+(55, 'ferias/calles_update', 'ferias/calles_update', 'catalogos', '', 'ferias', 'calles_update', 0, ''),
+(56, 'ferias/modulos', 'Modulos', 'catalogos', '', 'ferias', 'modulos', 1, 'icon-list'),
+(57, 'ferias/calles_add', 'ferias/calles_add', 'catalogos', '', 'ferias', 'calles_add', 0, ''),
+(58, 'ferias/calles_delete', 'ferias/calles_delete', 'catalogos', '', 'ferias', 'calles_delete', 0, ''),
+(59, 'ferias/modulos_update', 'ferias/modulos_update', 'catalogos', '', 'ferias', 'modulos_update', 0, ''),
+(60, 'ferias/modulos_add', 'ferias/modulos_add', 'catalogos', '', 'ferias', 'modulos_add', 0, ''),
+(61, 'ferias/modulos_delete', 'ferias/modulos_delete', 'catalogos', '', 'ferias', 'modulos_delete', 0, ''),
+(62, 'ferias/periodos', 'Períodos', 'catalogos', '', 'ferias', 'periodos', 1, 'icon-list'),
+(63, 'ferias/periodos_add', 'ferias/periodos_add', 'catalogos', '', 'ferias', 'periodos_add', 0, ''),
+(64, 'ferias/periodos_update', 'ferias/periodos_update', 'catalogos', '', 'ferias', 'periodos_update', 0, ''),
+(65, 'ferias/periodos_delete', 'ferias/periodos_delete', 'catalogos', '', 'ferias', 'periodos_delete', 0, '');
 
 -- --------------------------------------------------------
 
