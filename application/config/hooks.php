@@ -61,6 +61,13 @@ $hook['post_controller'][] = array(
     'filepath' => 'hooks'
 );
 
+$hook['post_controller'][] = array(
+    'class' => 'Periodo_activo',
+    'function' => 'index',
+    'filename' => 'periodo_activo.php',
+    'filepath' => 'hooks'
+);
+
 /*$hook['display_override'] = array(
 	'class' => 'Layout',
 	'function' => 'index',

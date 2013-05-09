@@ -70,10 +70,15 @@
       <?php 
       // Link para ir al home
       echo anchor(site_url(), $this->config->item('nombre_proyecto'), 'class="brand"'); 
+      $periodo = $this->session->userdata('periodo');
       ?>
       <div class="nav-collapse collapse">
         <p class="navbar-text pull-right hidden-phone">
-          <i class="icon-user icon-white"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(logout)','class="navbar-link"'); ?>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i class="icon-user icon-white"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(Salir)','class="navbar-link"'); ?>
+        </p>
+        <p class="navbar-text pull-right hidden-phone">
+              <strong><?php echo $periodo->nombre; ?></strong>
         </p>
         <ul class="nav">
             <?php

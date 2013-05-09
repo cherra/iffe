@@ -16,7 +16,113 @@ class Ferias extends CI_Controller{
         parent::__construct();
     }
     
+    /**
+     * -------------------------------------------------------------------------
+     * Periodos - Lista
+     * -------------------------------------------------------------------------
+     * 
+     * @param int $offset
+     */
+    public function periodos($offset = 0) {
+       
+            // obtener datos
+        $this->config->load("pagination");
+        $this->load->model('periodo', 'm');
+        $page_limit = $this->config->item("per_page");
+        $lista = $this->m->get_paged_list($page_limit, $offset)->result();
+
+        // generar paginacion
+        $this->load->library('pagination');
+        $config['base_url'] = site_url('catalogos/ferias/periodos');
+        $config['total_rows'] = $this->m->count_all();
+        $config['uri_segment'] = 4;
+        $this->pagination->initialize($config);
+        $data['pagination'] = $this->pagination->create_links();
+
+        // generar tabla
+        $this->load->library('table');
+        $this->table->set_empty('&nbsp;');
+        $tmpl = array ( 'table_open' => '<table class="' . $this->config->item('tabla_css') . '">' );
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('Nombre', array('data' => 'Inicio', 'class' => 'hidden-phone'), array('data' => 'Fin', 'class' => 'hidden-phone'), 'Estado', '');
+        foreach ($lista as $r) {
+            $this->table->add_row(
+                $r->nombre, 
+                array('data' => $r->fecha_inicio, 'class' => 'hidden-phone'),
+                array('data' => $r->fecha_fin, 'class' => 'hidden-phone'),
+                $r->activo == 1 ? 'Activo' : '-', 
+                anchor('catalogos/ferias/periodos_update/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Editar')),
+                array('data' => anchor('catalogos/ferias/periodos_delete/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
+            );
+        }
+
+        $data['table'] = $this->table->generate();
+        $data['link_add'] = anchor('catalogos/ferias/periodos_add/','<i class="icon-plus"></i> Agregar período', array('class' => 'btn'));
+        $data['titulo'] = 'Períodos <small>Listado</small>';
+        $this->load->view('catalogos/periodos/lista', $data);
+    }
     
+    /**
+     * -------------------------------------------------------------------------
+     * Calles - Agregar
+     * -------------------------------------------------------------------------
+     */
+    public function periodos_add() {
+        $data['titulo'] = 'Períodos <small>Alta</small>';
+        $data['link_back'] = anchor('catalogos/ferias/periodos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['mensaje'] = '';
+        $data['action'] = site_url('catalogos/ferias/periodos_add/');
+	
+        if ( ($datos = $this->input->post()) ) {
+           	$this->load->model('periodo', 'm');
+           	$this->m->save($datos);
+                $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro exitoso</div>';
+        }
+        $this->load->view('catalogos/periodos/formulario', $data);
+    }
+    
+    /**
+     * -------------------------------------------------------------------------
+     * Calles - Modificar
+     * -------------------------------------------------------------------------
+     * @param int $id
+     */
+    public function periodos_update($id = null) {
+
+        if (empty($id)) {
+            redirect('catalogos/ferias/periodos');
+        }
+
+        $data['titulo'] = 'Períodos <small>Modificar</small>';
+        $data['link_back'] = anchor('catalogos/ferias/periodos/','<li class="icon-arrow-left"></li> Regresar',array('class'=>'btn'));
+        $data['mensaje'] = '';
+        $data['action'] = site_url('catalogos/ferias/periodos_update') . '/' . $id;
+        
+        $this->load->model('periodo', 'm');
+        $registro = $this->m->get_by_id($id)->row();
+        $data['datos'] = $registro;
+        
+        if ( ($registro = $this->input->post()) ) {
+            $this->m->update($id, $registro);
+            $data['datos'] = (object)$registro;
+            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro modificado</div>';
+        }    
+        $this->load->view('catalogos/periodos/formulario', $data);
+    }
+    
+    /**
+     * -------------------------------------------------------------------------
+     * Calles - Borrar
+     * -------------------------------------------------------------------------
+     * @param int $id
+     */
+    public function periodos_delete($id = null) {
+        if (!empty($id)) {
+            $this->load->model('periodo', 'm');
+            $this->m->delete($id);
+        }
+        redirect('catalogos/ferias/periodos');
+    }
     
     /**
      * -------------------------------------------------------------------------

@@ -217,8 +217,8 @@ class acl
                             */
                             $roles = $this->getAllPerms('full');
                             if(!array_key_exists($permKey, $roles)){
-                                if(method_exists($this->ci, $method)){
-                                    if(is_callable(array($this->ci,$method))){
+                                if(method_exists($this->ci, $method)){  // El método existe ?
+                                    if(is_callable(array($this->ci,$method))){  // Está declarado como public ?
                                         $this->setPerm($permKey);
                                     }
                                 }
