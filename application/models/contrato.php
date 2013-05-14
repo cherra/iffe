@@ -26,16 +26,19 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select($this->tbl.".*, Calles.nombre AS calle, Modulos.numero AS modulo, 
-            CONCAT(Clientes.nombre,' ',Clientes.apellido_paterno,' ',Clientes.apellido_materno) AS cliente ", false);
-        $this->db->join($this->tbl_contrato_modulos,$this->tbl.'.id = '.$this->tbl_contrato_modulos.'.id_contrato');
-        $this->db->join('Modulos', $this->tbl_contrato_modulos.'.id_modulo = Modulos.id');
-        $this->db->join('Usuarios',$this->tbl.'.id_usuario = Usuarios.id_usuario');
-        $this->db->join('Clientes',$this->tbl.'.id_cliente = Clientes.id');
-        $this->db->join('Calles','Modulos.id_calle = Calles.id');
-        
-        $this->db->order_by('fecha','asc');
-        return $this->db->get($this->tbl,$limit, $offset);
+        $this->db->select('c.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
+        $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->order_by('numero','desc');
+        return $this->db->get($this->tbl.' c',$limit, $offset);
+    }
+    
+    function get_modulos( $id, $limit = null, $offset = 0 ){
+        $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe');
+        $this->db->join('Modulos m','cm.id_modulo = m.id');
+        $this->db->join('Calles c','m.id_calle = c.id');
+        $this->db->where('cm.id_contrato',$id);
+        $this->db->order_by('c.nombre, m.numero');
+        return $this->db->get($this->tbl_contrato_modulos.' cm', $limit, $offset);
     }
 
     /**
@@ -44,26 +47,12 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function get_by_id($id) {
-        $this->db->select("Co.*, Co.numero AS numero_contrato,
-                F.descripcion AS fraccionamiento, F.ciudad, F.estado,
-                M.descripcion AS manzana, 
-                L.descripcion AS lote, L.calle, L.numero,
-                Ca.precio_casa,
-                CONCAT(C.nombre,' ',C.apellido_paterno,' ',C.apellido_materno) AS cliente, 
-                U.nombre AS vendedor", false);
-        $this->db->join('Usuarios U','Co.id_usuario = U.id_usuario');
-        $this->db->join('Apartados A','Co.id_apartado = A.id_apartado','left');
-        $this->db->join('Clientes C','Co.id_cliente = C.id_cliente');
-        $this->db->join('Lotes L', 'Co.id_lote = L.id_lote');
-        $this->db->join('Casas Ca', 'L.id_lote = Ca.id_lote');
-        $this->db->join('Manzanas M','L.id_manzana = M.id_manzana');
-        $this->db->join('Fraccionamientos F','M.id_fraccionamiento = F.id_fraccionamiento');
-        $this->db->where('id_contrato', $id);
-        return $this->db->get($this->tbl.' Co');
+        $this->db->where('id', $id);
+        return $this->db->get($this->tbl);
     }
     
     function get_last(){
-        $this->db->order_by('id_contrato', 'desc');
+        $this->db->order_by('id', 'desc');
         return $this->db->get($this->tbl, 1);
     }
 
@@ -78,6 +67,17 @@ class Contrato extends CI_Model{
         else
             return false;
     }
+    
+    function save_modulo( $modulo ) {
+        if( $this->db->insert($this->tbl_contrato_modulos, $modulo) )
+            return $this->db->insert_id();
+        else
+            return false;
+    }
+    
+    function delete_modulo($id_modulo){
+        $this->db->delete($this->tbl_contrato_modulos, array('id_modulo' => $id_modulo));
+    }
 
     /**
     * ***********************************************************************
@@ -85,7 +85,7 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function update( $id, $contrato ) {
-        $this->db->where('id_contrato', $id);
+        $this->db->where('id', $id);
         $this->db->update($this->tbl, $contrato);
     }
 
@@ -94,9 +94,9 @@ class Contrato extends CI_Model{
     * Eliminar contrato por id
     * ***********************************************************************
     */
-    function delete( $id ) {
-        $this->db->where('id_contrato', $id);
-        $this->db->delete($this->tbl);
+    function estado( $id, $estado ) {
+        $this->db->where('id', $id);
+        $this->db->update($this->tbl, array('estado' => $estado));
     }
     /*
      * Adjuntos del contrato

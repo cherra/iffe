@@ -1,6 +1,6 @@
 <?php
 
-class Ferias extends CI_Controller{
+class Ventas extends CI_Controller{
     
     public $layout = 'template_backend';
     private $upload_path;
@@ -8,10 +8,6 @@ class Ferias extends CI_Controller{
     function __construct() {
         parent::__construct();
         $this->upload_path = $this->config->item('contratos_adjuntos_path');
-    }
-    
-    public function ferias_lista(){
-        $this->load->view('operacion/ferias/lista');
     }
     
     /**
@@ -28,86 +24,78 @@ class Ferias extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $contrados = $this->a->get_paged_list($page_limit, $offset)->result();
+        $contratos = $this->a->get_paged_list($page_limit, $offset)->result();
         $this->load->library('pagination');
-        $config['base_url'] = site_url('operacion/ferias/contratos/');
+        $config['base_url'] = site_url('operacion/ventas/contratos/');
         $config['total_rows'] = $this->a->count_all();
-        $config['uri_segment'] = 3;
+        $config['uri_segment'] = 4;
+        $config['per_page'] = $page_limit;
         $this->pagination->initialize($config);
 
         // generar tabla
         $this->load->library('table');
-        $this->table->set_empty('No hay contratos por mostrar');
+        $this->table->set_empty('-');
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
-        $this->table->set_heading('Fraccionamiento', array('data' => 'Manzana', 'class' => 'hidden-phone'), array('data' => 'Lote', 'class' => 'hidden-phone'), 'Cliente', array('data' => 'Fecha', 'class' => 'hidden-phone'));
-        foreach ($contrados as $contrato) {
+        $this->table->set_heading('Cliente', 'Número', array('data' => 'Importe','class' => 'hidden-phone'), 'Módulos','','','', 'Estado');
+        foreach ($contratos as $contrato) {
+            $modulos = $this->a->get_modulos($contrato->id)->result();
+            $calle = '';
+            $mods = '';
+            $total = 0;
+            $i=0;
+            foreach ($modulos as $m){
+                if($m->calle != $calle){
+                    if($calle != '')
+                        $mods .= '<br/>';
+                    $mods .= $m->calle.': ';
+                    $calle = $m->calle;
+                    $i=0;
+                }else
+                    $mods.=', ';
+                $mods .= $m->modulo;
+                $total += $m->importe;                
+            }
             $this->table->add_row(
-                $contrato->fraccionamiento, 
-                array('data' => $contrato->manzana, 'class' => 'hidden-phone'),
-                array('data' => $contrato->lote, 'class' => 'hidden-phone'),
                 $contrato->cliente,
-                array('data' => $contrato->fecha, 'class' => 'hidden-phone'),
-                array('data' => anchor_popup('operacion/ferias/contratos_documento/' . $contrato->id_contrato, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
-                anchor('operacion/ferias/contratos_adjuntos/' . $contrato->id_contrato, '<i class="icon-file"></i>', array('class' => 'btn btn-small', 'title' => 'Adjuntos')),
-                anchor('operacion/ferias/contratos_proceso/' . $contrato->id_contrato, '<i class="icon-th-list"></i>', array('class' => 'btn btn-small', 'title' => 'Procesos')),
-                array('data' => anchor('operacion/ferias/contratos_update/' . $contrato->id_contrato, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')), 'class' => 'hidden-phone'),
-                array('data' => anchor('operacion/ferias/contratos_delete/' . $contrato->id_contrato, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
+                $contrato->numero,
+                array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
+                $mods,
+                array('data' => ($contrato->estado == 'autorizado' ? anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')) : '<a class="btn btn-small disabled"><i class="icon-print"></i></a>'), 'class' => 'hidden-phone'),
+                ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_modulos/' . $contrato->id, '<i class="icon-road"></i>', array('class' => 'btn btn-small', 'title' => 'Módulos')) : '<a class="btn btn-small disabled"><i class="icon-road"></i></a>'),
+                ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_update/' . $contrato->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')) : '<a class="btn btn-small disabled"><i class="icon-edit"></i></a>'),
+                anchor('operacion/ventas/contratos_estado/'.$contrato->id,'<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-ban-circle')).'"></i>', array('class' => 'btn btn-small', 'title' => 'Cambiar estado', 'id' => 'estado'))
             );
         }
         
         $data['pagination'] = $this->pagination->create_links();
         $data['table'] = $this->table->generate();
         $data['titulo'] = 'Contratos <small>Listado</small>';
-        $data['add_link'] = anchor('operacion/ferias/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        $data['add_link'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/contratos/lista', $data);
     }
     
-    public function contratos_add( $id_calle = null, $id_modulo = null, $id_cliente = null, $fecha = null ){
+    public function contratos_add(){
         
         $data['titulo'] = 'Contratos <small>Alta</small>';
-        $data['link_back'] = anchor('operacion/ferias/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('operacion/ventas/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ferias/contratos_add');
+        $data['action'] = site_url('operacion/ventas/contratos_add');
 	
-        $this->load->model('modulo','m');
-        $this->load->model('calle','ca');
-        $this->load->model('cliente','c');
+        $this->load->model('periodo','p');
 
-        $data['calles'] = $this->ca->get_paged_list()->result();
-        
-        if(!empty($id_calle)){
-            $data['id_calle'] = $id_calle;
-            $data['modulos'] = $this->m->get_disponibles($id_calle)->result();
-        }
-        if(!empty($id_modulo)){
-            $data['id_modulo'] = $id_modulo;
-            $data['modulo'] = $this->m->get_by_id($id_modulo)->row();
-        }
-        if(!empty($id_cliente)){
-            $data['cliente'] = $this->c->get_by_id($id_cliente)->row();
-        }
-        
-        // Establece la fecha para el registro del apartado y
-        // Calcula la fecha de vencimiento del mismo
-        if(empty($fecha)){
-            $fecha = date_create();
-        }else{
-            $fecha = date_create($fecha);
-        }
-        $data['fecha'] = date_format($fecha,'Y-m-d');
-        date_add($fecha, date_interval_create_from_date_string($this->configuracion->get_valor('contrato_vencimiento').' days'));
-        $data['fecha_vencimiento'] = date_format($fecha, 'Y-m-d');;
+        $data['periodo'] = $this->session->userdata('periodo');
         
         if ( ($datos = $this->input->post()) ) {
             $this->load->model('contrato', 'co');
             
             if( ($ultimo_contrato = $this->co->get_last()->row()) )
-                $contrato['numero'] = $ultimo_contrato->numero + 1;
+                $datos['numero'] = $ultimo_contrato->numero + 1;
             else
-                $contrato['numero'] = 1;
-            $this->co->save($contrato);
+                $datos['numero'] = 1;
+            $datos['id_usuario'] = $this->session->userdata('userid');
+            $this->co->save($datos);
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Contrato registrado</div>';
         }
         $this->load->view('operacion/contratos/formulario', $data);
@@ -118,51 +106,27 @@ class Ferias extends CI_Controller{
         $this->load->model('contrato', 'co');
         
         if (empty($id)) {
-            redirect(site_url('operacion/ferias/contratos/'));
+            redirect(site_url('operacion/ventas/contratos/'));
         }
         
-        $this->load->model('apartado','a');
         $this->load->model('cliente','c');
         
-        $this->load->model('fraccionamientos/fraccionamiento','f');
-        $this->load->model('fraccionamientos/manzana','m');
-        $this->load->model('fraccionamientos/lote','l');
-        
-        
-        $id = floatval($id);
-
         $data['titulo'] = 'Contratos <small>Modificar</small>';
-        $data['link_back'] = anchor('operacion/ferias/contratos/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('operacion/ventas/contratos/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ferias/contratos_update') . '/' . $id;
+        $data['action'] = site_url('operacion/ventas/contratos_update') . '/' . $id;
 	
         $contrato = $this->co->get_by_id($id)->row();
         $data['contrato'] = $contrato;
-        $lote = $this->l->get_by_id($contrato->id_lote)->row();
-        $manzana = $this->m->get_by_id($lote->id_manzana)->row();
-        $fraccionamiento = $this->f->get_by_id($manzana->id_fraccionamiento)->row();
-        $cliente = $this->c->get_by_id($contrato->id_cliente)->row();
-        
-        $data['id_apartado'] = $contrato->id_apartado;
-        $data['id_fraccionamiento'] = $fraccionamiento->id_fraccionamiento;
-        $data['id_manzana'] = $manzana->id_manzana;
-        $data['id_lote'] = $lote->id_lote;
-        $data['cliente'] = $cliente;
-        
-        $data['apartados'] = $this->a->get_vigentes()->result();
-        // Se agrega a la lista el apartado asignado al contrato
-        $data['apartados'][] = $this->a->get_by_id($contrato->id_apartado)->row();
-        
-        $data['fraccionamientos'] = $this->f->get_paged_list()->result();
-        $data['manzanas'] = $this->m->get_paged_list($manzana->id_fraccionamiento)->result();
-        $data['lotes'] = $this->l->get_paged_list($lote->id_manzana)->result();
-        
+        $data['cliente'] = $this->c->get_by_id($contrato->id_cliente)->row();
+                
         if( $this->input->post() ) {
             $contrato = array(
-                'id_apartado' => $this->input->post('id_apartado'),
-                'id_usuario' => $this->session->userdata('userid'),
+                'id_cliente' => $this->input->post('id_cliente'),
                 'fecha' => $this->input->post('fecha'),
                 'fecha_vencimiento' => $this->input->post('fecha_vencimiento'),
+                'testigo1' => $this->input->post('testigo1'),
+                'testigo2' => $this->input->post('testigo2'),
                 'observaciones' => $this->input->post('observaciones')
             );
             
@@ -173,15 +137,19 @@ class Ferias extends CI_Controller{
         $this->load->view('operacion/contratos/formulario', $data);
     }
     
-    public function contratos_delete( $id = null ) {
-        $this->load->model('contrato', 'c');
+    public function contratos_estado( $id = null ) {
         
         if(!empty($id)){
-            $id = floatval($id);
-
-            $this->c->delete($id);
+            $this->load->model('contrato', 'c');
+            $contrato = $this->c->get_by_id($id)->row();
+            if($contrato->estado == 'pendiente')
+                $estado = 'autorizado';
+            elseif($contrato->estado == 'autorizado')
+                $estado = 'cancelado';
+            
+            $this->c->estado($id, $estado);
         }
-        redirect(site_url('operacion/ferias/contratos/'));
+        redirect(site_url('operacion/ventas/contratos/'));
     }
 
     /**
@@ -189,38 +157,74 @@ class Ferias extends CI_Controller{
      * Contratos proceso
      * --------------------------------------------------------
      */
-    public function contratos_proceso($id) {
+    public function contratos_modulos($id = null, $id_calle = null, $id_modulo = null) {
         
         if (empty($id)) {
-            redirect(site_url('operacion/ferias/contratos/'));
+            redirect('operacion/ventas/contratos/');
         }
         
-        $this->load->model('contrato', 'c');
-        $this->load->model('fraccionamientos/proceso', 'p');
-
-        $data['titulo'] = 'Contrato <small>Procesos</small>';
-        $data['link_back'] = anchor('operacion/ferias/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
-        $data['contrato'] = (object)$this->c->get_by_id($id)->row();
-        $data['action'] = site_url('operacion/ferias/contratos_proceso') . '/' . $id;
+        $this->load->model('contrato', 'co');
+        $this->load->model('calle', 'c');
+        $this->load->model('cliente','cl');
+        $data['contrato'] = $this->co->get_by_id($id)->row();
+        $data['cliente'] = $this->cl->get_by_id($data['contrato']->id_cliente)->row();
+        $data['calles'] = $this->c->get_all()->result();
+        
+        $data['titulo'] = 'Contrato <small>Módulos</small>';
+        $data['link_back'] = anchor('operacion/ventas/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
+        $data['action'] = site_url('operacion/ventas/contratos_modulos') . '/' . $id .'/'. $id_calle;
         
-        $data['procesos_not'] = $this->p->get_procesos_not_contrato($id);
-        $data['procesos'] = $this->p->get_procesos_contrato($id);
-
-        if ( $this->input->post() ) {
-            $datos = array(
-                'id_proceso' => $this->input->post('id_proceso', true),
-                'id_contrato' => $this->input->post('id_contrato', true)
-            );
-            $this->load->model('contrato', 'c');
-            $this->c->save_proceso($id, $datos);
-            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro nuevo</div>';
-            $data['procesos_not'] = $this->p->get_procesos_not_contrato($id);
-            $data['procesos'] = $this->p->get_procesos_contrato($id);
+        if(!empty($id_calle)){
+            $data['calle'] = $this->c->get_by_id($id_calle)->row();
+            $this->load->model('modulo', 'm');
+            $data['modulos'] = $this->m->get_disponibles($id_calle)->result();
+            if(!empty($id_modulo)){
+                $data['modulo'] = $this->m->get_by_id($id_modulo)->row();
+            }
         }
+        if ( ($datos = $this->input->post()) ) {
+            $result = $this->co->save_modulo( $datos );
+            if($result > 0){
+                $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Módulo agregado correctamente</div>';
+            }else{
+                $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Error al agregar el módulo</div>';
+            }
+            $data['modulos'] = $this->m->get_disponibles($id_calle)->result();
+        }
+        
+        $modulos = $this->co->get_modulos($id)->result();
+        // generar tabla
+        $this->load->library('table');
+        $this->table->set_empty('-');
+        $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('Calle', 'Módulo', array('data' => 'Categoría','class' => 'hidden-phone'), array('data' => 'Tipo','class' => 'hidden-phone'), 'Importe', '');
+        
+        foreach ($modulos as $m) {
+            $this->table->add_row(
+                $m->calle,
+                $m->modulo,
+                array('data' => ucfirst($m->categoria), 'class' => 'hidden-phone'),
+                array('data' => ucfirst($m->tipo), 'class' => 'hidden-phone'),
+                number_format($m->importe,2,'.',','),
+                array('data' => anchor('operacion/ventas/contratos_delete_modulo/' . $id.'/'.$id_calle.'/'.$m->id_modulo, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Quitar')), 'class' => 'hidden-phone')
+            );
+        }
+        $data['table'] = $this->table->generate();
 
-        $this->load->view('operacion/contratos/contratos_proceso', $data);
+        $this->load->helper('form');
+        $this->load->view('operacion/contratos/contratos_modulos', $data);
 
+    }
+    
+    public function contratos_delete_modulo( $id = null, $id_calle = null, $id_modulo = null ){
+        if(empty($id_modulo) or empty($id) or empty($id_calle)){
+            redirect('operacion/ventas/contratos_modulos/');
+        }
+        $this->load->model('contrato','co');
+        $this->co->delete_modulo($id_modulo);
+        redirect('operacion/ventas/contratos_modulos/'.$id.'/'.$id_calle);
     }
     
     /********************
@@ -268,14 +272,14 @@ class Ferias extends CI_Controller{
                     $data['contenido'] = $this->tbs->Source;
                     $this->load->view('documento', $data);
                 }else{
-                    redirect('operacion/ferias/contratos');
+                    redirect('operacion/ventas/contratos');
                 }
             }else{
                 $this->session->set_flashdata('pdf', true);
-                redirect('operacion/ferias/contratos_documento/'.$id); // Se recarga el método para imprimirlo como PDF
+                redirect('operacion/ventas/contratos_documento/'.$id); // Se recarga el método para imprimirlo como PDF
             }
         }else{
-            redirect('operacion/ferias/contratos');
+            redirect('operacion/ventas/contratos');
         }
     }
     
@@ -296,7 +300,7 @@ class Ferias extends CI_Controller{
 
             // generar paginacion
             $this->load->library('pagination');
-            $config['base_url'] = site_url('operacion/ferias/contratos_adjunto/' . $id_contrato);
+            $config['base_url'] = site_url('operacion/ventas/contratos_adjunto/' . $id_contrato);
             $config['total_rows'] = $this->c->count_all_adjuntos($id_contrato);
             $config['uri_segment'] = 5;
             $this->pagination->initialize($config);
@@ -315,16 +319,16 @@ class Ferias extends CI_Controller{
                     $adjunto->file_name,
                     '<a href="#" path="'.base_url().$adjunto->path . $id_contrato . '/' . $adjunto->file_name.'" class="btn btn-small" title="Ver" preview_link><i class="icon-eye-open"></i></a>',
                     array('data' => '<a href="'.base_url().$adjunto->path . $id_contrato . '/' . $adjunto->file_name.'" class="btn btn-small" title="Descargar"><i class="icon-download"></i></a>', 'class' => 'hidden-phone'),
-                    array('data' => anchor('operacion/ferias/contratos_adjuntos_update/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')), 'class' => 'hidden-phone'),
-                    array('data' => anchor('operacion/ferias/contratos_adjuntos_delete/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
+                    array('data' => anchor('operacion/ventas/contratos_adjuntos_update/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')), 'class' => 'hidden-phone'),
+                    array('data' => anchor('operacion/ventas/contratos_adjuntos_delete/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
                 );
             }
 
             $data['table'] = $this->table->generate();
-            $data['link_add'] = anchor('operacion/ferias/contratos_adjuntos_add/' . $id_contrato,'<i class="icon-plus"></i> Agregar adjunto', array('class' => 'btn'));
+            $data['link_add'] = anchor('operacion/ventas/contratos_adjuntos_add/' . $id_contrato,'<i class="icon-plus"></i> Agregar adjunto', array('class' => 'btn'));
         }
         
-        $data['link_back'] = anchor('operacion/ferias/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('operacion/ventas/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['titulo'] = 'Contrato <small>Adjuntos</small>';
         $this->load->view('operacion/contratos/lista_adjuntos', $data);
     }
@@ -335,13 +339,13 @@ class Ferias extends CI_Controller{
             $data['contrato'] = (object)$this->c->get_by_id($id_contrato)->row();
         }
         else {
-            redirect(site_url('operacion/ferias/contratos_adjuntos/') . '/' . $id_contrato);
+            redirect(site_url('operacion/ventas/contratos_adjuntos/') . '/' . $id_contrato);
         }
 
         $data['titulo'] = 'Adjuntos de Contrato <small>Agregar</small>';
-        $data['link_back'] = anchor('operacion/ferias/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('operacion/ventas/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ferias/contratos_adjuntos_add/' . $id_contrato);
+        $data['action'] = site_url('operacion/ventas/contratos_adjuntos_add/' . $id_contrato);
 	
         if ( $this->input->post() ) {
             // Se define la ruta donde se va a guardar el archivo y se valida si existe y es escribible.
@@ -388,13 +392,13 @@ class Ferias extends CI_Controller{
             $data['adjunto'] = $this->c->get_by_id_adjunto($id_adjunto)->row();
         }
         else {
-            redirect(site_url('operacion/ferias/contratos_adjuntos/') . '/' . $id_contrato);
+            redirect(site_url('operacion/ventas/contratos_adjuntos/') . '/' . $id_contrato);
         }
 
         $data['titulo'] = 'Adjuntos de Contrato <small>Modificar</small>';
-        $data['link_back'] = anchor('operacion/ferias/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['link_back'] = anchor('operacion/ventas/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ferias/contratos_adjuntos_update/' . $id_adjunto.'/'.$id_contrato);
+        $data['action'] = site_url('operacion/ventas/contratos_adjuntos_update/' . $id_adjunto.'/'.$id_contrato);
 	
         if ( $this->input->post() ) {
             $adjunto = array(
@@ -422,7 +426,7 @@ class Ferias extends CI_Controller{
                 
                 if( $this->c->delete_adjunto($id_adjunto, $id_contrato) ){
                     if( unlink( $adjunto->path.$id_contrato.'/'.$adjunto->file_name ) ){
-                        redirect(site_url('operacion/ferias/contratos_adjuntos/'.$id_contrato));
+                        redirect(site_url('operacion/ventas/contratos_adjuntos/'.$id_contrato));
                     }else{
                         die("Error al borrar el archivo");
                     }
@@ -430,7 +434,7 @@ class Ferias extends CI_Controller{
                     die("Error al borrar los registros de la base de datos");
                 }
             }
-            redirect(site_url('operacion/ferias/contratos_adjuntos/'.$id_contrato));
+            redirect(site_url('operacion/ventas/contratos_adjuntos/'.$id_contrato));
         }
     }
 

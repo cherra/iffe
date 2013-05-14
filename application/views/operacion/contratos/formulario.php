@@ -7,46 +7,14 @@
 <div class="row-fluid">
   <div class="span12">
     <form name="form" id="form" action="<?php echo $action; ?>" class="form-horizontal" method="post">
-       <div class="control-group">
+      <?php if(isset($contrato)){ ?>
+      <div class="control-group">
+        <label class="control-label hidden-phone" for="numero">Número</label>
         <div class="controls">
-          <input type="hidden" name="id_contrato">
+            <input disabled type="text" id="numero" placeholder="Número" value="<?php if(!empty($contrato)) echo $contrato->numero; ?>"/>
         </div>
       </div>
-        
-      <div class="control-group">
-        <label class="control-label hidden-phone" for="id_calle">Calle</label>
-        <div class="controls">
-          <select name="id_calle" id="id_calle" class="required">
-            <option value="0">Selecciona una Calle...</option>
-            <?php foreach ($calles as $c){ ?>
-                <option value="<?php echo $c->id; ?>" <?php if(!empty($id_calle)) echo ($id_calle == $c->id ? "selected" : ""); ?>><?php echo $c->nombre; ?></option>
-            <?php
-              }
-            ?>
-          </select>
-        </div>
-      </div>
-        
-      <div class="control-group">
-        <label class="control-label hidden-phone" for="id_modulo">Módulo</label>
-        <div class="controls">
-          <select name="id_modulo" id="id_modulo" class="required" <?php if(!isset($id_calle)) echo "disabled"; ?>>
-            <option value="">Selecciona un Módulo...</option>
-            <?php foreach($modulos as $m){ ?>
-                <option value="<?php echo $m->id; ?>" <?php if(!empty($id_modulo)) echo ($id_modulo == $m->id ? "selected" : ""); ?>><?php echo $m->numero; ?></option>
-            <?php } ?>
-          </select>
-        </div>
-      </div>
-      <div class="control-group">
-          <label class="control-label hidden-phone">Precio</label>
-          <div class="controls">
-            <div class="input-prepend">
-                <span class="add-on">$</span>
-                <input type="text" class="span11" disabled value="<?php echo (!empty($modulo->precio) ? number_format($modulo->precio,2,'.',',') : ''); ?>"/>
-            </div>
-          </div>
-      </div>
+      <?php } ?>
       <div class="control-group">
         <label class="control-label hidden-phone" for="txt_cliente">Cliente</label>
         <div class="controls">
@@ -55,16 +23,29 @@
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label hidden-phone" for="fecha">Fecha</label>
+        <label class="control-label hidden-phone" for="fecha_inicio">Fecha de inicio</label>
         <div class="controls">
-          <input type="text" class="fecha date" name="fecha" id="fecha" value="<?php echo (isset($contrato->fecha) ? $contrato->fecha : $fecha); ?>">
+            <input type="hidden" name="fecha_inicio" value="<?php echo (isset($contrato) ? $contrato->fecha_inicio : $periodo->fecha_inicio); ?>">
+            <input class="fecha" disabled type="text" value="<?php echo (isset($contrato) ? $contrato->fecha_inicio : $periodo->fecha_inicio); ?>">
         </div>
       </div>
       <div class="control-group">
         <label class="control-label hidden-phone" for="fecha_vencimiento">Fecha de vencimiento</label>
         <div class="controls">
-            <input type="hidden" name="fecha_vencimiento" value="<?php echo (isset($contrato->fecha_vencimiento) ? $contrato->fecha_vencimiento : $fecha_vencimiento); ?>">
-            <input class="fecha" disabled type="text" value="<?php echo (isset($contrato->fecha_vencimiento) ? $contrato->fecha_vencimiento : $fecha_vencimiento); ?>">
+            <input type="hidden" name="fecha_vencimiento" value="<?php echo (isset($contrato) ? $contrato->fecha_vencimiento : $periodo->fecha_fin); ?>">
+            <input class="fecha" disabled type="text" value="<?php echo (isset($contrato) ? $contrato->fecha_vencimiento : $periodo->fecha_fin); ?>">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label hidden-phone" for="testigo1">Testigo 1:</label>
+        <div class="controls">
+            <input type="text" name="testigo1" id="testigo1" placeholder="Testigo 1" value="<?php echo (isset($contrato) ? $contrato->testigo1 : ''); ?>"/>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label hidden-phone" for="testigo2">Testigo 2:</label>
+        <div class="controls">
+            <input type="text" name="testigo2" id="testigo2" placeholder="Testigo 2" value="<?php echo (isset($contrato) ? $contrato->testigo2 : ''); ?>"/>
         </div>
       </div>
       <div class="control-group">
@@ -73,7 +54,7 @@
           <textarea name="observaciones" 
                     id="observaciones" 
                     placeholder="Observaciones" 
-                    rows="5"><?php echo (isset($contrato->observaciones) ? $contrato->observaciones : ''); ?></textarea>
+                    rows="5"><?php echo (isset($contrato) ? $contrato->observaciones : ''); ?></textarea>
         </div>
       </div>
       <div class="control-group">
@@ -91,26 +72,7 @@
 
 <script>
 $(document).ready(function(){
-    var url = "<?php echo site_url(); ?>/ventas/ventas/contratos_add";
-    $('#id_calle').change(function(){
-        if($(this).val() > 0)
-           $(location).attr('href',url+'/'+$(this).val()+'/'+$('#id_modulo').val()+'/'+$('#id_cliente').val()+'/'+$('#fecha').val());
-    });
-    
-    $('#id_modulo').change(function(){
-        if($(this).val() > 0)
-           $(location).attr('href',url+'/'+$('#id_calle').val()+'/'+$(this).val()+'/'+$('#id_cliente').val()+'/'+$('#fecha').val());
-    });
-    
-    $('#fecha').datepicker({
-        dateFormat: "yy-mm-dd",
-        changeMonth: true,
-        changeYear: true,
-        onSelect: function(dateText){
-            $(location).attr('href',url+'/'+$('#id_calle').val()+'/'+$('#id_modulo').val()+'/'+$('#id_cliente').val()+'/'+dateText);
-    }});
-
-/*
+    /*
      * Autocompletado para el campo cliente
      */
     var separador = '{#####}';
