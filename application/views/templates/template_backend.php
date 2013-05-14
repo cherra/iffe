@@ -100,10 +100,9 @@
     </div>
   </div>
 </div>
-
 <!-- contenido ----------------------------------------------------------------------- -->
-<div class="container-fluid contenedor-principal">
-  <div class="row-fluid">
+<div class="container contenedor-principal">
+  <div class="row">
       <!-- Menú lateral para tablets y escritorio -->
     <div class="span3 hidden-phone">
       <div class="well sidebar-nav">
@@ -172,10 +171,10 @@
   </div>
 </div>
 
-<div class="navbar navbar-fixed-bottom visible-phone">
+<div class="navbar navbar-inverse navbar-fixed-bottom visible-phone">
   <div class="navbar-inner">
         <p class="navbar-text">
-          <?php echo anchor('login/do_logout','<i class="icon-user"></i> Salir','class="navbar-link pull-right"'); ?>
+          <?php echo anchor('login/do_logout','<i class="icon-user icon-white"></i> Salir','class="navbar-link pull-right"'); ?>
         </p>
   </div>
 </div>

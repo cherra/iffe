@@ -97,10 +97,10 @@
 <!-- contenido ---------------------------------------------------------------------- -->
 {contenido_vista}
 
-<div class="navbar navbar-fixed-bottom visible-phone">
+<div class="navbar navbar-inverse navbar-fixed-bottom visible-phone">
   <div class="navbar-inner">
         <p class="navbar-text">
-          <?php echo anchor('login/do_logout','<i class="icon-user"></i> Salir','class="navbar-link pull-right"'); ?>
+          <?php echo anchor('login/do_logout','<i class="icon-user icon-white"></i> Salir','class="navbar-link pull-right"'); ?>
         </p>
   </div>
 </div>

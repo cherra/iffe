@@ -7,14 +7,12 @@
  */
 class Periodo_activo {
     
-    private $CI;
-    
     function index(){
-        $this->CI =& get_instance();
+        $CI =& get_instance();
         
-        $this->CI->load->model('periodo','p');
-        $periodo = $this->CI->p->get_activo()->row();
-        $this->CI->session->set_userdata('periodo', $periodo);
+        $CI->load->model('periodo');
+        $periodo = $CI->periodo->get_activo()->row();
+        $CI->session->set_userdata('periodo', $periodo);
     }
 }
 
