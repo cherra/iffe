@@ -10,7 +10,12 @@
     <div class="data"><?php echo $table; ?></div>
   </div>
 </div>
-
+<!-- <div class="row-fluid">
+  <div class="span6 offset3">
+    <?php echo $mensaje ?>
+  </div>
+</div>
+-->
 <script>
 $(document).ready(function(){
     
@@ -38,13 +43,14 @@ $(document).ready(function(){
     /*
      * 
      */
-    $('#estado').click(function(event){
-        var etiqueta = $(this).children('i');
-        if(etiqueta.hasClass('icon-ban-circle')){
-            var a = confirm("¿Seguro(a) que deseas cancelar el contrato?\nEsta acción no se puede deshacer");
-        }else if(etiqueta.hasClass('icon-ok')){
-            var a = confirm("¿Autorizar contrato?");
-        }
+    $('#cancelar').click(function(event){
+        var a = confirm("¿Seguro(a) que deseas cancelar el contrato?\nEsta acción no se puede deshacer.");
+        if(!a)
+            event.preventDefault();
+    });
+    
+    $('#autorizar').click(function(event){
+        var a = confirm("¿Seguro(a) que deseas autorizar el contrato?");
         if(!a)
             event.preventDefault();
     });

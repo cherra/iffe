@@ -37,9 +37,9 @@ class Ventas extends CI_Controller{
         $this->table->set_empty('-');
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
-        $this->table->set_heading('Cliente', 'Número', array('data' => 'Importe','class' => 'hidden-phone'), 'Módulos','','','', 'Estado');
+        $this->table->set_heading('Estado', 'No.', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
         foreach ($contratos as $contrato) {
-            $modulos = $this->a->get_modulos($contrato->id)->result();
+            /*$modulos = $this->a->get_modulos($contrato->id)->result();
             $calle = '';
             $mods = '';
             $total = 0;
@@ -55,16 +55,21 @@ class Ventas extends CI_Controller{
                     $mods.=', ';
                 $mods .= $m->modulo;
                 $total += $m->importe;                
-            }
+            }*/
+            $modulos = $this->a->get_modulos($contrato->id);
+            $num_modulos = $modulos->num_rows();
+            $total = $this->a->get_importe($contrato->id);
             $this->table->add_row(
-                $contrato->cliente,
+                '<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-remove')).'"></i>',
                 $contrato->numero,
+                $contrato->cliente,
                 array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
-                $mods,
+                //$mods,
                 array('data' => ($contrato->estado == 'autorizado' ? anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')) : '<a class="btn btn-small disabled"><i class="icon-print"></i></a>'), 'class' => 'hidden-phone'),
                 ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_modulos/' . $contrato->id, '<i class="icon-road"></i>', array('class' => 'btn btn-small', 'title' => 'Módulos')) : '<a class="btn btn-small disabled"><i class="icon-road"></i></a>'),
                 ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_update/' . $contrato->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')) : '<a class="btn btn-small disabled"><i class="icon-edit"></i></a>'),
-                anchor('operacion/ventas/contratos_estado/'.$contrato->id,'<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-ban-circle')).'"></i>', array('class' => 'btn btn-small', 'title' => 'Cambiar estado', 'id' => 'estado'))
+                array('data' => (($contrato->estado == 'pendiente' && $num_modulos > 0) ? anchor('operacion/ventas/contratos_autorizar/'.$contrato->id,'<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),
+                array('data' => ($contrato->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-remove"></i></a>' : anchor('operacion/ventas/contratos_cancelar/'.$contrato->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
             );
         }
         
@@ -137,17 +142,20 @@ class Ventas extends CI_Controller{
         $this->load->view('operacion/contratos/formulario', $data);
     }
     
-    public function contratos_estado( $id = null ) {
+    public function contratos_autorizar( $id = null ) {
         
         if(!empty($id)){
             $this->load->model('contrato', 'c');
-            $contrato = $this->c->get_by_id($id)->row();
-            if($contrato->estado == 'pendiente')
-                $estado = 'autorizado';
-            elseif($contrato->estado == 'autorizado')
-                $estado = 'cancelado';
-            
-            $this->c->estado($id, $estado);
+            $this->c->autorizar($id);
+        }
+        redirect(site_url('operacion/ventas/contratos/'));
+    }
+    
+    public function contratos_cancelar( $id = null ) {
+        
+        if(!empty($id)){
+            $this->load->model('contrato', 'c');
+            $this->c->cancelar($id);
         }
         redirect(site_url('operacion/ventas/contratos/'));
     }

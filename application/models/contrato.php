@@ -40,6 +40,18 @@ class Contrato extends CI_Model{
         $this->db->order_by('c.nombre, m.numero');
         return $this->db->get($this->tbl_contrato_modulos.' cm', $limit, $offset);
     }
+    
+    function get_importe( $id ){
+        $this->db->select('SUM(cm.importe) as importe', FALSE);
+        $this->db->join('Modulos m','cm.id_modulo = m.id');
+        $this->db->where('cm.id_contrato',$id);
+        $this->db->group_by('cm.id_contrato');
+        $query = $this->db->get($this->tbl_contrato_modulos.' cm');
+        if($query->num_rows() > 0)
+            return $query->row()->importe;
+        else
+            return 0;
+    }
 
     /**
     * ***********************************************************************
@@ -91,13 +103,24 @@ class Contrato extends CI_Model{
 
     /**
     * ***********************************************************************
-    * Eliminar contrato por id
+    * Autorizar
     * ***********************************************************************
     */
-    function estado( $id, $estado ) {
+    function autorizar( $id ) {
         $this->db->where('id', $id);
-        $this->db->update($this->tbl, array('estado' => $estado));
+        $this->db->update($this->tbl, array('estado' => 'autorizado'));
     }
+    
+    /**
+    * ***********************************************************************
+    * Cancelar
+    * ***********************************************************************
+    */
+    function cancelar( $id ) {
+        $this->db->where('id', $id);
+        $this->db->update($this->tbl, array('estado' => 'cancelado'));
+    }
+    
     /*
      * Adjuntos del contrato
      */
