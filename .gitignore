@@ -10,4 +10,3 @@ assets/tmp/*
 application/libraries/mpdf/ttfontdata/*
 application/libraries/mpdf/tmp/*
 application/libraries/mpdf/graph_cache/*
-assets/templates/*

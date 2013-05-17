@@ -236,7 +236,7 @@ class Ventas extends CI_Controller{
     }
     
     /********************
-     *  Impresión de recibos de apartados
+     *  Impresión 
      * 
      ********************/
     public function contratos_documento( $id = null ){
@@ -246,6 +246,20 @@ class Ventas extends CI_Controller{
             if( $this->session->flashdata('pdf') ){
                 $contrato = $this->a->get_by_id($id)->row();
                 if($contrato){
+                    $modulos = $this->a->get_modulos($contrato->id)->result();
+                    
+                    $this->load->model('cliente','cl');
+                    $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
+                    
+                    $this->load->model('giro','g');
+                    $giro = $this->g->get_by_id($cliente->id_giro)->row();
+                    
+                    /*$this->load->model('calle','ca');
+                    foreach($modulos as $modulo){
+                        $calle
+                    }
+                    $this->ca->*/
+                    
                     $this->load->library('tbs');
                     $this->load->library('numero_letras');
                     
@@ -257,11 +271,14 @@ class Ventas extends CI_Controller{
                     
                     // Se sustituyen los campos en el template
                     $this->tbs->VarRef['numero'] = $contrato->numero;
-                    $this->tbs->VarRef['cliente'] = $contrato->cliente;
-                    $this->tbs->VarRef['fraccionamiento'] = $contrato->fraccionamiento;
-                    $this->tbs->VarRef['calle'] = $contrato->calle;
-                    $this->tbs->VarRef['numero'] = $contrato->numero_contrato;
-                    $fecha_vencimiento = date_create($contrato->fecha_vencimiento);
+                    $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                    $this->tbs->VarRef['giro'] = $giro->nombre;
+                    $this->tbs->VarRef['calle'] = $cliente->calle;
+                    $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
+                    $this->tbs->VarRef['colonia'] = $cliente->colonia;
+                    $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
+                    $this->tbs->VarRef['estado'] = $cliente->estado;
+                    /*$fecha_vencimiento = date_create($contrato->fecha_vencimiento);
                     $this->tbs->VarRef['fecha_vencimiento'] = date_format($fecha_vencimiento,'d/F/Y');
                     $this->tbs->VarRef['dia_vencimiento'] = date_format($fecha_vencimiento,'d');
                     $this->tbs->VarRef['mes_vencimiento'] = $meses[date_format($fecha_vencimiento,'n')-1];
@@ -273,11 +290,12 @@ class Ventas extends CI_Controller{
                     $this->tbs->VarRef['precio_casa'] = number_format($contrato->precio_casa,2,'.',',');
                     $this->tbs->VarRef['cantidad_letra'] = $this->numero_letras->convertir($contrato->precio_casa);
                     $this->tbs->VarRef['ciudad'] = $contrato->ciudad;
-                    $this->tbs->VarRef['estado'] = $contrato->estado;
+                    $this->tbs->VarRef['estado'] = $contrato->estado;*/
                     // Render sin desplegar en navegador
                     $this->tbs->Show(TBS_NOTHING);
                     // Se almacena el render en el array $data
                     $data['contenido'] = $this->tbs->Source;
+                    
                     $this->load->view('documento', $data);
                 }else{
                     redirect('operacion/ventas/contratos');

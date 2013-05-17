@@ -38,10 +38,11 @@ class Modulo extends CI_Model {
     function get_disponibles($id_calle){
         $this->db->select('m.*, cm.id_contrato AS contrato, c.estado as estado');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
-        $this->db->join('Contratos c','cm.id_contrato = c.id AND c.estado != "cancelado"','left');
+        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado")','left');
         $this->db->where('m.id_calle', $id_calle);
-        //$this->db->where('c.estado != "cancelado"');
-        $this->db->having('contrato IS NULL');
+        //$this->db->where('c.id NOT IN (SELECT id FROM Contratos WHERE estado = "pendiente" OR estado = "autorizado")');
+        $this->db->group_by('m.id');
+        $this->db->having('contrato IS NULL OR estado = "cancelado"');
         $this->db->order_by('m.numero');
         return $this->db->get($this->tbl.' m');
     }
