@@ -54,6 +54,7 @@ class Layout
                 $this->CI->load->library('pdf');
                 $pdf = $this->CI->pdf->render($view);
                 $this->CI->output->set_content_type('application/pdf')->set_output($pdf);
+                //$this->CI->output->set_output($view);
             }else{
                 $this->CI->output->set_output($view);
             }
