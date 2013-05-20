@@ -236,29 +236,24 @@ class Ventas extends CI_Controller{
     }
     
     /********************
-     *  Impresión 
+     *  Impresión de contratos
      * 
      ********************/
     public function contratos_documento( $id = null ){
         if(!empty($id)){
-            $this->layout = "template_backend_wo_menu";
+            $this->layout = "template_pdf";
             $this->load->model('contrato', 'a');
             if( $this->session->flashdata('pdf') ){
                 $contrato = $this->a->get_by_id($id)->row();
                 if($contrato){
-                    $modulos = $this->a->get_modulos($contrato->id)->result();
+                    $modulos = $this->a->get_modulos($contrato->id)->result_array();
+                    $importe = $this->a->get_importe($contrato->id);
                     
                     $this->load->model('cliente','cl');
                     $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
                     
                     $this->load->model('giro','g');
                     $giro = $this->g->get_by_id($cliente->id_giro)->row();
-                    
-                    /*$this->load->model('calle','ca');
-                    foreach($modulos as $modulo){
-                        $calle
-                    }
-                    $this->ca->*/
                     
                     $this->load->library('tbs');
                     $this->load->library('numero_letras');
@@ -270,28 +265,41 @@ class Ventas extends CI_Controller{
                     $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_contratos'));
                     
                     // Se sustituyen los campos en el template
-                    $this->tbs->VarRef['numero'] = $contrato->numero;
+                    $this->tbs->VarRef['numero_contrato'] = $contrato->numero;
                     $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                    $this->tbs->VarRef['testigo1'] = $contrato->testigo1;
+                    $this->tbs->VarRef['testigo2'] = $contrato->testigo2;
                     $this->tbs->VarRef['giro'] = $giro->nombre;
                     $this->tbs->VarRef['calle'] = $cliente->calle;
                     $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
                     $this->tbs->VarRef['colonia'] = $cliente->colonia;
                     $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
                     $this->tbs->VarRef['estado'] = $cliente->estado;
-                    /*$fecha_vencimiento = date_create($contrato->fecha_vencimiento);
-                    $this->tbs->VarRef['fecha_vencimiento'] = date_format($fecha_vencimiento,'d/F/Y');
+                    $this->tbs->VarRef['importe'] = '$'.number_format($importe,2,'.',',');
+                    $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir($importe);
+                    
+                    $fecha_inicio = date_create($contrato->fecha_inicio);
+                    $this->tbs->VarRef['fecha_inicio'] = date_format($fecha_inicio,'d/m/Y');
+                    $this->tbs->VarRef['dia_inicio'] = date_format($fecha_inicio,'d');
+                    $this->tbs->VarRef['mes_inicio'] = $meses[date_format($fecha_inicio,'n')-1];
+                    $this->tbs->VarRef['ano_inicio'] = date_format($fecha_inicio,'Y');
+                    
+                    $fecha_vencimiento = date_create($contrato->fecha_vencimiento);
+                    $this->tbs->VarRef['fecha_vencimiento'] = date_format($fecha_vencimiento,'d/m/Y');
                     $this->tbs->VarRef['dia_vencimiento'] = date_format($fecha_vencimiento,'d');
                     $this->tbs->VarRef['mes_vencimiento'] = $meses[date_format($fecha_vencimiento,'n')-1];
                     $this->tbs->VarRef['ano_vencimiento'] = date_format($fecha_vencimiento,'Y');
+                    
                     $fecha = date_create($contrato->fecha);
+                    $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
                     $this->tbs->VarRef['dia'] = date_format($fecha,'d');
                     $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
                     $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
-                    $this->tbs->VarRef['precio_casa'] = number_format($contrato->precio_casa,2,'.',',');
-                    $this->tbs->VarRef['cantidad_letra'] = $this->numero_letras->convertir($contrato->precio_casa);
-                    $this->tbs->VarRef['ciudad'] = $contrato->ciudad;
-                    $this->tbs->VarRef['estado'] = $contrato->estado;*/
                     // Render sin desplegar en navegador
+                    foreach($modulos as $key => $value){
+                        $modulos[$key]['importe'] = '$'.number_format($modulos[$key]['importe'],2,'.',',');
+                    }
+                    $this->tbs->MergeBlock('modulos', $modulos);
                     $this->tbs->Show(TBS_NOTHING);
                     // Se almacena el render en el array $data
                     $data['contenido'] = $this->tbs->Source;
