@@ -14,9 +14,13 @@ class Pdf {
         $this->CI =& get_instance();
     }
     
-    function render( $html, $pagesize = 'Letter' ){
+    function render( $html, $pagesize = 'Letter', $watermark = null ){
         $pdf = new mPDF('utf-8', $pagesize);
         //$pdf->bottom-margin = "500";
+        if(!empty($watermark)){
+            $pdf->SetWatermarkText($watermark);
+            $pdf->showWatermarkText = true;
+        }
         $pdf->WriteHTML($html);
         
         return $pdf->Output('','S');

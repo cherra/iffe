@@ -52,7 +52,17 @@ class Layout
             // Se puede enviar al navegador HTML o PDF
             if( $this->CI->session->flashdata('pdf') ){ // Variable flash para saber si es impresión
                 $this->CI->load->library('pdf');
-                $pdf = $this->CI->pdf->render($view);
+                if( $this->CI->session->flashdata('watermark') ){
+                    $watermark = $this->CI->session->flashdata('watermark');
+                }else{
+                    $watermark = null;
+                }
+                if( $this->CI->session->flashdata('pagesize') ){
+                    $pagesize = $this->CI->session->flashdata('pagesize');
+                }else{
+                    $pagesize = "Letter";
+                }
+                $pdf = $this->CI->pdf->render($view, $pagesize, $watermark);
                 $this->CI->output->set_content_type('application/pdf')->set_output($pdf);
                 //$this->CI->output->set_output($view);
             }else{
