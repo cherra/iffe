@@ -16,7 +16,7 @@
     </form>
   </div>
   <div class="row-fluid">
-    <div class="span6">
+    <div class="span12">
         <?php echo $mensaje ?>
     </div>
   </div>
