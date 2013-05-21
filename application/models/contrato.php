@@ -106,9 +106,11 @@ class Contrato extends CI_Model{
     * Autorizar
     * ***********************************************************************
     */
-    function autorizar( $id ) {
-        $this->db->where('id', $id);
-        $this->db->update($this->tbl, array('estado' => 'autorizado'));
+    function autorizar( $id, $documento ) {
+        if(!empty($id) && !empty($documento)){
+            $this->db->where('id', $id);
+            $this->db->update($this->tbl, array('estado' => 'autorizado', 'documento' => $documento));
+        }
     }
     
     /**
