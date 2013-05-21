@@ -26,7 +26,7 @@ class Giro extends CI_Model{
      */
     
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->order_by('id','desc');
+        $this->db->order_by('nombre','asc');
         return $this->db->get($this->tbl, $limit, $offset);
     }
     

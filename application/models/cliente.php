@@ -9,8 +9,22 @@ class Cliente extends CI_Model {
  	* Cantidad de registros
  	* ***********************************************************************
  	*/
-    function count_all() {
-        return $this->db->count_all($this->tbl_clientes);
+    
+    //
+    //   FILTROS SIN TERMINAR !!!!
+    //
+    function count_all($filtros = null) {
+        if(!empty($filtros)){
+            $filtros = explode(' ', $filtros);
+            foreach($filtros as $filtro){
+                $this->db->or_like('apellido_paterno',$filtro);
+                $this->db->or_like('apellido_materno',$filtro);
+                $this->db->or_like('nombre',$filtro);
+                $this->db->or_like('razon_social',$filtro);
+            }
+        }
+        $query = $this->db->get($this->tbl_clientes);
+        return $query->num_rows();
     }
 
     /**
@@ -18,8 +32,21 @@ class Cliente extends CI_Model {
  	* Cantidad de registros por pagina
  	* ***********************************************************************
  	*/
-    function get_paged_list($limit = null, $offset = 0) {
-        $this->db->order_by('id','desc');
+    
+    //
+    //   FILTROS SIN TERMINAR !!!!
+    //
+    function get_paged_list($limit = null, $offset = 0, $filtros = null) {
+        if(!empty($filtros)){
+            $filtros = explode(' ', $filtros);
+            foreach($filtros as $filtro){
+                $this->db->or_like('apellido_paterno',$filtro);
+                $this->db->or_like('apellido_materno',$filtro);
+                $this->db->or_like('nombre',$filtro);
+                $this->db->or_like('razon_social',$filtro);
+            }
+        }
+        $this->db->order_by('apellido_paterno, apellido_materno, nombre, razon_social','asc');
         return $this->db->get($this->tbl_clientes, $limit, $offset);
     }
 

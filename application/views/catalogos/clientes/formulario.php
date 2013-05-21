@@ -22,11 +22,26 @@
         <label class="control-label hidden-phone" for="id_concesion">Concesión</label>
         <div class="controls">
             <select name="id_concesion" class="required">
-                <option value="">Selecciona un giro...</option>
+                <option value="">Selecciona una concesión...</option>
                 <?php foreach ($concesiones as $concesion){ ?>
                 <option value="<?php echo $concesion->id; ?>" <?php if( isset($datos->id_concesion) && ($datos->id_concesion == $concesion->id) ) echo "selected"; ?>><?php echo $concesion->nombre; ?></option>
                 <?php } ?>
             </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label hidden-phone" for="tipo">Persona</label>
+        <div class="controls">
+            <select name="tipo" class="required">
+                <option value="fisica" <?php if( isset($datos->tipo) && ($datos->tipo == 'fisica') ) echo "selected"; ?>>Física</option>
+                <option value="moral" <?php if( isset($datos->tipo) && ($datos->tipo == 'moral') ) echo "selected"; ?>>Moral</option>
+            </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label hidden-phone" for="razon_social">Razón social</label>
+        <div class="controls">
+          <input type="text" name="razon_social" id="razon_social" placeholder="Razón social" value="<?php echo (isset($datos->razon_social) ? $datos->razon_social : ''); ?>">
         </div>
       </div>
       <div class="control-group">
@@ -56,7 +71,7 @@
       <div class="control-group">
         <label class="control-label hidden-phone" for="numero_exterior">Numero Exterior</label>
         <div class="controls">
-          <input type="text" maxlength="10" class="required" name="numero_exterior" placeholder="Numero Exterior" value="<?php echo (isset($datos->numero_exterior) ? $datos->numero_exterior : ''); ?>">
+          <input type="text" maxlength="10" name="numero_exterior" placeholder="Numero Exterior" value="<?php echo (isset($datos->numero_exterior) ? $datos->numero_exterior : ''); ?>">
         </div>
       </div>
       <div class="control-group">

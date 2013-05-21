@@ -22,12 +22,20 @@ class Clientes extends CI_Controller {
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
-    	$clientes = $this->f->get_paged_list($page_limit, $offset)->result();
-    	
+        
+        //
+        //   FILTROS SIN TERMINAR !!!!
+        // (ver modelo cliente.php)
+        
+        $filtros = $this->input->post();  // Filtros de busqueda
+        
+    	$clientes = $this->f->get_paged_list($page_limit, $offset, $filtros['filtro'])->result();
+    	//echo $this->db->last_query();
+        //die();
     	// generar paginacion
     	$this->load->library('pagination');
     	$config['base_url'] = site_url('catalogos/clientes/lista');
-    	$config['total_rows'] = $this->f->count_all();
+    	$config['total_rows'] = $this->f->count_all($filtros['filtro']);
     	$config['per_page'] = $page_limit;
     	$config['uri_segment'] = 4;
     	$this->pagination->initialize($config);
@@ -38,12 +46,12 @@ class Clientes extends CI_Controller {
     	$this->table->set_empty('&nbsp;');
     	$tmpl = array ( 'table_open' => '<table class="' . $this->config->item('tabla_css') . '" >' );
     	$this->table->set_template($tmpl);
-    	$this->table->set_heading('Nombre', 'Apellido Paterno',array('data' => 'Apellido Materno', 'class' => 'hidden-phone'), array('data' => 'Telefono','class' => 'hidden-phone'),array('data' => 'Celular', 'class' => 'hidden-phone'), '');
+    	$this->table->set_heading('Apellido Paterno',array('data' => 'Apellido Materno', 'class' => 'hidden-phone'), 'Nombre', array('data' => 'Telefono','class' => 'hidden-phone'),array('data' => 'Celular', 'class' => 'hidden-phone'), '');
     	foreach ($clientes as $cliente) {
     		$this->table->add_row(
-                    $cliente->nombre,
                     $cliente->apellido_paterno,
                     array('data' => $cliente->apellido_materno, 'class' => 'hidden-phone'),
+                    $cliente->nombre,
                     array('data' => $cliente->telefono, 'class' => 'hidden-phone'),
                     array('data' => $cliente->celular, 'class' => 'hidden-phone'),
                     anchor('catalogos/clientes/update/' . $cliente->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
@@ -53,7 +61,7 @@ class Clientes extends CI_Controller {
     	$data['table'] = $this->table->generate();
     	$data['titulo'] = 'Clientes <small>Lista</small>';
     	$data['link_add'] = anchor('catalogos/clientes/add','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
-    	
+    	$data['action'] = 'catalogos/clientes/lista';
     	$this->load->view('catalogos/clientes/lista', $data);
     }
     
