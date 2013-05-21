@@ -7,22 +7,40 @@
   <!-- css -------------------------------------------------------------------- -->
   <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap.css" rel="stylesheet">
   <style type="text/css">
-      body{
-          padding-top: 60px;
+      .contenedor-principal {
+        padding-top: 50px;
+        padding-bottom: 40px;
       }
-      
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
       @media (max-width: 980px) {
+        .contenedor-principal {
+          padding-top: 0px;
+          padding-bottom: 10px;
+        }
+          
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+        
+        .page-header{
+            margin: 10px 0 10px;
+            padding-bottom: 0;
+        }
+        
         .pagination{
             margin: 5px 0;
         }
-      }
-      
-        .map-viewport{ position:relative; width:400px; height:300px; border:1px solid black; overflow:hidden; margin:0 0 20px 0;}
-        .level{ position:absolute; left:0; top:0; z-index:10;}
-        .selected-level{ z-index:20; }
-        #map-1{ width:800px; height:600px; position:absolute; left:0; top:0; }
-        img{max-width: none !important;}
         
+        .navbar-fixed-top{
+            margin-bottom: 10px;
+        }
+      }
     </style>
   <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
   <?php 

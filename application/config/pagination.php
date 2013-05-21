@@ -25,6 +25,7 @@ $config['next_tag_close'] = '</li>';
 $config['prev_link'] = '&laquo;';
 $config['prev_tag_open'] = '<li>';
 $config['prev_tag_close'] = '</li>';
-$config['per_page'] = 20;
-
+$config['num_links'] = 2;
+$config['per_page'] = 30;
+//$config['display_pages'] = FALSE;
 ?>

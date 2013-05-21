@@ -27,6 +27,46 @@
       }
     }
   ?> 
+  
+  <style>
+      
+
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+      
+      .page-header{
+        margin: 10px 0 10px;
+        padding-bottom: 5px;
+      }
+
+      .pagination{
+        margin: 5px 0;
+      }
+
+      .navbar-fixed-top{
+        margin-bottom: 10px;
+      }
+
+      /* Tablets y mobiles*/
+      @media (max-width: 980px) {
+        .contenedor-principal {
+          padding-top: 0px;
+          padding-bottom: 10px;
+        }
+          
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+        
+        .sidebar-nav{
+            margin-bottom: 5px;
+        }
+      }
+  </style>
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
   <script src="<?php echo asset_url(); ?>bootstrap/js/html5shiv.js"></script>
