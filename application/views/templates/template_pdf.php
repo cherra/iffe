@@ -14,7 +14,7 @@ Template para PDFs
             }
             
             @page{
-                margin-left: 25mm;
+                margin-left: 12mm;
                 margin-right: 12mm;
                 margin-top: 12mm;
                 margin-bottom: 12mm;
