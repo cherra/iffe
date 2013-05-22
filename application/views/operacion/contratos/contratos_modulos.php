@@ -59,7 +59,7 @@
     <div class="control-group">
         <label class="control-label" for="importe">Importe</label>
         <div class="controls">
-            <input type="text" name="importe" id="importe" value="<?php if(!empty($modulo) ) echo $modulo->precio; ?>" <?php if(empty($modulo)) echo "disabled"; ?> />
+            <input type="text" name="importe" id="importe" value="<?php if(!empty($modulo) ) echo number_format($importe,2,'.',''); ?>" <?php if(empty($modulo)) echo "disabled"; ?> />
         </div>
     </div>
     <div class="control-group">

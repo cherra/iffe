@@ -32,6 +32,18 @@ class Contrato extends CI_Model{
         return $this->db->get($this->tbl.' c',$limit, $offset);
     }
     
+    function get_con_adeudo() {
+        $this->db->select('c.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente, SUM(r.total) as abonos', FALSE);
+        $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->join('Recibos r','c.id = r.id_contrato','left');
+        $this->db->where('c.estado','autorizado');
+        $this->db->where('(r.estado = "vigente" OR r.estado IS NULL)');
+        $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL');
+        $this->db->group_by('c.id');
+        $this->db->order_by('numero','desc');
+        return $this->db->get($this->tbl.' c');
+    }
+    
     function get_modulos( $id, $limit = null, $offset = 0 ){
         $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe');
         $this->db->join('Modulos m','cm.id_modulo = m.id');
@@ -51,6 +63,35 @@ class Contrato extends CI_Model{
             return $query->row()->importe;
         else
             return 0;
+    }
+    
+    function get_abonos( $id ){
+        $this->db->select('SUM(r.total) as abonos', FALSE);
+        //$this->db->join('Recibos r', 'c.id = r.id_contrato');
+        $this->db->where('r.id_contrato',$id);
+        $this->db->where('r.estado','vigente');
+        $this->db->group_by('r.id_contrato');
+        $query = $this->db->get('Recibos r');
+        if($query->num_rows() > 0){
+            return $query->row()->abonos;
+        }else{
+            return 0;
+        }
+    }
+    
+    function get_saldo( $id ){
+        $importe = $this->get_importe($id);
+        $this->db->select('SUM(r.total) as abonos', FALSE);
+        //$this->db->join('Recibos r', 'c.id = r.id_contrato');
+        $this->db->where('r.id_contrato',$id);
+        $this->db->where('r.estado','vigente');
+        $this->db->group_by('r.id_contrato');
+        $query = $this->db->get('Recibos r');
+        if($query->num_rows() > 0){
+            return number_format($importe - $query->row()->abonos,2,'.','');
+        }else{
+            return $importe;
+        }
     }
 
     /**
