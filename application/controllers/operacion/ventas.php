@@ -253,9 +253,12 @@ class Ventas extends CI_Controller{
             $data['modulos'] = $this->m->get_disponibles($id_calle)->result();
             if(!empty($id_modulo)){
                 $data['modulo'] = $this->m->get_by_id($id_modulo)->row();
+                $data['importe'] = $data['modulo']->precio * (1 + $this->configuracion->get_valor('iva'));
             }
         }
         if ( ($datos = $this->input->post()) ) {
+            $datos['subtotal'] = $datos['importe'] / (1 + $this->configuracion->get_valor('iva') );
+            $datos['iva'] = $datos['subtotal'] * $this->configuracion->get_valor('iva');
             $result = $this->co->save_modulo( $datos );
             if($result > 0){
                 $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Módulo agregado correctamente</div>';
@@ -328,7 +331,7 @@ class Ventas extends CI_Controller{
         }
     }
     
-    
+    /*
     public function contratos_adjuntos($id_contrato = null, $offset = 0){
         $this->load->model('contrato', 'c');
         $data['contratos'] = $this->c->get_paged_list()->result();
@@ -465,9 +468,9 @@ class Ventas extends CI_Controller{
             $adjunto = $this->c->get_by_id_adjunto($id_adjunto)->row();
             if( !empty($adjunto) ){
 
-                /*
-                 *  FALTA ENVIAR UN MENSAJE AL USUARIO CUANDO OCURRE UN ERROR
-                 */
+                //
+                //  FALTA ENVIAR UN MENSAJE AL USUARIO CUANDO OCURRE UN ERROR
+                //
                 
                 if( $this->c->delete_adjunto($id_adjunto, $id_contrato) ){
                     if( unlink( $adjunto->path.$id_contrato.'/'.$adjunto->file_name ) ){
@@ -482,7 +485,187 @@ class Ventas extends CI_Controller{
             redirect(site_url('operacion/ventas/contratos_adjuntos/'.$id_contrato));
         }
     }
+    */
 
+    /**
+     * ----------------------------------------------------
+     * Métodos para recibos
+     * ----------------------------------------------------
+     */
+    
+    public function recibos( $offset = 0 ){
+        $this->load->model('recibo','a');
+        $this->load->model('contrato','c');
+        
+        $offset = floatval($offset);
+        
+        // generar paginacion
+        $this->config->load("pagination");
+        $page_limit = $this->config->item("per_page");
+        $recibos = $this->a->get_paged_list($page_limit, $offset)->result();
+        $this->load->library('pagination');
+        $config['base_url'] = site_url('operacion/ventas/recibos/');
+        $config['total_rows'] = $this->a->count_all();
+        $config['uri_segment'] = 4;
+        $config['per_page'] = $page_limit;
+        $this->pagination->initialize($config);
+
+        // generar tabla
+        $this->load->library('table');
+        $this->table->set_empty('-');
+        $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
+        $this->table->set_template($tmpl);
+        $this->table->set_heading('Estado', 'No.', 'Contrato', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
+        foreach ($recibos as $recibo) {
+            $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
+            $clase = '';
+            if($recibo->estado == 'cancelado')
+                $clase = 'muted';
+            $this->table->add_row(
+                '<i class="'.($recibo->estado == 'vigente' ? 'icon-ok' : 'icon-remove').'"></i>',
+                $recibo->numero,
+                $contrato->numero.'-'.$contrato->sufijo,
+                $recibo->cliente, 
+                array('data' => number_format($recibo->total,2,'.',','), 'class' => 'hidden-phone'),
+                array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
+                array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+            );
+            $this->table->add_row_class($clase);
+        }
+        
+        $data['pagination'] = $this->pagination->create_links();
+        $data['table'] = $this->table->generate();
+        $data['titulo'] = 'Recibos <small>Listado</small>';
+        $data['add_link'] = anchor('operacion/ventas/recibos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        
+        $this->load->view('operacion/recibos/lista', $data);
+    }
+    
+    public function recibos_add( $id_contrato = null ){
+        
+        $data['titulo'] = 'Recibos <small>Nuevo</small>';
+        $data['link_back'] = anchor('operacion/ventas/recibos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['mensaje'] = '';
+        if(!empty($id_contrato)){
+            $data['action'] = site_url('operacion/ventas/recibos_add/'.$id_contrato);
+        }else{
+            $data['action'] = site_url('operacion/ventas/recibos_add');
+        }
+	
+        $this->load->model('periodo','p');
+        $data['periodo'] = $this->session->userdata('periodo');
+        
+        if ( ($datos = $this->input->post()) ) {
+            $this->load->model('recibo', 'r');
+            
+            if( ($ultimo_recibo = $this->r->get_last()->row()) )
+                $datos['numero'] = $ultimo_recibo->numero + 1;
+            else
+                $datos['numero'] = 1;
+            $datos['id_usuario'] = $this->session->userdata('userid');
+            
+            $tasa_iva = $this->configuracion->get_valor('iva');
+            $datos['subtotal'] = $datos['total'] / (1+$tasa_iva);
+            $datos['iva'] = $datos['total'] - $datos['subtotal'];
+            
+            // Datos del contrato
+            $this->load->model('contrato','c');
+            $contrato = $this->c->get_by_id($datos['id_contrato'])->row();
+            
+            // Datos del cliente
+            $this->load->model('cliente','cl');
+            $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
+            
+            // Documento
+            $this->load->library('tbs');
+            $this->load->library('numero_letras');
+
+            // Nombres de meses en español (config/sitio.php)
+            $meses = $this->config->item('meses');
+
+            // Se carga el template predefinido para los recibos (tabla Configuracion)
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_recibos'));
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['logo'] = '';
+            $this->tbs->VarRef['folio'] = $datos['numero'];
+            $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            $this->tbs->VarRef['calle'] = $cliente->calle;
+            $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
+            $this->tbs->VarRef['colonia'] = $cliente->colonia;
+            $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
+            $this->tbs->VarRef['estado'] = $cliente->estado;
+            if($datos['tipo'] == 'anticipo')
+                $concepto = "Anticipo";
+            elseif($datos['tipo'] == 'total')
+                $concepto = "Pago total";
+            $concepto.=" al contrato No. ".$contrato->numero."-".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
+            $this->tbs->VarRef['concepto'] = $concepto;
+            $this->tbs->VarRef['importe'] = '$'.number_format($datos['total'],2,'.',',');
+            $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($datos['total'],2,'.',''));
+
+            $fecha = date_create();
+            $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
+            $this->tbs->VarRef['dia'] = date_format($fecha,'d');
+            $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
+            $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
+            // Render sin desplegar en navegador
+            $this->tbs->Show(TBS_NOTHING);
+            // Se almacena el render en el array $data
+            $datos['documento'] = $this->tbs->Source;
+            
+            $this->r->save($datos);
+            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Recibo registrado</div>';
+        }
+        
+        $this->load->model('contrato','c');
+        $data['contratos'] = $this->c->get_con_adeudo()->result();
+        if(!empty($id_contrato)){
+            $data['id_contrato'] = $id_contrato;
+            $data['total'] = $this->c->get_importe( $id_contrato );
+            $data['abonos'] = $this->c->get_abonos( $id_contrato );
+            $data['saldo'] = $this->c->get_saldo( $id_contrato );
+        }
+        $this->load->view('operacion/recibos/formulario', $data);
+    }
+    
+    public function recibos_cancelar( $id = null ) {
+        
+        if(!empty($id)){
+            $this->load->model('recibo', 'r');
+            $this->r->cancelar($id);
+        }
+        redirect(site_url('operacion/ventas/recibos/'));
+    }
+    
+    /********************
+     *  Impresión de recibos
+     * 
+     ********************/
+    public function recibos_documento( $id = null ){
+        if(!empty($id)){
+            $this->layout = "template_pdf";
+            $this->load->model('recibo', 'r');
+            $recibo = $this->r->get_by_id($id)->row();
+            if( $this->session->flashdata('pdf') ){
+                if($recibo){
+                    $data['contenido'] = $recibo->documento;
+                    $this->load->view('documento', $data);
+                }else{
+                    redirect('operacion/ventas/recibos');
+                }
+            }else{
+                $this->session->set_flashdata('pdf', true);
+                if($recibo){
+                    if($recibo->estado == 'cancelado')  // Se agrega una marca de agua al PDF
+                        $this->session->set_flashdata('watermark', 'Cancelado');
+                }
+                redirect('operacion/ventas/recibos_documento/'.$id); // Se recarga el método para imprimirlo como PDF
+            }
+        }else{
+            redirect('operacion/ventas/recibos');
+        }
+    }
 }
 
 ?>
