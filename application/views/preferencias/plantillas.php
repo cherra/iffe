@@ -8,7 +8,7 @@
   <div class="span12">
     <form class="form-horizontal" name="form" id="form" action="<?php echo $action; ?>" class="form-horizontal" method="post">
         <div class="control-group">
-                <textarea name="plantilla" id="plantilla" class="required" rows="15"><?php echo (isset($plantilla) ? $plantilla : ''); ?></textarea>
+                <textarea name="plantilla" id="plantilla" class="required" rows="20"><?php echo (isset($plantilla) ? $plantilla : ''); ?></textarea>
         </div>
         <div class="control-group">
                 <button type="submit" id="guardar" class="btn btn-primary">Guardar</button>
