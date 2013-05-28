@@ -1,12 +1,11 @@
 <?php
 /**
- * Description of contrato
- *
+  *
  * @author cherra
  */
-class Recibo extends CI_Model{
+class Factura extends CI_Model{
     
-    private $tbl = 'Recibos'; 
+    private $tbl = 'Facturas'; 
     /**
     * ***********************************************************************
     * Cantidad de registros
@@ -22,11 +21,12 @@ class Recibo extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select('r.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
+        $this->db->select('f.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
+        $this->db->join('Recibos r','f.id = r.id_factura');
         $this->db->join('Contratos c','r.id_contrato = c.id');
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->order_by('r.numero','desc');
-        return $this->db->get($this->tbl.' r',$limit, $offset);
+        $this->db->order_by('f.serie, f.folio','desc');
+        return $this->db->get($this->tbl.' f',$limit, $offset);
     }
     
     /**
@@ -43,24 +43,14 @@ class Recibo extends CI_Model{
         $this->db->order_by('id', 'desc');
         return $this->db->get($this->tbl, 1);
     }
-    
-    /**
-     * **********************************************************************
-     * Obtener los recibos que no tienen factura
-     * **********************************************************************
-     */
-    function get_sin_factura(){
-        $this->db->where('id_factura IS NULL');
-        return $this->db->get($this->tbl);
-    }
 
     /**
     * ***********************************************************************
-    * Alta de recibo
+    * Alta de factura
     * ***********************************************************************
     */
-    function save( $recibo ) {
-        if( $this->db->insert($this->tbl, $recibo) )
+    function save( $datos ) {
+        if( $this->db->insert($this->tbl, $datos) )
             return $this->db->insert_id();
         else
             return false;
@@ -71,9 +61,9 @@ class Recibo extends CI_Model{
     * Actualizar recibo por id
     * ***********************************************************************
     */
-    function update( $id, $recibo ) {
+    function update( $id, $datos ) {
         $this->db->where('id', $id);
-        $this->db->update($this->tbl, $recibo);
+        $this->db->update($this->tbl, $datos);
     }
 
     
@@ -84,7 +74,7 @@ class Recibo extends CI_Model{
     */
     function cancelar( $id ) {
         $this->db->where('id', $id);
-        $this->db->update($this->tbl, array('estado' => 'cancelado'));
+        $this->db->update($this->tbl, array('estado' => '0'));
     }
 
 }
