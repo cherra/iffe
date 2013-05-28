@@ -21,7 +21,7 @@ $(document).ready(function(){
     /*
      * 
      */
-    $('#cancelar').click(function(event){
+    $('td').on('click','#cancelar', function(event){
         var a = confirm("¿Seguro(a) que deseas cancelar el recibo?\nEsta acción no se puede deshacer.");
         if(!a)
             event.preventDefault();
