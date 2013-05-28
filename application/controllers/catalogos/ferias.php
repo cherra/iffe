@@ -259,9 +259,9 @@ class Ferias extends CI_Controller{
 
             // generar paginacion
             $this->load->library('pagination');
-            $config['base_url'] = site_url('catalogos/ferias/modulos');
+            $config['base_url'] = site_url('catalogos/ferias/modulos/'.$id_calle);
             $config['total_rows'] = $this->m->count_all($id_calle);
-            $config['uri_segment'] = 6;
+            $config['uri_segment'] = 5;
             $this->pagination->initialize($config);
             $data['pagination'] = $this->pagination->create_links();
 
