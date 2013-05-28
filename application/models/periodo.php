@@ -58,6 +58,14 @@ class Periodo extends CI_Model {
         $this->db->order_by('id','desc');
         return $this->db->get($this->tbl,1);
     }
+    
+    function set_activo( $id ) {
+        $this->db->update($this->tbl, array('activo' => '0'));
+        
+        $this->db->where('id', $id);
+        $this->db->update($this->tbl, array('activo' => '1'));
+        return $this->db->affected_rows();
+    }
 
     /**
     * ***********************************************************************

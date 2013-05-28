@@ -6,13 +6,24 @@
 class Factura extends CI_Model{
     
     private $tbl = 'Facturas'; 
+    private $periodo = '';
+    
+    function __construct() {
+        parent::__construct();
+        $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
+    }
+    
     /**
     * ***********************************************************************
     * Cantidad de registros
     * ***********************************************************************
     */
     function count_all() {
-        return $this->db->count_all_results($this->tbl);
+        $this->db->join('Recibos r','f.id = r.id_factura');
+        $this->db->join('Contratos c','r.id_contrato = c.id');
+        $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
+        return $this->db->get($this->tbl.' f')->num_rows();
     }
 
     /**
@@ -25,6 +36,7 @@ class Factura extends CI_Model{
         $this->db->join('Recibos r','f.id = r.id_factura');
         $this->db->join('Contratos c','r.id_contrato = c.id');
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
         $this->db->order_by('f.serie, f.folio','desc');
         return $this->db->get($this->tbl.' f',$limit, $offset);
     }

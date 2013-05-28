@@ -52,6 +52,7 @@ class Ferias extends CI_Controller{
                 array('data' => $r->fecha_fin, 'class' => 'hidden-phone'),
                 $r->activo == 1 ? 'Activo' : '-', 
                 anchor('catalogos/ferias/periodos_update/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Editar')),
+                array('data' => ($r->activo == 0) ? anchor('catalogos/ferias/periodos_set_activo/' . $r->id, '<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Activo')) : '<a class="btn btn-small disabled"><i class="icon-minus"></i></a>', 'class' => 'hidden-phone'),
                 array('data' => anchor('catalogos/ferias/periodos_delete/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
             );
         }
@@ -112,7 +113,7 @@ class Ferias extends CI_Controller{
     
     /**
      * -------------------------------------------------------------------------
-     * Calles - Borrar
+     * Periodos - Borrar
      * -------------------------------------------------------------------------
      * @param int $id
      */
@@ -120,6 +121,20 @@ class Ferias extends CI_Controller{
         if (!empty($id)) {
             $this->load->model('periodo', 'm');
             $this->m->delete($id);
+        }
+        redirect('catalogos/ferias/periodos');
+    }
+    
+    /**
+     * -------------------------------------------------------------------------
+     * Periodos - Borrar
+     * -------------------------------------------------------------------------
+     * @param int $id
+     */
+    public function periodos_set_activo($id = null) {
+        if (!empty($id)) {
+            $this->load->model('periodo', 'm');
+            $this->m->set_activo($id);
         }
         redirect('catalogos/ferias/periodos');
     }

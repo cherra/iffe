@@ -6,14 +6,24 @@
  */
 class Recibo extends CI_Model{
     
-    private $tbl = 'Recibos'; 
+    private $tbl = 'Recibos';
+    private $periodo = '';
+    
+    function __construct() {
+        parent::__construct();
+        $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
+    }
+    
     /**
     * ***********************************************************************
     * Cantidad de registros
     * ***********************************************************************
     */
     function count_all() {
-        return $this->db->count_all_results($this->tbl);
+        $this->db->join('Contratos c','r.id_contrato = c.id');
+        $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
+        return $this->db->get($this->tbl.' r')->num_rows();
     }
 
     /**
@@ -25,6 +35,7 @@ class Recibo extends CI_Model{
         $this->db->select('r.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
         $this->db->join('Contratos c','r.id_contrato = c.id');
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
         $this->db->order_by('r.numero','desc');
         return $this->db->get($this->tbl.' r',$limit, $offset);
     }

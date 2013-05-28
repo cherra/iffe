@@ -100,6 +100,7 @@ class Ventas extends CI_Controller{
             else
                 $datos['numero'] = 1;
             $datos['id_usuario'] = $this->session->userdata('userid');
+            $datos['id_periodo'] = $data['periodo']->id;  // Período activo de la feria
             $this->co->save($datos);
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Contrato registrado</div>';
         }

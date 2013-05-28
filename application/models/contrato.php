@@ -10,6 +10,12 @@ class Contrato extends CI_Model{
     private $tbl_contrato_modulos = 'ContratoModulos'; 
     private $tbl_adjuntos_contrato = 'ContratoAdjuntos';
     private $tbl_adjuntos = 'Adjuntos';
+    private $periodo = '';
+    
+    function __construct() {
+        parent::__construct();
+        $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
+    }
     
     /**
     * ***********************************************************************
@@ -17,7 +23,9 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function count_all() {
-        return $this->db->count_all_results($this->tbl);
+        $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
+        return $this->db->get($this->tbl.' c')->num_rows();
     }
 
     /**
@@ -28,6 +36,7 @@ class Contrato extends CI_Model{
     function get_paged_list($limit = null, $offset = 0) {
         $this->db->select('c.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
+        $this->db->where('c.id_periodo', $this->periodo->id);
         $this->db->order_by('numero','desc');
         return $this->db->get($this->tbl.' c',$limit, $offset);
     }
@@ -38,6 +47,7 @@ class Contrato extends CI_Model{
         $this->db->join('Recibos r','c.id = r.id_contrato','left');
         $this->db->where('c.estado','autorizado');
         $this->db->where('(r.estado = "vigente" OR r.estado IS NULL)');
+        $this->db->where('c.id_periodo', $this->periodo->id);
         $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL');
         $this->db->group_by('c.id');
         $this->db->order_by('numero','desc');
