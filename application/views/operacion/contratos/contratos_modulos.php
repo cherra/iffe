@@ -57,9 +57,22 @@
         </div>
     </div>
     <div class="control-group">
+        <label class="control-label" for="precio">Precio</label>
+        <div class="controls">
+            <input type="hidden" name="subtotal" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio,2,'.',''); ?>" />
+            <input type="text" id="precio" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio,2,'.',','); ?>" disabled/>
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label" for="iva">IVA</label>
+        <div class="controls">
+            <input type="text" id="iva" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio * $this->configuracion->get_valor('iva'),2,'.',','); ?>" disabled/>
+        </div>
+    </div>
+    <div class="control-group">
         <label class="control-label" for="importe">Importe</label>
         <div class="controls">
-            <input type="text" name="importe" id="importe" value="<?php if(!empty($modulo) ) echo number_format($importe,2,'.',''); ?>" <?php if(empty($modulo)) echo "disabled"; ?> />
+            <input type="text" id="importe" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio * (1 + $this->configuracion->get_valor('iva')),2,'.',','); ?>" disabled />
         </div>
     </div>
     <div class="control-group">

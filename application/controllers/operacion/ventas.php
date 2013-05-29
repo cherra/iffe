@@ -255,12 +255,12 @@ class Ventas extends CI_Controller{
             $data['modulos'] = $this->m->get_disponibles($id_calle)->result();
             if(!empty($id_modulo)){
                 $data['modulo'] = $this->m->get_by_id($id_modulo)->row();
-                $data['importe'] = $data['modulo']->precio * (1 + $this->configuracion->get_valor('iva'));
+                //$data['importe'] = $data['modulo']->precio * (1 + $this->configuracion->get_valor('iva'));
             }
         }
         if ( ($datos = $this->input->post()) ) {
-            $datos['subtotal'] = $datos['importe'] / (1 + $this->configuracion->get_valor('iva') );
             $datos['iva'] = $datos['subtotal'] * $this->configuracion->get_valor('iva');
+            $datos['importe'] = $datos['subtotal'] + $datos['iva'];
             $result = $this->co->save_modulo( $datos );
             if($result > 0){
                 $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Módulo agregado correctamente</div>';

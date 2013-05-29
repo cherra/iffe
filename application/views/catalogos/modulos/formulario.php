@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label hidden-phone" for="precio">Precio</label>
+                <label class="control-label hidden-phone" for="precio">Precio <small>(sin IVA)</small></label>
                 <div class="controls">
                     <input type="text" id="precio" name="precio" class="required number" value="<?php echo (isset($datos->precio) ? $datos->precio : $calle->precio_base); ?>" placeholder="Precio">
                 </div>

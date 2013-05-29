@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label hidden-phone" for="precio_base">Precio base</label>
+                <label class="control-label hidden-phone" for="precio_base">Precio base <small>(sin IVA)</small></label>
                 <div class="controls">
                     <input type="text" id="precio_base" name="precio_base" class="required number" value="<?php echo (isset($datos->precio_base) ? $datos->precio_base : ''); ?>" placeholder="Precio base">
                 </div>
