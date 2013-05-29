@@ -163,7 +163,7 @@
                     <li <?php 
                     // Si el link es igual al URI quiere decir que es la opción seleccionada
                     // y se marca como activa para resaltarla
-                    if( strpos(current_url(), $metodo->folder.'/'.$metodo->class) ) 
+                    if( strpos(current_url(), $metodo->folder.'/'.$metodo->class.'/'.$metodo->method) ) 
                         echo 'class="active"'; 
                     ?>><?php echo anchor($link, '<i class="'.$metodo->icon.'"></i> '.$metodo->nombre) ?></li>
             <?php
