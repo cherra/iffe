@@ -28,6 +28,12 @@
                 </div>
             </div>
             <div class="control-group">
+                <label class="control-label hidden-phone" for="sufijo_contratos">Sufijo en contratos</label>
+                <div class="controls">
+                    <input type="text" id="sufijo_contratos" name="sufijo_contratos" class="required" value="<?php echo (isset($datos->sufijo_contratos) ? $datos->sufijo_contratos : ''); ?>" placeholder="Sufijo en contratos">
+                </div>
+            </div>
+            <div class="control-group">
                 <label class="control-label hidden-phone" for="observaciones">Observaciones</label>
                 <div class="controls">
                     <input type="text" id="observaciones" name="observaciones" value="<?php echo (isset($datos->observaciones) ? $datos->observaciones : ''); ?>" placeholder="Observaciones">

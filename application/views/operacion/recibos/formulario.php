@@ -15,7 +15,7 @@
                 <option value="0">Selecciona un contrato...</option>
                 <?php
                 foreach($contratos as $c){ ?>
-                    <option value="<?php echo $c->id; ?>" <?php if(!empty($id_contrato) && $id_contrato == $c->id) echo "selected"; ?>><?php echo $c->numero."-".$c->sufijo; ?></option>
+                    <option value="<?php echo $c->id; ?>" <?php if(!empty($id_contrato) && $id_contrato == $c->id) echo "selected"; ?>><?php echo $c->numero."/".$c->sufijo; ?></option>
                 <?php
                 }
                 ?>

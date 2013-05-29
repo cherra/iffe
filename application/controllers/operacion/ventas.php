@@ -99,6 +99,7 @@ class Ventas extends CI_Controller{
                 $datos['numero'] = $ultimo_contrato->numero + 1;
             else
                 $datos['numero'] = 1;
+            $datos['sufijo'] = $data['periodo']->sufijo_contratos;
             $datos['id_usuario'] = $this->session->userdata('userid');
             $datos['id_periodo'] = $data['periodo']->id;  // Período activo de la feria
             $this->co->save($datos);
@@ -171,7 +172,7 @@ class Ventas extends CI_Controller{
                 $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_contratos'));
 
                 // Se sustituyen los campos en el template
-                $this->tbs->VarRef['numero_contrato'] = $contrato->numero;
+                $this->tbs->VarRef['numero_contrato'] = $contrato->numero.'/'.$contrato->sufijo;
                 $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
                 $this->tbs->VarRef['testigo1'] = $contrato->testigo1;
                 $this->tbs->VarRef['testigo2'] = $contrato->testigo2;
@@ -516,7 +517,7 @@ class Ventas extends CI_Controller{
         $this->table->set_empty('-');
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
-        $this->table->set_heading('Estado', 'No.', 'Contrato', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
+        $this->table->set_heading('Estado', 'No.', 'Contrato', array('data' => 'Factura', 'class' => 'hidden-phone'), array('data' => 'Cliente', 'class' => 'hidden-phone'), 'Importe', '','','', '');
         foreach ($recibos as $recibo) {
             $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
             $clase = '';
@@ -525,10 +526,12 @@ class Ventas extends CI_Controller{
             $this->table->add_row(
                 '<i class="'.($recibo->estado == 'vigente' ? 'icon-ok' : 'icon-remove').'"></i>',
                 $recibo->numero,
-                $contrato->numero.'-'.$contrato->sufijo,
-                $recibo->cliente, 
-                array('data' => number_format($recibo->total,2,'.',','), 'class' => 'hidden-phone'),
+                $contrato->numero.'/'.$contrato->sufijo,
+                array('data' => $recibo->serie.' '.$recibo->folio, 'class' => 'hidden-phone'),
+                array('data' => $recibo->cliente, 'class' => 'hidden-phone'),
+                number_format($recibo->total,2,'.',','),
                 array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
+                array('data' => (($recibo->estado == 'cancelado' || !empty($recibo->id_factura)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
                 array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
             );
             $this->table->add_row_class($clase);
@@ -600,7 +603,7 @@ class Ventas extends CI_Controller{
                 $concepto = "Anticipo";
             elseif($datos['tipo'] == 'total')
                 $concepto = "Pago total";
-            $concepto.=" al contrato No. ".$contrato->numero."-".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
+            $concepto.=" al contrato No. ".$contrato->numero."/".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
             $this->tbs->VarRef['concepto'] = $concepto;
             $this->tbs->VarRef['importe'] = '$'.number_format($datos['total'],2,'.',',');
             $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($datos['total'],2,'.',''));
@@ -781,7 +784,7 @@ class Ventas extends CI_Controller{
                 $concepto = "Anticipo";
             elseif($recibo->tipo == 'total')
                 $concepto = "Pago total";
-            $concepto.=" al contrato No. ".$contrato->numero."-".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
+            $concepto.=" al contrato No. ".$contrato->numero."/".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
             $this->tbs->VarRef['concepto'] = $concepto;
             $this->tbs->VarRef['total'] = '$'.number_format($recibo->total,2,'.',',');
             $this->tbs->VarRef['importe'] = '$'.number_format($recibo->subtotal,2,'.',',');
