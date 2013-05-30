@@ -237,11 +237,16 @@
         
         //$('input[type="text"]').attr('autocomplete', 'off');
         
-        $('#form').validate({
+        $('form').validate({
             rules: {
                 confirmar_password: {
                     equalTo: "#password"
                 }
+            },
+            highlight: function(element, errorClass) {
+                $(element).fadeOut(function() {
+                  $(element).fadeIn();
+                });
             }
         });
         

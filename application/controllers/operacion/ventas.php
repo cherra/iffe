@@ -333,6 +333,22 @@ class Ventas extends CI_Controller{
         }
     }
     
+    public function contratos_adeudo(){
+        if($this->input->is_ajax_request()){
+            if(($query = $this->input->post('q', true))){
+                $this->load->model('contrato','c');
+                if(( $contratos = $this->c->get_con_adeudo($query) )){
+                    //unset($contratos->documento);
+                    echo json_encode($contratos->result());
+                }else
+                    echo json_encode(false);
+            }
+            else {
+                echo json_encode(false);
+            }
+        }
+    }
+    
     /*
     public function contratos_adjuntos($id_contrato = null, $offset = 0){
         $this->load->model('contrato', 'c');
@@ -517,22 +533,24 @@ class Ventas extends CI_Controller{
         $this->table->set_empty('-');
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
-        $this->table->set_heading('Estado', 'No.', 'Contrato', array('data' => 'Factura', 'class' => 'hidden-phone'), array('data' => 'Cliente', 'class' => 'hidden-phone'), 'Importe', '','','', '');
+        $this->table->set_heading('Estado', 'Fecha', 'No.', 'Contrato', array('data' => 'Factura', 'class' => 'hidden-phone'), array('data' => 'Cliente', 'class' => 'hidden-phone'), 'Importe', '','','', '');
         foreach ($recibos as $recibo) {
             $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
             $clase = '';
+            $fecha = date_create($recibo->fecha);
             if($recibo->estado == 'cancelado')
                 $clase = 'muted';
             $this->table->add_row(
                 '<i class="'.($recibo->estado == 'vigente' ? 'icon-ok' : 'icon-remove').'"></i>',
+                date_format($fecha,'Y-m-d'),
                 $recibo->numero,
                 $contrato->numero.'/'.$contrato->sufijo,
                 array('data' => $recibo->serie.' '.$recibo->folio, 'class' => 'hidden-phone'),
                 array('data' => $recibo->cliente, 'class' => 'hidden-phone'),
                 number_format($recibo->total,2,'.',','),
                 array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
-                array('data' => (($recibo->estado == 'cancelado' || !empty($recibo->id_factura)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
-                array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
+                array('data' => (($recibo->estado == 'cancelado' || $recibo->estatus_factura == 1) ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
             );
             $this->table->add_row_class($clase);
         }
@@ -559,6 +577,8 @@ class Ventas extends CI_Controller{
         $this->load->model('periodo','p');
         $data['periodo'] = $this->session->userdata('periodo');
         
+        $this->load->model('cliente','cl');
+        
         if ( ($datos = $this->input->post()) ) {
             $this->load->model('recibo', 'r');
             
@@ -577,7 +597,6 @@ class Ventas extends CI_Controller{
             $contrato = $this->c->get_by_id($datos['id_contrato'])->row();
             
             // Datos del cliente
-            $this->load->model('cliente','cl');
             $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
             
             // Documento
@@ -626,6 +645,8 @@ class Ventas extends CI_Controller{
         $data['contratos'] = $this->c->get_con_adeudo()->result();
         if(!empty($id_contrato)){
             $data['id_contrato'] = $id_contrato;
+            $data['contrato'] = $this->c->get_by_id($id_contrato)->row();
+            $data['cliente'] = $this->cl->get_by_id($data['contrato']->id_cliente)->row();
             $data['total'] = $this->c->get_importe( $id_contrato );
             $data['abonos'] = $this->c->get_abonos( $id_contrato );
             $data['saldo'] = $this->c->get_saldo( $id_contrato );
@@ -704,17 +725,17 @@ class Ventas extends CI_Controller{
         foreach ($facturas as $factura) {
             //$contrato = $this->c->get_by_id($factura->id_recibo)->row();
             $clase = '';
-            if($factura->estado == 0)
+            if($factura->estatus == 0)
                 $clase = 'muted';
             $this->table->add_row(
-                '<i class="'.($factura->estado == '1' ? 'icon-ok' : 'icon-remove').'"></i>',
+                '<i class="'.($factura->estatus == '1' ? 'icon-ok' : 'icon-remove').'"></i>',
                 $factura->fecha,
                 $factura->serie,
                 $factura->folio,
-                $factura->cliente, 
+                $factura->nombre, 
                 array('data' => number_format($factura->total,2,'.',','), 'class' => 'hidden-phone'),
-                array('data' => ($factura->estado == '0' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/facturas_documento/' . $factura->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
-                array('data' => ($factura->estado == '0' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/facturas_cancelar/'.$factura->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                array('data' => anchor_popup('operacion/ventas/facturas_documento/' . $factura->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
+                array('data' => ($factura->estatus == '0' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/facturas_cancelar/'.$factura->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
             );
             $this->table->add_row_class($clase);
         }
@@ -733,86 +754,131 @@ class Ventas extends CI_Controller{
         $data['link_back'] = anchor('operacion/ventas/facturas','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
         
-        if(!empty($id_recibo)){
-            $data['action'] = site_url('operacion/ventas/facturas_add/'.$id_recibo);
-        }else{
-            $data['action'] = site_url('operacion/ventas/facturas_add');
-        }
+        $data['action'] = site_url('operacion/ventas/facturas_add');
 	
-        $this->load->model('recibo','r');
-        
-        if ( ($datos = $this->input->post()) ) {
-            
-            $datos['id_usuario'] = $this->session->userdata('userid');
-            
-            $tasa_iva = $this->configuracion->get_valor('iva');
-            $datos['subtotal'] = $datos['total'] / (1+$tasa_iva);
-            $datos['iva'] = $datos['total'] - $datos['subtotal'];
-            
-            // Datos del recibo
-            $recibo = $this->r->get_by_id($id_recibo)->row();
-            
-            // Datos del contrato
-            $this->load->model('contrato','c');
-            $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
-            
-            // Datos del cliente
-            $this->load->model('cliente','cl');
-            $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
-            
-            // Documento
-            $this->load->library('tbs');
-            $this->load->library('numero_letras');
-
-            // Nombres de meses en español (config/sitio.php)
-            $meses = $this->config->item('meses');
-
-            // Se carga el template predefinido para los recibos (tabla Configuracion)
-            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_facturas'));
-
-            // Se sustituyen los campos en el template
-            $this->tbs->VarRef['logo'] = '';
-            $this->tbs->VarRef['serie'] = $datos['serie'];
-            $this->tbs->VarRef['folio'] = $datos['folio'];
-            $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
-            $this->tbs->VarRef['calle'] = $cliente->calle;
-            $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
-            $this->tbs->VarRef['colonia'] = $cliente->colonia;
-            $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
-            $this->tbs->VarRef['estado'] = $cliente->estado;
-            if($recibo->tipo == 'anticipo')
-                $concepto = "Anticipo";
-            elseif($recibo->tipo == 'total')
-                $concepto = "Pago total";
-            $concepto.=" al contrato No. ".$contrato->numero."/".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
-            $this->tbs->VarRef['concepto'] = $concepto;
-            $this->tbs->VarRef['total'] = '$'.number_format($recibo->total,2,'.',',');
-            $this->tbs->VarRef['importe'] = '$'.number_format($recibo->subtotal,2,'.',',');
-            $this->tbs->VarRef['subtotal'] = '$'.number_format($recibo->subtotal,2,'.',',');
-            $this->tbs->VarRef['iva'] = '$'.number_format($recibo->iva,2,'.',',');
-            $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($datos['total'],2,'.',''));
-
-            $fecha = date_create($datos['fecha']);
-            $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
-            $this->tbs->VarRef['dia'] = date_format($fecha,'d');
-            $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
-            $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
-            // Render sin desplegar en navegador
-            $this->tbs->Show(TBS_NOTHING);
-            // Se almacena el render en el array $data
-            $datos['documento'] = $this->tbs->Source;
-            
-            $this->load->model('factura','f');
-            $id_factura = $this->f->save($datos);
-            $this->r->update($id_recibo, array('id_factura' => $id_factura));
-            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Recibo registrado</div>';
-        }
-        
-        $data['recibos'] = $this->r->get_sin_factura()->result();
+        // Se envía el id del recibo a la vista si viene predefinida en el url
         if(!empty($id_recibo)){
             $data['id_recibo'] = $id_recibo;
-            $data['recibo'] = $this->r->get_by_id( $id_recibo )->row();
         }
+        
+        $this->load->model('factura','f');
+        $this->load->model('recibo','r');
+        
+        // Si se hizo submit en el formulario
+        // $datos es lo que se inserta en la base de datos
+        if ( ($datos = $this->input->post()) ) {
+            
+            if(($this->f->folio_disponible($datos['folio'], $datos['serie']))){
+            
+                $datos['id_usuario'] = $this->session->userdata('userid');
+
+                // Importes
+                $tasa_iva = $this->configuracion->get_valor('iva');
+                $datos['subtotal'] = $datos['total'] / (1+$tasa_iva);
+                $datos['iva'] = $datos['total'] - $datos['subtotal'];
+
+                // Si vienen dos o mas recibos es factura de Público en General
+                // el key 'id_recibo' es un Array de checkbox que viene del formulario de captura
+                if(sizeof($datos['id_recibo']) > 1){
+                    $cliente = (object)Array('rfc' => $this->configuracion->get_valor('clientes_varios_rfc'), 'nombre' => $this->configuracion->get_valor('clientes_varios_nombre'), 'apellido_paterno' => '', 'apellido_materno' => '', 'calle' => '', 'numero_exterior' => '', 'numero_interior' => '', 'colonia' => '', 'ciudad' => '', 'estado' => '');
+                    $concepto = "Renta de espacios varios en la Feria de Todos los Santos Colima";
+                }
+                // Si es solo un recibo es factura para un solo cliente
+                else{
+
+                    $recibo = $this->r->get_by_id($datos['id_recibo'][0])->row();
+
+                    // Datos del contrato
+                    $this->load->model('contrato','c');
+                    $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
+
+                    // Concepto de la factura
+                    if($recibo->tipo == 'anticipo')
+                        $concepto = "Anticipo";
+                    elseif($recibo->tipo == 'total')
+                        $concepto = "Pago total";
+                    $concepto.=" al contrato No. ".$contrato->numero."/".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ";
+
+                    // Datos del cliente
+                    $this->load->model('cliente','cl');
+                    $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
+                }
+                // Documento
+                $this->load->library('tbs');
+                $this->load->library('numero_letras');
+
+                // Nombres de meses en español (config/sitio.php)
+                $meses = $this->config->item('meses');
+
+                // Se carga el template predefinido para los recibos (tabla Configuracion)
+                $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_facturas'));
+
+                // Se sustituyen los campos en el template
+                $this->tbs->VarRef['logo'] = '';
+                $this->tbs->VarRef['serie'] = $datos['serie'];
+                $this->tbs->VarRef['folio'] = $datos['folio'];
+                $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                $this->tbs->VarRef['rfc'] = $cliente->rfc;
+                $this->tbs->VarRef['calle'] = $cliente->calle;
+                $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
+                $this->tbs->VarRef['colonia'] = $cliente->colonia;
+                $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
+                $this->tbs->VarRef['estado'] = $cliente->estado;
+
+                $this->tbs->VarRef['concepto'] = $concepto;
+                $this->tbs->VarRef['total'] = '$'.number_format($datos['total'],2,'.',',');
+                $this->tbs->VarRef['importe'] = '$'.number_format($datos['total'] / (1 + $this->configuracion->get_valor('iva')),2,'.',',');
+                $this->tbs->VarRef['subtotal'] = '$'.number_format($datos['total'] / (1 + $this->configuracion->get_valor('iva')),2,'.',',');
+                $this->tbs->VarRef['iva'] = '$'.number_format($datos['total'] / (1 + $this->configuracion->get_valor('iva')) * $this->configuracion->get_valor('iva'),2,'.',',');
+                $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($datos['total'],2,'.',''));
+
+                $fecha = date_create($datos['fecha']);
+                $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
+                $this->tbs->VarRef['dia'] = date_format($fecha,'d');
+                $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
+                $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
+                // Render sin desplegar en navegador
+                $this->tbs->Show(TBS_NOTHING);
+                // Se almacena el render en el array $data
+                $datos['documento'] = $this->tbs->Source;
+
+                // Datos del cliente para guardarlos en la factura
+                $datos['nombre'] =  $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                $datos['rfc'] =  $cliente->rfc;
+                $datos['calle'] =  $cliente->calle;
+                $datos['no_exterior'] =  $cliente->numero_exterior;
+                $datos['no_interior'] =  $cliente->numero_interior;
+                $datos['colonia'] =  $cliente->colonia;
+                $datos['ciudad'] =  $cliente->ciudad;
+                $datos['estado'] =  $cliente->estado;
+
+                // Se almacena el array de recibos en una variable
+                $recibo = $datos['id_recibo'];
+                // Borramos el campo id_recibo del array $datos para que no marque error al insertar en la base de datos
+                unset($datos['id_recibo']);
+
+                // Aquí inica el registro de la factura
+                $this->db->trans_start();
+                $id_factura = $this->f->save($datos); // Se guarda la factura y se obtiene el id
+                foreach ($recibo as $id_recibo) // Se agrega el id de la factura a cada recibo incluido
+                    $this->r->update($id_recibo, array('id_factura' => $id_factura));
+                $this->db->trans_complete();
+
+                $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Factura registrada</div>';
+            }else{
+                $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Error! Folio de factura no disponible</div>';
+            }
+        }
+        
+        // Recibos disponibles para facturar
+        $data['recibos'] = $this->r->get_sin_factura()->result();
+        // Serie predefinida en los parametros de configuracion
+        $data['serie'] = $this->configuracion->get_valor('facturas_serie');
+        
+        // Se sugiere el siguiente folio disponible
+        $ultimo_folio = $this->f->get_ultimo_folio($data['serie'])->row();
+        $data['folio'] = $ultimo_folio->folio + 1;
+        
         $this->load->view('operacion/facturas/formulario', $data);
     }
     
@@ -844,8 +910,8 @@ class Ventas extends CI_Controller{
             }else{
                 $this->session->set_flashdata('pdf', true);
                 if($factura){
-                    if($factura->estado == 0)  // Se agrega una marca de agua al PDF
-                        $this->session->set_flashdata('watermark', 'Cancelado');
+                    if($factura->estatus == 0)  // Se agrega una marca de agua al PDF
+                        $this->session->set_flashdata('watermark', 'Cancelada');
                 }
                 redirect('operacion/ventas/facturas_documento/'.$id); // Se recarga el método para imprimirlo como PDF
             }

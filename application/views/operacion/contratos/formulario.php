@@ -77,7 +77,7 @@ $(document).ready(function(){
      */
     var separador = '{#####}';
     $('#txt_cliente').typeahead({
-            minLength: 1,
+            minLength: 2,
             items: 10,
             source: function(query, process) {
                 objects = [];
