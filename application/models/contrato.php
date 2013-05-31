@@ -61,7 +61,7 @@ class Contrato extends CI_Model{
     }
     
     function get_modulos( $id, $limit = null, $offset = 0 ){
-        $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe');
+        $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe, m.id_calle');
         $this->db->join('Modulos m','cm.id_modulo = m.id');
         $this->db->join('Calles c','m.id_calle = c.id');
         $this->db->where('cm.id_contrato',$id);

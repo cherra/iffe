@@ -65,7 +65,7 @@ class Ventas extends CI_Controller{
                 $contrato->cliente,
                 array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
                 //$mods,
-                array('data' => (($contrato->estado == 'autorizado' || $contrato->estado == 'cancelado') ? anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')) : '<a class="btn btn-small disabled"><i class="icon-print"></i></a>'), 'class' => 'hidden-phone'),
+                array('data' => (anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
                 ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_modulos/' . $contrato->id, '<i class="icon-road"></i>', array('class' => 'btn btn-small', 'title' => 'Módulos')) : '<a class="btn btn-small disabled"><i class="icon-road"></i></a>'),
                 ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_update/' . $contrato->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')) : '<a class="btn btn-small disabled"><i class="icon-edit"></i></a>'),
                 array('data' => (($contrato->estado == 'pendiente' && $num_modulos > 0) ? anchor('operacion/ventas/contratos_autorizar/'.$contrato->id,'<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),
@@ -79,6 +79,69 @@ class Ventas extends CI_Controller{
         $data['add_link'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/contratos/lista', $data);
+    }
+    
+    private function contratos_render_template($id){
+        $this->load->model('contrato', 'c');
+            
+        $contrato = $this->c->get_by_id($id)->row();
+        $modulos = $this->c->get_modulos($contrato->id)->result_array();
+        $importe = $this->c->get_importe($contrato->id);
+
+        $this->load->model('cliente','cl');
+        $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
+
+        $this->load->model('giro','g');
+        $giro = $this->g->get_by_id($cliente->id_giro)->row();
+
+        $this->load->library('tbs');
+        $this->load->library('numero_letras');
+
+        // Nombres de meses en español (config/sitio.php)
+        $meses = $this->config->item('meses');
+
+        // Se carga el template predefinido para los recibos (tabla Configuracion)
+        $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_contratos'));
+
+        // Se sustituyen los campos en el template
+        $this->tbs->VarRef['numero_contrato'] = $contrato->numero.'/'.$contrato->sufijo;
+        $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+        $this->tbs->VarRef['testigo1'] = $contrato->testigo1;
+        $this->tbs->VarRef['testigo2'] = $contrato->testigo2;
+        $this->tbs->VarRef['giro'] = $giro->nombre;
+        $this->tbs->VarRef['calle'] = $cliente->calle;
+        $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
+        $this->tbs->VarRef['colonia'] = $cliente->colonia;
+        $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
+        $this->tbs->VarRef['estado'] = $cliente->estado;
+        $this->tbs->VarRef['importe'] = '$'.number_format($importe,2,'.',',');
+        $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir($importe);
+
+        $fecha_inicio = date_create($contrato->fecha_inicio);
+        $this->tbs->VarRef['fecha_inicio'] = date_format($fecha_inicio,'d/m/Y');
+        $this->tbs->VarRef['dia_inicio'] = date_format($fecha_inicio,'d');
+        $this->tbs->VarRef['mes_inicio'] = $meses[date_format($fecha_inicio,'n')-1];
+        $this->tbs->VarRef['ano_inicio'] = date_format($fecha_inicio,'Y');
+
+        $fecha_vencimiento = date_create($contrato->fecha_vencimiento);
+        $this->tbs->VarRef['fecha_vencimiento'] = date_format($fecha_vencimiento,'d/m/Y');
+        $this->tbs->VarRef['dia_vencimiento'] = date_format($fecha_vencimiento,'d');
+        $this->tbs->VarRef['mes_vencimiento'] = $meses[date_format($fecha_vencimiento,'n')-1];
+        $this->tbs->VarRef['ano_vencimiento'] = date_format($fecha_vencimiento,'Y');
+
+        $fecha = date_create($contrato->fecha);
+        $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
+        $this->tbs->VarRef['dia'] = date_format($fecha,'d');
+        $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
+        $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
+        // Render sin desplegar en navegador
+        foreach($modulos as $key => $value){
+            $modulos[$key]['importe'] = '$'.number_format($modulos[$key]['importe'],2,'.',',');
+        }
+        $this->tbs->MergeBlock('modulos', $modulos);
+        $this->tbs->Show(TBS_NOTHING);
+        // Se regresa el render
+        return $this->tbs->Source;
     }
     
     public function contratos_add(){
@@ -122,11 +185,7 @@ class Ventas extends CI_Controller{
         $data['link_back'] = anchor('operacion/ventas/contratos/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
         $data['action'] = site_url('operacion/ventas/contratos_update') . '/' . $id;
-	
-        $contrato = $this->co->get_by_id($id)->row();
-        $data['contrato'] = $contrato;
-        $data['cliente'] = $this->c->get_by_id($contrato->id_cliente)->row();
-                
+
         if( $this->input->post() ) {
             $contrato = array(
                 'id_cliente' => $this->input->post('id_cliente'),
@@ -138,9 +197,13 @@ class Ventas extends CI_Controller{
             );
             
             $this->co->update($id, $contrato);
-            $data['contrato'] = (object)$contrato;
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro modificado</div>';
         }
+        
+        $contrato = $this->co->get_by_id($id)->row();
+        $data['contrato'] = $contrato;
+        $data['cliente'] = $this->c->get_by_id($contrato->id_cliente)->row();
+        
         $this->load->view('operacion/contratos/formulario', $data);
     }
     
@@ -153,63 +216,8 @@ class Ventas extends CI_Controller{
             // Se genera el documento para impresión y se guarda en la base de datos
             // en formato HTML
             if($contrato){
-                $modulos = $this->c->get_modulos($contrato->id)->result_array();
-                $importe = $this->c->get_importe($contrato->id);
-
-                $this->load->model('cliente','cl');
-                $cliente = $this->cl->get_by_id($contrato->id_cliente)->row();
-
-                $this->load->model('giro','g');
-                $giro = $this->g->get_by_id($cliente->id_giro)->row();
-
-                $this->load->library('tbs');
-                $this->load->library('numero_letras');
-
-                // Nombres de meses en español (config/sitio.php)
-                $meses = $this->config->item('meses');
-
-                // Se carga el template predefinido para los recibos (tabla Configuracion)
-                $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_contratos'));
-
-                // Se sustituyen los campos en el template
-                $this->tbs->VarRef['numero_contrato'] = $contrato->numero.'/'.$contrato->sufijo;
-                $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
-                $this->tbs->VarRef['testigo1'] = $contrato->testigo1;
-                $this->tbs->VarRef['testigo2'] = $contrato->testigo2;
-                $this->tbs->VarRef['giro'] = $giro->nombre;
-                $this->tbs->VarRef['calle'] = $cliente->calle;
-                $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
-                $this->tbs->VarRef['colonia'] = $cliente->colonia;
-                $this->tbs->VarRef['ciudad'] = $cliente->ciudad;
-                $this->tbs->VarRef['estado'] = $cliente->estado;
-                $this->tbs->VarRef['importe'] = '$'.number_format($importe,2,'.',',');
-                $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir($importe);
-
-                $fecha_inicio = date_create($contrato->fecha_inicio);
-                $this->tbs->VarRef['fecha_inicio'] = date_format($fecha_inicio,'d/m/Y');
-                $this->tbs->VarRef['dia_inicio'] = date_format($fecha_inicio,'d');
-                $this->tbs->VarRef['mes_inicio'] = $meses[date_format($fecha_inicio,'n')-1];
-                $this->tbs->VarRef['ano_inicio'] = date_format($fecha_inicio,'Y');
-
-                $fecha_vencimiento = date_create($contrato->fecha_vencimiento);
-                $this->tbs->VarRef['fecha_vencimiento'] = date_format($fecha_vencimiento,'d/m/Y');
-                $this->tbs->VarRef['dia_vencimiento'] = date_format($fecha_vencimiento,'d');
-                $this->tbs->VarRef['mes_vencimiento'] = $meses[date_format($fecha_vencimiento,'n')-1];
-                $this->tbs->VarRef['ano_vencimiento'] = date_format($fecha_vencimiento,'Y');
-
-                $fecha = date_create($contrato->fecha);
-                $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
-                $this->tbs->VarRef['dia'] = date_format($fecha,'d');
-                $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
-                $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
-                // Render sin desplegar en navegador
-                foreach($modulos as $key => $value){
-                    $modulos[$key]['importe'] = '$'.number_format($modulos[$key]['importe'],2,'.',',');
-                }
-                $this->tbs->MergeBlock('modulos', $modulos);
-                $this->tbs->Show(TBS_NOTHING);
                 // Se almacena el render en el array $data
-                $documento = $this->tbs->Source;
+                $documento = $this->contratos_render_template($id);
                 
                 $this->c->autorizar($id, $documento);
             }
@@ -285,7 +293,7 @@ class Ventas extends CI_Controller{
                 array('data' => ucfirst($m->categoria), 'class' => 'hidden-phone'),
                 array('data' => ucfirst($m->tipo), 'class' => 'hidden-phone'),
                 number_format($m->importe,2,'.',','),
-                array('data' => anchor('operacion/ventas/contratos_delete_modulo/' . $id.'/'.$id_calle.'/'.$m->id_modulo, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Quitar')), 'class' => 'hidden-phone')
+                array('data' => anchor('operacion/ventas/contratos_delete_modulo/' . $id.'/'.$m->id_calle.'/'.$m->id_modulo, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Quitar')), 'class' => 'hidden-phone')
             );
         }
         $data['table'] = $this->table->generate();
@@ -315,7 +323,11 @@ class Ventas extends CI_Controller{
             $contrato = $this->a->get_by_id($id)->row();
             if( $this->session->flashdata('pdf') ){
                 if($contrato){
-                    $data['contenido'] = $contrato->documento;
+                    if($contrato->estado == 'autorizado'){
+                        $data['contenido'] = $contrato->documento;
+                    }else{
+                        $data['contenido'] = $this->contratos_render_template($id);
+                    }
                     $this->load->view('documento', $data);
                 }else{
                     redirect('operacion/ventas/contratos');
@@ -323,8 +335,11 @@ class Ventas extends CI_Controller{
             }else{
                 $this->session->set_flashdata('pdf', true);
                 if($contrato){
-                    if($contrato->estado == 'cancelado')  // Se agrega una marca de agua al PDF
+                    if($contrato->estado == 'cancelado'){  // Se agrega una marca de agua al PDF
                         $this->session->set_flashdata('watermark', 'Cancelado');
+                    }elseif($contrato->estado == 'pendiente'){
+                        $this->session->set_flashdata('watermark', 'Para autorización');
+                    }
                 }
                 redirect('operacion/ventas/contratos_documento/'.$id); // Se recarga el método para imprimirlo como PDF
             }
