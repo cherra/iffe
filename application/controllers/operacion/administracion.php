@@ -383,6 +383,11 @@ class Administracion extends CI_Controller{
             
             $result = $this->nt->save_contrato( $datos );
             if($result > 0){
+                unset($datos);
+                $datos['total'] = $this->nt->get_importe($id);
+                $datos['subtotal'] = $datos['total'] / (1 + $this->configuracion->get_valor('iva'));
+                $datos['iva'] = $datos['subtotal'] * $this->configuracion->get_valor('iva');
+                $this->nt->update($id, $datos);
                 $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Contrato agregado correctamente</div>';
             }else{
                 $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Error al agregar el contrato</div>';

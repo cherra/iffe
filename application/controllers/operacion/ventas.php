@@ -649,6 +649,7 @@ class Ventas extends CI_Controller{
             $data['cliente'] = $this->cl->get_by_id($data['contrato']->id_cliente)->row();
             $data['total'] = $this->c->get_importe( $id_contrato );
             $data['abonos'] = $this->c->get_abonos( $id_contrato );
+            $data['notas'] = $this->c->get_notas( $id_contrato );
             $data['saldo'] = $this->c->get_saldo( $id_contrato );
         }
         $this->load->view('operacion/recibos/formulario', $data);
