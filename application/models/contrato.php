@@ -43,9 +43,10 @@ class Contrato extends CI_Model{
     
     function get_con_adeudo( $query = null ) {
         $this->db->select('c.id, c.id_periodo, c.id_cliente, c.id_usuario, c.sufijo, c.numero, c.fecha, c.fecha_inicio, c.fecha_vencimiento, c.testigo1, c.testigo2, c.observaciones, c.estado');
-        $this->db->select('CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente, SUM(r.total) as abonos', FALSE);
+        $this->db->select('CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
+        $this->db->select('IFNULL((SELECT IFNULL(SUM(ncc.importe),0) FROM NotaCreditoContratos ncc WHERE ncc.id_contrato = c.id GROUP BY ncc.id_contrato),0) + SUM(r.total) as abonos',FALSE);
         $this->db->select('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) AS total',FALSE);
-        $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
+        //$this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
         $this->db->join('Recibos r','c.id = r.id_contrato','left');
         $this->db->where('c.estado','autorizado');
@@ -53,7 +54,7 @@ class Contrato extends CI_Model{
         $this->db->where('c.id_periodo', $this->periodo->id);
         if(!empty($query))
             $this->db->where("(concat(cl.nombre, ' ', cl.apellido_paterno, ' ', cl.apellido_materno) like '%" . $query . "%' OR c.numero = '".$query."')");
-        $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL');
+        $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL OR abonos = 0');
         $this->db->group_by('c.id');
         $this->db->order_by('numero','desc');
         
@@ -82,14 +83,14 @@ class Contrato extends CI_Model{
     }
     
     function get_abonos( $id ){
-        $this->db->select('SUM(r.total) as abonos', FALSE);
-        //$this->db->join('Recibos r', 'c.id = r.id_contrato');
+        $this->db->select('SUM(r.total) as abonos, SUM(ncc.importe) as notas_credito, SUM(r.total) + IFNULL(SUM(ncc.importe),0) as total', FALSE);
+        $this->db->join('NotaCreditoContratos ncc', 'ncc.id_contrato = r.id_contrato','left');
         $this->db->where('r.id_contrato',$id);
         $this->db->where('r.estado','vigente');
         $this->db->group_by('r.id_contrato');
         $query = $this->db->get('Recibos r');
         if($query->num_rows() > 0){
-            return $query->row()->abonos;
+            return $query->row();
         }else{
             return 0;
         }
@@ -97,8 +98,8 @@ class Contrato extends CI_Model{
     
     function get_saldo( $id ){
         $importe = $this->get_importe($id);
-        $this->db->select('SUM(r.total) as abonos', FALSE);
-        //$this->db->join('Recibos r', 'c.id = r.id_contrato');
+        $this->db->select('SUM(r.total) + IFNULL(SUM(ncc.importe),0) as abonos', FALSE);
+        $this->db->join('NotaCreditoContratos ncc', 'ncc.id_contrato = r.id_contrato','left');
         $this->db->where('r.id_contrato',$id);
         $this->db->where('r.estado','vigente');
         $this->db->group_by('r.id_contrato');

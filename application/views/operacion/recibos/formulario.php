@@ -37,7 +37,7 @@
       <div class="control-group">
         <label class="control-label" for="abonos">Abonos</label>
         <div class="controls">
-            <input type="text" id="abonos" placeholder="0.00" disabled value="<?php if(isset($abonos)) echo number_format(-$abonos,2,'.',','); ?>"/>
+            <input type="text" id="abonos" placeholder="0.00" disabled value="<?php if(!empty($abonos->total)) echo number_format(-$abonos->total,2,'.',','); ?>"/>
         </div>
       </div>
       <div class="control-group">
