@@ -100,7 +100,7 @@ $(document).ready(function(){
     });
     
     /*
-     * Autocompletado para el campo cliente
+     * Autocompletado para el campo contrato
      */
     var separador = '{#####}';
     $('#txt_contrato').typeahead({
