@@ -174,7 +174,7 @@ class Nota_credito extends CI_Model{
     */
     function cancelar( $id ) {
         $this->db->where('id', $id);
-        $this->db->update($this->tbl, array('estatus' => '0'));
+        $this->db->update($this->tbl, array('estatus' => 'cancelada'));
     }
 
 }

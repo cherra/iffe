@@ -124,11 +124,12 @@ class Administracion extends CI_Controller{
                 // Nombres de meses en español (config/sitio.php)
                 $meses = $this->config->item('meses');
 
-                // Se carga el template predefinido para los recibos (tabla Configuracion)
+                // Se carga el template predefinido para las facturas (tabla Configuracion)
                 $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_facturas'));
 
                 // Se sustituyen los campos en el template
-                $this->tbs->VarRef['logo'] = '';
+                $logo = $this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('logo');
+                $this->tbs->VarRef['logo'] = base_url($logo);
                 $this->tbs->VarRef['serie'] = $datos['serie'];
                 $this->tbs->VarRef['folio'] = $datos['folio'];
                 $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
@@ -276,8 +277,8 @@ class Administracion extends CI_Controller{
                 array('data' => number_format($importe,2,'.',','), 'class' => 'hidden-phone'),
                 array('data' => anchor_popup('operacion/administracion/notas_credito_documento/' . $nota->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
                 $nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_contratos/'.$nota->id,'<i class="icon-list"></i>', array('class' => 'btn btn-small', 'title' => 'Contratos', 'id' => 'contratos')) : '<a class="btn btn-small disabled"><i class="icon-list"></i></a>',
-                array('data' => ($nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_revisar/' . $nota->id, '<i class="icon-zoom-in"></i>', array('class' => 'btn btn-small', 'title' => 'Marcar como revisada')) : '<a class="btn btn-small disabled"><i class="icon-zoom-in"></i></a>'), 'class' => 'hidden-phone'),    
-                array('data' => ($nota->estatus == 'revisada' ? anchor('operacion/administracion/notas_credito_autorizar/' . $nota->id, '<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),    
+                array('data' => ($nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_revisar/' . $nota->id, '<i class="icon-zoom-in"></i>', array('class' => 'btn btn-small', 'title' => 'Marcar como revisada', 'id' => 'revisar')) : '<a class="btn btn-small disabled"><i class="icon-zoom-in"></i></a>'), 'class' => 'hidden-phone'),    
+                array('data' => ($nota->estatus == 'revisada' ? anchor('operacion/administracion/notas_credito_autorizar/' . $nota->id, '<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),    
                 array('data' => ($nota->estatus == 'cancelada' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/notas_credito_cancelar/'.$nota->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
             );
             $this->table->add_row_class($clase);
@@ -349,7 +350,8 @@ class Administracion extends CI_Controller{
             $nota = $this->nc->get_by_id($id)->row();
             if($nota){
                 $id_usuario = $this->session->userdata('userid');
-                $this->nc->autorizar($id, $id_usuario);
+                $documento = $this->render_template($id);
+                $this->nc->autorizar($id, $id_usuario, $documento);
             }
         }
         redirect('operacion/administracion/notas_credito/');
@@ -432,8 +434,109 @@ class Administracion extends CI_Controller{
         redirect('operacion/administracion/notas_credito_contratos/'.$id);
     }
     
+    public function notas_credito_cancelar($id = null){
+        if(!empty($id)){
+            $this->load->model('nota_credito','nc');
+            $this->nc->cancelar($id);
+        }
+        redirect('operacion/administracion/notas_credito');
+    }
     
+    private function render_template($id){
+        $this->load->model('nota_credito','nc');
+        
+        $nota = $this->nc->get_by_id($id)->row();
+        
+        $this->load->library('tbs');
+        $this->load->library('numero_letras');
+
+        // Nombres de meses en español (config/sitio.php)
+        $meses = $this->config->item('meses');
+        
+        // Se carga el template predefinido para las notas de crédito (tabla Configuracion)
+        $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_notas_credito'));
+
+        // Se sustituyen los campos en el template
+        $logo = $this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('logo');
+        $this->tbs->VarRef['logo'] = base_url($logo);
+        $this->tbs->VarRef['serie'] = $nota->serie;
+        $this->tbs->VarRef['folio'] = $nota->folio;
+        $this->tbs->VarRef['cliente'] = $nota->nombre;
+        $this->tbs->VarRef['rfc'] = $nota->rfc;
+        $this->tbs->VarRef['calle'] = $nota->calle;
+        $this->tbs->VarRef['numero'] = $nota->no_exterior.$nota->no_interior;
+        $this->tbs->VarRef['colonia'] = $nota->colonia;
+        $this->tbs->VarRef['ciudad'] = $nota->ciudad;
+        $this->tbs->VarRef['estado'] = $nota->estado;
+
+        $this->load->model('contrato','co');
+        $contratos = $this->nc->get_contratos($id)->result();
+        if($contratos){
+            $this->tbs->VarRef['contratos'] = "";
+            $i=0;
+            $total = 0;
+            foreach($contratos as $c){
+                if($i > 0)
+                    $this->tbs->VarRef['contratos'] .= ",";
+                $this->tbs->VarRef['contratos'] .= $c->numero;
+                $i++;
+                $total += $this->co->get_importe($c->id);
+            }
+        }
+        $this->tbs->VarRef['porcentaje'] = number_format($nota->total / $total * 100,2,'.','');
+        $this->tbs->VarRef['concepto'] = $nota->concepto;
+        $this->tbs->VarRef['total'] = '$'.number_format($nota->total,2,'.',',');
+        $this->tbs->VarRef['importe'] = '$'.number_format($nota->subtotal,2,'.',',');
+        $this->tbs->VarRef['subtotal'] = '$'.number_format($nota->subtotal,2,'.',',');
+        $this->tbs->VarRef['iva'] = '$'.number_format($nota->iva,2,'.',',');
+        $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($nota->total,2,'.',''));
+
+        $fecha = date_create($nota->fecha);
+        $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
+        $this->tbs->VarRef['dia'] = date_format($fecha,'d');
+        $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
+        $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
+
+        $this->load->model('usuario','u');
+        $usuario = $this->u->get_by_id($nota->id_usuario)->row();
+        $usuario_revisa = $this->u->get_by_id($nota->id_usuario_revisa)->row();
+        $this->tbs->VarRef['usuario'] = $usuario->nombre;
+        if($usuario_revisa)
+            $this->tbs->VarRef['usuario_revisa'] = $usuario_revisa->nombre;
+        else
+            $this->tbs->VarRef['usuario_revisa'] = '';
+        $this->tbs->VarRef['usuario_autoriza'] = '';
+
+        // Render sin desplegar en navegador
+        $this->tbs->Show(TBS_NOTHING);
+        // Se almacena el render en el array $data
+        return $this->tbs->Source;
+    }
     
+    public function notas_credito_documento($id = null){
+        if(!empty($id)){
+            $this->layout = "template_backend_wo_menu";
+            $this->load->model('nota_credito', 'nc');
+            if( $this->session->flashdata('pdf') ){
+                $nota = $this->nc->get_by_id($id)->row();
+                if($nota){
+                    if($nota->estatus == 'autorizada'){
+                        $data['contenido'] = $nota->documento;
+                    }else{
+                        $data['contenido'] = $this->render_template($id);
+                    }
+                    $this->load->view('documento',$data);
+                }else{
+                    redirect('operacion/administracion/notas_credito');
+                }
+            }else{
+                $this->session->set_flashdata('pdf', true);
+                redirect('operacion/administracion/notas_credito_documento/'.$id); // Se recarga el método para imprimirlo como PDF
+            }
+        }else{
+            redirect('operacion/administracion/notas_credito');
+        }
+    }
 }
 
 ?>

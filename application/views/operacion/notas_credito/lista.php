@@ -26,5 +26,17 @@ $(document).ready(function(){
         if(!a)
             event.preventDefault();
     });
+    
+    $('td').on('click','#revisar', function(event){
+        var a = confirm("¿Seguro(a) que deseas marcar como revisada la nota de crédito?");
+        if(!a)
+            event.preventDefault();
+    });
+    
+    $('td').on('click','#autorizar', function(event){
+        var a = confirm("¿Seguro(a) que deseas autorizar la nota de crédito?");
+        if(!a)
+            event.preventDefault();
+    });
 });
 </script>

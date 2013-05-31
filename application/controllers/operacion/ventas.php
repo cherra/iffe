@@ -610,7 +610,8 @@ class Ventas extends CI_Controller{
             $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_recibos'));
 
             // Se sustituyen los campos en el template
-            $this->tbs->VarRef['logo'] = '';
+            $logo = $this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('logo');
+            $this->tbs->VarRef['logo'] = base_url($logo);
             $this->tbs->VarRef['folio'] = $datos['numero'];
             $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
             $this->tbs->VarRef['calle'] = $cliente->calle;
