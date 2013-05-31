@@ -350,7 +350,7 @@ class Administracion extends CI_Controller{
             $nota = $this->nc->get_by_id($id)->row();
             if($nota){
                 $id_usuario = $this->session->userdata('userid');
-                $documento = $this->render_template($id);
+                $documento = $this->notas_credito_render_template($id);
                 $this->nc->autorizar($id, $id_usuario, $documento);
             }
         }
@@ -442,7 +442,7 @@ class Administracion extends CI_Controller{
         redirect('operacion/administracion/notas_credito');
     }
     
-    private function render_template($id){
+    private function notas_credito_render_template($id){
         $this->load->model('nota_credito','nc');
         
         $nota = $this->nc->get_by_id($id)->row();
@@ -515,15 +515,15 @@ class Administracion extends CI_Controller{
     
     public function notas_credito_documento($id = null){
         if(!empty($id)){
-            $this->layout = "template_backend_wo_menu";
+            $this->layout = "template_pdf";
             $this->load->model('nota_credito', 'nc');
+            $nota = $this->nc->get_by_id($id)->row();
             if( $this->session->flashdata('pdf') ){
-                $nota = $this->nc->get_by_id($id)->row();
                 if($nota){
                     if($nota->estatus == 'autorizada'){
                         $data['contenido'] = $nota->documento;
                     }else{
-                        $data['contenido'] = $this->render_template($id);
+                        $data['contenido'] = $this->notas_credito_render_template($id);
                     }
                     $this->load->view('documento',$data);
                 }else{
@@ -531,6 +531,13 @@ class Administracion extends CI_Controller{
                 }
             }else{
                 $this->session->set_flashdata('pdf', true);
+                if($nota){
+                    if($nota->estatus == 'pendiente'){  // Se agrega una marca de agua al PDF
+                        $this->session->set_flashdata('watermark', 'En revisión');
+                    }elseif($nota->estatus == 'revisada'){
+                        $this->session->set_flashdata('watermark', 'Para autorización ');
+                    }
+                }
                 redirect('operacion/administracion/notas_credito_documento/'.$id); // Se recarga el método para imprimirlo como PDF
             }
         }else{
