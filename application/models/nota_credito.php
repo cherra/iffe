@@ -21,12 +21,16 @@ class Nota_credito extends CI_Model{
     * ***********************************************************************
     */
     function count_all() {
-        $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
-        $this->db->join('Contratos c','ntc.id_contrato = c.id','left');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        $this->db->group_by('nt.id');
-        $query = $this->db->get($this->tbl.' nt');
-        return $query->num_rows();
+        if(!empty($this->periodo)){
+            $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
+            $this->db->join('Contratos c','ntc.id_contrato = c.id','left');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->group_by('nt.id');
+            $query = $this->db->get($this->tbl.' nt');
+            return $query->num_rows();
+        }else{
+            return 0;
+        }
     }
 
     /**
@@ -35,12 +39,16 @@ class Nota_credito extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select('nt.*');
-        $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
-        $this->db->join('Contratos c','ntc.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id,'left');
-        $this->db->group_by('nt.id');
-        $this->db->order_by('nt.serie, nt.folio','desc');
-        return $this->db->get($this->tbl.' nt',$limit, $offset);
+        if(!empty($this->periodo)){
+            $this->db->select('nt.*');
+            $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
+            $this->db->join('Contratos c','ntc.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id,'left');
+            $this->db->group_by('nt.id');
+            $this->db->order_by('nt.serie, nt.folio','desc');
+            return $this->db->get($this->tbl.' nt',$limit, $offset);
+        }else{
+            return false;
+        }
     }
     
     function get_contratos( $id, $limit = null, $offset = 0 ){

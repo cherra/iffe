@@ -23,9 +23,13 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function count_all() {
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        return $this->db->get($this->tbl.' c')->num_rows();
+        if(!empty($this->periodo)){
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            return $this->db->get($this->tbl.' c')->num_rows();
+        }else{
+            return 0;
+        }
     }
 
     /**
@@ -34,11 +38,15 @@ class Contrato extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select('c.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        $this->db->order_by('numero','desc');
-        return $this->db->get($this->tbl.' c',$limit, $offset);
+        if(!empty($this->periodo)){
+            $this->db->select('c.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente', FALSE);
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->order_by('numero','desc');
+            return $this->db->get($this->tbl.' c',$limit, $offset);
+        }else {
+            return false;
+        }
     }
     
     function get_con_adeudo( $query = null ) {

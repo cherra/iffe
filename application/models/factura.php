@@ -19,13 +19,17 @@ class Factura extends CI_Model{
     * ***********************************************************************
     */
     function count_all() {
-        $this->db->join('Recibos r','f.id = r.id_factura');
-        $this->db->join('Contratos c','r.id_contrato = c.id');
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        $this->db->group_by('f.id');
-        $query = $this->db->get($this->tbl.' f');
-        return $query->num_rows();
+        if(!empty($this->periodo)){
+            $this->db->join('Recibos r','f.id = r.id_factura');
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->group_by('f.id');
+            $query = $this->db->get($this->tbl.' f');
+            return $query->num_rows();
+        }else{
+            return 0;
+        }
     }
 
     /**
@@ -34,14 +38,18 @@ class Factura extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select('f.*');
-        $this->db->join('Recibos r','f.id = r.id_factura');
-        $this->db->join('Contratos c','r.id_contrato = c.id');
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        $this->db->group_by('f.id');
-        $this->db->order_by('f.serie, f.folio','desc');
-        return $this->db->get($this->tbl.' f',$limit, $offset);
+        if(!empty($this->periodo)){
+            $this->db->select('f.*');
+            $this->db->join('Recibos r','f.id = r.id_factura');
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->group_by('f.id');
+            $this->db->order_by('f.serie, f.folio','desc');
+            return $this->db->get($this->tbl.' f',$limit, $offset);
+        }else{
+            return false;
+        }
     }
     
     /**

@@ -20,10 +20,14 @@ class Recibo extends CI_Model{
     * ***********************************************************************
     */
     function count_all() {
-        $this->db->join('Contratos c','r.id_contrato = c.id');
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        return $this->db->get($this->tbl.' r')->num_rows();
+        if(!empty($this->periodo)){
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            return $this->db->get($this->tbl.' r')->num_rows();
+        }else{
+            return 0;
+        }
     }
 
     /**
@@ -32,13 +36,17 @@ class Recibo extends CI_Model{
     * ***********************************************************************
     */
     function get_paged_list($limit = null, $offset = 0) {
-        $this->db->select('r.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente, f.serie, f.folio, f.estatus AS estatus_factura', FALSE);
-        $this->db->join('Contratos c','r.id_contrato = c.id');
-        $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->join('Facturas f','r.id_factura = f.id','left');
-        $this->db->where('c.id_periodo', $this->periodo->id);
-        $this->db->order_by('r.numero','desc');
-        return $this->db->get($this->tbl.' r',$limit, $offset);
+        if(!empty($this->periodo)){
+            $this->db->select('r.*, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) AS cliente, f.serie, f.folio, f.estatus AS estatus_factura', FALSE);
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('Facturas f','r.id_factura = f.id','left');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->order_by('r.numero','desc');
+            return $this->db->get($this->tbl.' r',$limit, $offset);
+        }else{
+            return false;
+        }
     }
     
     /**

@@ -22,7 +22,9 @@ class Administracion extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $facturas = $this->a->get_paged_list($page_limit, $offset)->result();
+        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        if($resultado)
+            $facturas = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/administracion/facturas/');
         $config['total_rows'] = $this->a->count_all();
@@ -36,28 +38,32 @@ class Administracion extends CI_Controller{
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
         $this->table->set_heading('Estado', 'Fecha', 'Serie', 'Folio', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
-        foreach ($facturas as $factura) {
-            //$contrato = $this->c->get_by_id($factura->id_recibo)->row();
-            $clase = '';
-            if($factura->estatus == 0)
-                $clase = 'muted';
-            $this->table->add_row(
-                '<i class="'.($factura->estatus == '1' ? 'icon-ok' : 'icon-remove').'"></i>',
-                $factura->fecha,
-                $factura->serie,
-                $factura->folio,
-                $factura->nombre, 
-                array('data' => number_format($factura->total,2,'.',','), 'class' => 'hidden-phone'),
-                array('data' => anchor_popup('operacion/administracion/facturas_documento/' . $factura->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
-                array('data' => ($factura->estatus == '0' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/facturas_cancelar/'.$factura->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
-            );
-            $this->table->add_row_class($clase);
+        if(isset($facturas)){
+            foreach ($facturas as $factura) {
+                //$contrato = $this->c->get_by_id($factura->id_recibo)->row();
+                $clase = '';
+                if($factura->estatus == 0)
+                    $clase = 'muted';
+                $this->table->add_row(
+                    '<i class="'.($factura->estatus == '1' ? 'icon-ok' : 'icon-remove').'"></i>',
+                    $factura->fecha,
+                    $factura->serie,
+                    $factura->folio,
+                    $factura->nombre, 
+                    array('data' => number_format($factura->total,2,'.',','), 'class' => 'hidden-phone'),
+                    array('data' => anchor_popup('operacion/administracion/facturas_documento/' . $factura->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
+                    array('data' => ($factura->estatus == '0' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/facturas_cancelar/'.$factura->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                );
+                $this->table->add_row_class($clase);
+            }
+            $data['add_link'] = anchor('operacion/administracion/facturas_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        }else{
+            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();
         $data['table'] = $this->table->generate();
         $data['titulo'] = 'Facturas <small>Listado</small>';
-        $data['add_link'] = anchor('operacion/administracion/facturas_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/facturas/lista', $data);
     }
@@ -251,7 +257,9 @@ class Administracion extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $notas = $this->a->get_paged_list($page_limit, $offset)->result();
+        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        if($resultado)
+            $notas = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/administracion/facturas/');
         $config['total_rows'] = $this->a->count_all();
@@ -265,32 +273,36 @@ class Administracion extends CI_Controller{
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
         $this->table->set_heading('Estado', 'Fecha', 'Serie', 'Folio', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
-        foreach ($notas as $nota) {
-            //$contrato = $this->c->get_by_id($factura->id_recibo)->row();
-            $importe = $this->a->get_importe($nota->id);
-            $clase = '';
-            if($nota->estatus == 'cancelada')
-                $clase = 'muted';
-            $this->table->add_row(
-                '<i class="'.($nota->estatus == 'pendiente' ? 'icon-search' : ($nota->estatus == 'revisada' ? 'icon-zoom-in' : ($nota->estatus == 'autorizada' ? 'icon-ok' : 'icon-remove'))).'"></i>',
-                $nota->fecha,
-                $nota->serie,
-                $nota->folio,
-                $nota->nombre, 
-                array('data' => number_format($importe,2,'.',','), 'class' => 'hidden-phone'),
-                array('data' => anchor_popup('operacion/administracion/notas_credito_documento/' . $nota->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
-                $nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_contratos/'.$nota->id,'<i class="icon-list"></i>', array('class' => 'btn btn-small', 'title' => 'Contratos', 'id' => 'contratos')) : '<a class="btn btn-small disabled"><i class="icon-list"></i></a>',
-                array('data' => ($nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_revisar/' . $nota->id, '<i class="icon-zoom-in"></i>', array('class' => 'btn btn-small', 'title' => 'Marcar como revisada', 'id' => 'revisar')) : '<a class="btn btn-small disabled"><i class="icon-zoom-in"></i></a>'), 'class' => 'hidden-phone'),    
-                array('data' => ($nota->estatus == 'revisada' ? anchor('operacion/administracion/notas_credito_autorizar/' . $nota->id, '<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),    
-                array('data' => ($nota->estatus == 'cancelada' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/notas_credito_cancelar/'.$nota->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
-            );
-            $this->table->add_row_class($clase);
+        if(isset($notas)){
+            foreach ($notas as $nota) {
+                //$contrato = $this->c->get_by_id($factura->id_recibo)->row();
+                $importe = $this->a->get_importe($nota->id);
+                $clase = '';
+                if($nota->estatus == 'cancelada')
+                    $clase = 'muted';
+                $this->table->add_row(
+                    '<i class="'.($nota->estatus == 'pendiente' ? 'icon-search' : ($nota->estatus == 'revisada' ? 'icon-zoom-in' : ($nota->estatus == 'autorizada' ? 'icon-ok' : 'icon-remove'))).'"></i>',
+                    $nota->fecha,
+                    $nota->serie,
+                    $nota->folio,
+                    $nota->nombre, 
+                    array('data' => number_format($importe,2,'.',','), 'class' => 'hidden-phone'),
+                    array('data' => anchor_popup('operacion/administracion/notas_credito_documento/' . $nota->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
+                    $nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_contratos/'.$nota->id,'<i class="icon-list"></i>', array('class' => 'btn btn-small', 'title' => 'Contratos', 'id' => 'contratos')) : '<a class="btn btn-small disabled"><i class="icon-list"></i></a>',
+                    array('data' => ($nota->estatus == 'pendiente' ? anchor('operacion/administracion/notas_credito_revisar/' . $nota->id, '<i class="icon-zoom-in"></i>', array('class' => 'btn btn-small', 'title' => 'Marcar como revisada', 'id' => 'revisar')) : '<a class="btn btn-small disabled"><i class="icon-zoom-in"></i></a>'), 'class' => 'hidden-phone'),    
+                    array('data' => ($nota->estatus == 'revisada' ? anchor('operacion/administracion/notas_credito_autorizar/' . $nota->id, '<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),    
+                    array('data' => ($nota->estatus == 'cancelada' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/notas_credito_cancelar/'.$nota->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                );
+                $this->table->add_row_class($clase);
+            }
+            $data['add_link'] = anchor('operacion/administracion/notas_credito_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        }else{
+            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();
         $data['table'] = $this->table->generate();
         $data['titulo'] = 'Notas de crédito <small>Listado</small>';
-        $data['add_link'] = anchor('operacion/administracion/notas_credito_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/notas_credito/lista', $data);
     }

@@ -18,13 +18,15 @@ class Ventas extends CI_Controller{
     
     public function contratos( $offset = 0 ){
         $this->load->model('contrato','a');
-        
+
         $offset = floatval($offset);
         
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $contratos = $this->a->get_paged_list($page_limit, $offset)->result();
+        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        if($resultado)
+            $contratos = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/ventas/contratos/');
         $config['total_rows'] = $this->a->count_all();
@@ -38,45 +40,48 @@ class Ventas extends CI_Controller{
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
         $this->table->set_heading('Estado', 'No.', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
-        foreach ($contratos as $contrato) {
-            /*$modulos = $this->a->get_modulos($contrato->id)->result();
-            $calle = '';
-            $mods = '';
-            $total = 0;
-            $i=0;
-            foreach ($modulos as $m){
-                if($m->calle != $calle){
-                    if($calle != '')
-                        $mods .= '<br/>';
-                    $mods .= $m->calle.': ';
-                    $calle = $m->calle;
-                    $i=0;
-                }else
-                    $mods.=', ';
-                $mods .= $m->modulo;
-                $total += $m->importe;                
-            }*/
-            $modulos = $this->a->get_modulos($contrato->id);
-            $num_modulos = $modulos->num_rows();
-            $total = $this->a->get_importe($contrato->id);
-            $this->table->add_row(
-                '<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-remove')).'"></i>',
-                $contrato->numero,
-                $contrato->cliente,
-                array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
-                //$mods,
-                array('data' => (anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
-                ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_modulos/' . $contrato->id, '<i class="icon-road"></i>', array('class' => 'btn btn-small', 'title' => 'Módulos')) : '<a class="btn btn-small disabled"><i class="icon-road"></i></a>'),
-                ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_update/' . $contrato->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')) : '<a class="btn btn-small disabled"><i class="icon-edit"></i></a>'),
-                array('data' => (($contrato->estado == 'pendiente' && $num_modulos > 0) ? anchor('operacion/ventas/contratos_autorizar/'.$contrato->id,'<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),
-                array('data' => ($contrato->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-remove"></i></a>' : anchor('operacion/ventas/contratos_cancelar/'.$contrato->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
-            );
+        if(isset($contratos)){
+            foreach ($contratos as $contrato) {
+                /*$modulos = $this->a->get_modulos($contrato->id)->result();
+                $calle = '';
+                $mods = '';
+                $total = 0;
+                $i=0;
+                foreach ($modulos as $m){
+                    if($m->calle != $calle){
+                        if($calle != '')
+                            $mods .= '<br/>';
+                        $mods .= $m->calle.': ';
+                        $calle = $m->calle;
+                        $i=0;
+                    }else
+                        $mods.=', ';
+                    $mods .= $m->modulo;
+                    $total += $m->importe;                
+                }*/
+                $modulos = $this->a->get_modulos($contrato->id);
+                $num_modulos = $modulos->num_rows();
+                $total = $this->a->get_importe($contrato->id);
+                $this->table->add_row(
+                    '<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-remove')).'"></i>',
+                    $contrato->numero,
+                    $contrato->cliente,
+                    array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
+                    //$mods,
+                    array('data' => (anchor_popup('operacion/ventas/contratos_documento/' . $contrato->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
+                    ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_modulos/' . $contrato->id, '<i class="icon-road"></i>', array('class' => 'btn btn-small', 'title' => 'Módulos')) : '<a class="btn btn-small disabled"><i class="icon-road"></i></a>'),
+                    ($contrato->estado == 'pendiente' ? anchor('operacion/ventas/contratos_update/' . $contrato->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')) : '<a class="btn btn-small disabled"><i class="icon-edit"></i></a>'),
+                    array('data' => (($contrato->estado == 'pendiente' && $num_modulos > 0) ? anchor('operacion/ventas/contratos_autorizar/'.$contrato->id,'<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),
+                    array('data' => ($contrato->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-remove"></i></a>' : anchor('operacion/ventas/contratos_cancelar/'.$contrato->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                );
+            }
+            $data['add_link'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        }else{
+            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> Para agregar un contrato es necesario un período activo</div>';
         }
-        
-        $data['pagination'] = $this->pagination->create_links();
         $data['table'] = $this->table->generate();
+        $data['pagination'] = $this->pagination->create_links();
         $data['titulo'] = 'Contratos <small>Listado</small>';
-        $data['add_link'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/contratos/lista', $data);
     }
@@ -539,7 +544,9 @@ class Ventas extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $recibos = $this->a->get_paged_list($page_limit, $offset)->result();
+        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        if($resultado)
+            $recibos = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/ventas/recibos/');
         $config['total_rows'] = $this->a->count_all();
@@ -553,31 +560,35 @@ class Ventas extends CI_Controller{
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
         $this->table->set_heading('Estado', 'Fecha', 'No.', 'Contrato', array('data' => 'Factura', 'class' => 'hidden-phone'), array('data' => 'Cliente', 'class' => 'hidden-phone'), 'Importe', '','','', '');
-        foreach ($recibos as $recibo) {
-            $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
-            $clase = '';
-            $fecha = date_create($recibo->fecha);
-            if($recibo->estado == 'cancelado')
-                $clase = 'muted';
-            $this->table->add_row(
-                '<i class="'.($recibo->estado == 'vigente' ? 'icon-ok' : 'icon-remove').'"></i>',
-                date_format($fecha,'Y-m-d'),
-                $recibo->numero,
-                $contrato->numero.'/'.$contrato->sufijo,
-                array('data' => $recibo->serie.' '.$recibo->folio, 'class' => 'hidden-phone'),
-                array('data' => $recibo->cliente, 'class' => 'hidden-phone'),
-                number_format($recibo->total,2,'.',','),
-                array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
-                array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
-                array('data' => (($recibo->estado == 'cancelado' || $recibo->estatus_factura == 1) ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
-            );
-            $this->table->add_row_class($clase);
+        if(isset($recibos)){
+            foreach ($recibos as $recibo) {
+                $contrato = $this->c->get_by_id($recibo->id_contrato)->row();
+                $clase = '';
+                $fecha = date_create($recibo->fecha);
+                if($recibo->estado == 'cancelado')
+                    $clase = 'muted';
+                $this->table->add_row(
+                    '<i class="'.($recibo->estado == 'vigente' ? 'icon-ok' : 'icon-remove').'"></i>',
+                    date_format($fecha,'Y-m-d'),
+                    $recibo->numero,
+                    $contrato->numero.'/'.$contrato->sufijo,
+                    array('data' => $recibo->serie.' '.$recibo->folio, 'class' => 'hidden-phone'),
+                    array('data' => $recibo->cliente, 'class' => 'hidden-phone'),
+                    number_format($recibo->total,2,'.',','),
+                    array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
+                    array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
+                    array('data' => (($recibo->estado == 'cancelado' || $recibo->estatus_factura == 1) ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                );
+                $this->table->add_row_class($clase);
+            }
+            $data['add_link'] = anchor('operacion/ventas/recibos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+        }else{
+            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();
         $data['table'] = $this->table->generate();
         $data['titulo'] = 'Recibos <small>Listado</small>';
-        $data['add_link'] = anchor('operacion/ventas/recibos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
         
         $this->load->view('operacion/recibos/lista', $data);
     }

@@ -47,6 +47,7 @@
 | http://www.syahzul.com/blogs/item/codeigniter-layout-without-using-additional-library
 |
 */
+
 $hook['post_controller_constructor'][] = array(
     'class' => 'acl',
     'function' => 'hasPermission',
@@ -54,17 +55,17 @@ $hook['post_controller_constructor'][] = array(
     'filepath' => 'hooks'
 );
 
-$hook['post_controller'][] = array(
-    'class' => 'menu',
-    'function' => 'menuOptions',
-    'filename' => 'menu.php',
+$hook['post_controller_constructor'][] = array(
+    'class' => 'Periodo_activo',
+    'function' => 'index',
+    'filename' => 'periodo_activo.php',
     'filepath' => 'hooks'
 );
 
 $hook['post_controller'][] = array(
-    'class' => 'Periodo_activo',
-    'function' => 'index',
-    'filename' => 'periodo_activo.php',
+    'class' => 'menu',
+    'function' => 'menuOptions',
+    'filename' => 'menu.php',
     'filepath' => 'hooks'
 );
 

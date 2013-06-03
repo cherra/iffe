@@ -14,6 +14,8 @@ class Periodo_activo {
         $periodo = $CI->periodo->get_activo()->row();
         if(!empty($periodo))
             $CI->session->set_userdata('periodo', $periodo);
+        else
+            $CI->session->unset_userdata('periodo');
     }
 }
 
