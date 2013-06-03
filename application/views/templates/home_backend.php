@@ -96,7 +96,7 @@
             <i class="icon-user icon-white"></i> <?php echo $this->session->userdata('nombre'); ?> <?php echo anchor('login/do_logout','(Salir)','class="navbar-link"'); ?>
         </p>
         <p class="navbar-text pull-right hidden-phone">
-              <strong><?php echo $periodo->nombre; ?></strong>
+              <strong><?php if(!empty($periodo)) echo $periodo->nombre; else echo "¡No hay período activo!"; ?></strong>
         </p>
         <ul class="nav">
             <?php

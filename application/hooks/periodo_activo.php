@@ -12,7 +12,8 @@ class Periodo_activo {
         
         $CI->load->model('periodo');
         $periodo = $CI->periodo->get_activo()->row();
-        $CI->session->set_userdata('periodo', $periodo);
+        if(!empty($periodo))
+            $CI->session->set_userdata('periodo', $periodo);
     }
 }
 
