@@ -192,7 +192,10 @@ class Administracion extends CI_Controller{
         
         // Se sugiere el siguiente folio disponible
         $ultimo_folio = $this->f->get_ultimo_folio($data['serie'])->row();
-        $data['folio'] = $ultimo_folio->folio + 1;
+        if(!empty($ultimo_folio))
+            $data['folio'] = $ultimo_folio->folio + 1;
+        else
+            $data['folio'] = 1;
         
         $this->load->view('operacion/facturas/formulario', $data);
     }
