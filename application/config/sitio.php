@@ -15,7 +15,7 @@ $config['nombre_proyecto'] = 'iffe';
 | Variable para ignorar el modulo de privilegios de usuario
 |
 */
-$config['developer_mode'] = 1;
+$config['developer_mode'] = 0;
 
 /*
 |--------------------------------------------------------------------------
