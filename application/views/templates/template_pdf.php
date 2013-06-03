@@ -11,10 +11,11 @@ Template para PDFs
             body{
                 font-size: 11px; 
                 line-height: 14px;
+                color: #000000;
             }
             
             @page{
-                margin-left: 12mm;
+                margin-left: 15mm;
                 margin-right: 12mm;
                 margin-top: 12mm;
                 margin-bottom: 12mm;
