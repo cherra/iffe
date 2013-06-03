@@ -85,7 +85,8 @@ class Ventas extends CI_Controller{
         $this->load->model('contrato', 'c');
             
         $contrato = $this->c->get_by_id($id)->row();
-        $modulos = $this->c->get_modulos($contrato->id)->result_array();
+        //$modulos = $this->c->get_modulos($contrato->id)->result_array();
+        $modulos = $this->c->get_modulos_agrupados($contrato->id)->result_array();
         $importe = $this->c->get_importe($contrato->id);
 
         $this->load->model('cliente','cl');
@@ -134,11 +135,14 @@ class Ventas extends CI_Controller{
         $this->tbs->VarRef['dia'] = date_format($fecha,'d');
         $this->tbs->VarRef['mes'] = $meses[date_format($fecha,'n')-1];
         $this->tbs->VarRef['ano'] = date_format($fecha,'Y');
-        // Render sin desplegar en navegador
+        
         foreach($modulos as $key => $value){
             $modulos[$key]['importe'] = '$'.number_format($modulos[$key]['importe'],2,'.',',');
+            $modulos[$key]['total'] = '$'.number_format($modulos[$key]['total'],2,'.',',');
+            $modulos[$key]['categoria'] = ucfirst($modulos[$key]['categoria']);
         }
         $this->tbs->MergeBlock('modulos', $modulos);
+        // Render sin desplegar en navegador
         $this->tbs->Show(TBS_NOTHING);
         // Se regresa el render
         return $this->tbs->Source;

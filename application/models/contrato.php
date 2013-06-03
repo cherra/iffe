@@ -69,6 +69,16 @@ class Contrato extends CI_Model{
         return $this->db->get($this->tbl_contrato_modulos.' cm', $limit, $offset);
     }
     
+    function get_modulos_agrupados( $id, $limit = null, $offset = 0 ){
+        $this->db->select('c.nombre as calle, m.id as id_modulo, COUNT(DISTINCT m.id) AS cantidad, GROUP_CONCAT(DISTINCT m.numero ORDER BY m.numero SEPARATOR ",") as modulo, cm.importe AS importe, SUM(cm.importe) AS total, m.categoria, m.id_calle', FALSE);
+        $this->db->join('Modulos m','cm.id_modulo = m.id');
+        $this->db->join('Calles c','m.id_calle = c.id');
+        $this->db->where('cm.id_contrato',$id);
+        $this->db->group_by('c.id');
+        $this->db->order_by('c.nombre, m.numero');
+        return $this->db->get($this->tbl_contrato_modulos.' cm', $limit, $offset);
+    }
+    
     function get_importe( $id ){
         $this->db->select('SUM(cm.importe) as importe', FALSE);
         $this->db->join('Modulos m','cm.id_modulo = m.id');
