@@ -12,7 +12,8 @@ if(($archivo = fopen("clientes.csv", "r")) !== FALSE){
     
     while(($data = fgetcsv($archivo)) !== FALSE){
         $tipo = 'moral';
-        $razon_social = $data[2];
+        $razon_social = '';
+        $nombre = '';
         $apellido_materno = '';
         $apellido_paterno = '';
         
@@ -24,10 +25,12 @@ if(($archivo = fopen("clientes.csv", "r")) !== FALSE){
             if(count($nombre) >= 3){
                 $apellido_materno = array_pop($nombre);
                 $apellido_paterno = array_pop($nombre);
+            }elseif(count($nombre) >= 2){
+                $apellido_paterno = array_pop($nombre);
             }
             $nombre = implode(' ', $nombre);
         }else{
-            $nombre = ucwords(strtolower(utf8_decode(trim($data[2]))));
+            $razon_social = ucwords(strtolower(utf8_decode(trim($data[2]))));
         }
         
         // Giros

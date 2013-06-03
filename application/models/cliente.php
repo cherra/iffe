@@ -46,7 +46,7 @@ class Cliente extends CI_Model {
                 $this->db->or_like('razon_social',$filtro);
             }
         }
-        $this->db->order_by('apellido_paterno, apellido_materno, nombre, razon_social','asc');
+        $this->db->order_by('razon_social, apellido_paterno, apellido_materno, nombre','asc');
         return $this->db->get($this->tbl_clientes, $limit, $offset);
     }
 

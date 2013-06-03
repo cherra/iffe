@@ -46,12 +46,11 @@ class Clientes extends CI_Controller {
     	$this->table->set_empty('&nbsp;');
     	$tmpl = array ( 'table_open' => '<table class="' . $this->config->item('tabla_css') . '" >' );
     	$this->table->set_template($tmpl);
-    	$this->table->set_heading('Apellido Paterno',array('data' => 'Apellido Materno', 'class' => 'hidden-phone'), 'Nombre', array('data' => 'Telefono','class' => 'hidden-phone'),array('data' => 'Celular', 'class' => 'hidden-phone'), '');
+    	$this->table->set_heading('Razón social','Nombre', array('data' => 'Telefono','class' => 'hidden-phone'),array('data' => 'Celular', 'class' => 'hidden-phone'), '');
     	foreach ($clientes as $cliente) {
     		$this->table->add_row(
-                    $cliente->apellido_paterno,
-                    array('data' => $cliente->apellido_materno, 'class' => 'hidden-phone'),
-                    $cliente->nombre,
+                    $cliente->razon_social,
+                    $cliente->apellido_paterno.' '.$cliente->apellido_materno.' '.$cliente->nombre,
                     array('data' => $cliente->telefono, 'class' => 'hidden-phone'),
                     array('data' => $cliente->celular, 'class' => 'hidden-phone'),
                     anchor('catalogos/clientes/update/' . $cliente->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
