@@ -119,8 +119,8 @@ $(document).ready(function(){
                             objects.push(object.id + separador + object.numero+'/'+object.sufijo+' '+object.cliente);
                             contratos[object.id] = object;
                         });
-                        process(objects);
                     }
+                    process(objects);
                 });
             },
             highlighter: function (item) {
