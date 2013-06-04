@@ -32,7 +32,7 @@
       <div class="control-group">
         <label class="control-label hidden-phone" for="tipo">Persona</label>
         <div class="controls">
-            <select name="tipo" class="required">
+            <select name="tipo" id="tipo" class="required">
                 <option value="fisica" <?php if( isset($datos->tipo) && ($datos->tipo == 'fisica') ) echo "selected"; ?>>Física</option>
                 <option value="moral" <?php if( isset($datos->tipo) && ($datos->tipo == 'moral') ) echo "selected"; ?>>Moral</option>
             </select>
@@ -47,13 +47,13 @@
       <div class="control-group">
         <label class="control-label hidden-phone" for="nombre">Nombre</label>
         <div class="controls">
-          <input type="text" name="nombre" id="nombre" placeholder="Nombre" value="<?php echo (isset($datos->nombre) ? $datos->nombre : ''); ?>">
+          <input type="text" name="nombre" id="nombre" class="required" placeholder="Nombre" value="<?php echo (isset($datos->nombre) ? $datos->nombre : ''); ?>">
         </div>
       </div>
       <div class="control-group">
         <label class="control-label hidden-phone" for="apellido_paterno">Apellido Paterno</label>
         <div class="controls">
-          <input type="text" name="apellido_paterno" placeholder="Apellido Paterno" value="<?php echo (isset($datos->apellido_paterno) ? $datos->apellido_paterno : ''); ?>">
+          <input type="text" name="apellido_paterno" class="required" placeholder="Apellido Paterno" value="<?php echo (isset($datos->apellido_paterno) ? $datos->apellido_paterno : ''); ?>">
         </div>
       </div>
       <div class="control-group">
@@ -150,27 +150,9 @@ $(document).ready(function(){
         rules:{
             razon_social:{
                 required: function(element){
-                    return $('#nombre').val() == '';
+                    return $('#tipo option:selected').val() === 'moral';
                 },
                 minlength: 10
-            },
-            nombre:{
-                required: function(element){
-                    return $('#razon_social').val() == '';
-                },
-                minlength: 3
-            },
-            apellido_paterno:{
-                required: function(element){
-                    return $('#razon_social').val() == '';
-                },
-                minlength: 3
-            },
-            apellido_materno:{
-                required: function(element){
-                    return $('#razon_social').val() == '';
-                },
-                minlength: 3
             }
         },
         highlight: function(element, errorClass) {
