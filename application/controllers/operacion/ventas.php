@@ -668,6 +668,15 @@ class Ventas extends CI_Controller{
                 $concepto = "Pago total";
             $concepto.=" al contrato No. ".$contrato->numero."/".$contrato->sufijo." por renta de espacio para la Feria de Todos los Santos Colima ".$contrato->sufijo;
             $this->tbs->VarRef['concepto'] = $concepto;
+            
+            $this->load->model('giro','g');
+            $giro = $this->g->get_by_id($cliente->id_giro)->row();
+            $this->tbs->VarRef['giro'] = $giro->nombre;
+            
+            $this->load->model('concesion','cs');
+            $concesion = $this->cs->get_by_id($cliente->id_concesion)->row();
+            $this->tbs->VarRef['concesion'] = $concesion->nombre;
+            
             $this->tbs->VarRef['importe'] = '$'.number_format($datos['total'],2,'.',',');
             $this->tbs->VarRef['importe_letra'] = $this->numero_letras->convertir(number_format($datos['total'],2,'.',''));
 
