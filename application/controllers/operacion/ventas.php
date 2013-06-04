@@ -111,7 +111,16 @@ class Ventas extends CI_Controller{
 
         // Se sustituyen los campos en el template
         $this->tbs->VarRef['numero_contrato'] = $contrato->numero.'/'.$contrato->sufijo;
-        $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+        if($cliente->tipo == 'moral'){
+            $this->tbs->VarRef['razon_social'] = $cliente->razon_social;
+            $this->tbs->VarRef['mensaje_representante'] = ' representada en este acto por el(la) C. ';
+            $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+        }else{
+            $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            $this->tbs->VarRef['mensaje_representante'] = ' el(la) C. ';
+            $this->tbs->VarRef['razon_social'] = '';
+        }
+        //$this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
         $this->tbs->VarRef['testigo1'] = $contrato->testigo1;
         $this->tbs->VarRef['testigo2'] = $contrato->testigo2;
         $this->tbs->VarRef['giro'] = $giro->nombre;
@@ -576,7 +585,7 @@ class Ventas extends CI_Controller{
                     array('data' => $recibo->cliente, 'class' => 'hidden-phone'),
                     number_format($recibo->total,2,'.',','),
                     array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
-                    array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/ventas/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
+                    array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/administracion/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
                     array('data' => (($recibo->estado == 'cancelado' || $recibo->estatus_factura == 1) ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
                 );
                 $this->table->add_row_class($clase);
@@ -643,7 +652,11 @@ class Ventas extends CI_Controller{
             $logo = $this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('logo');
             $this->tbs->VarRef['logo'] = base_url($logo);
             $this->tbs->VarRef['folio'] = $datos['numero'];
-            $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            if($cliente->tipo == 'moral'){
+                $this->tbs->VarRef['cliente'] = $cliente->razon_social;
+            }else{
+                $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            }
             $this->tbs->VarRef['calle'] = $cliente->calle;
             $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
             $this->tbs->VarRef['colonia'] = $cliente->colonia;

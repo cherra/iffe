@@ -11,7 +11,14 @@
         <label class="control-label" for="id_contrato">Contrato</label>
         <div class="controls">
             <input type="hidden" name="id_contrato" id="id_contrato" value="<?php if(isset($id_contrato)) echo $id_contrato; ?>"/>
-            <input type="text" id="txt_contrato" autocomplete="off" value="<?php if(isset($cliente) && isset($contrato)) echo $contrato->numero."/".$contrato->sufijo." ".$cliente->nombre." ".$cliente->apellido_paterno." ".$cliente->apellido_materno; ?>" />
+            <input type="text" id="txt_contrato" autocomplete="off" value="<?php 
+                if(isset($cliente) && isset($contrato)){
+                    if($cliente->tipo == 'moral'){
+                        echo $contrato->numero."/".$contrato->sufijo." ".$cliente->razon_social; 
+                    }else{
+                        echo $contrato->numero."/".$contrato->sufijo." ".$cliente->nombre." ".$cliente->apellido_paterno." ".$cliente->apellido_materno; 
+                    }
+                }?>" />
         </div>
       </div>
       <!-- <div class="control-group">

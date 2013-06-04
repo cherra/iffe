@@ -138,7 +138,11 @@ class Administracion extends CI_Controller{
                 $this->tbs->VarRef['logo'] = base_url($logo);
                 $this->tbs->VarRef['serie'] = $datos['serie'];
                 $this->tbs->VarRef['folio'] = $datos['folio'];
-                $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                if($cliente->tipo == 'moral'){
+                    $this->tbs->VarRef['cliente'] = $cliente->razon_social;
+                }else{
+                    $this->tbs->VarRef['cliente'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                }
                 $this->tbs->VarRef['rfc'] = $cliente->rfc;
                 $this->tbs->VarRef['calle'] = $cliente->calle;
                 $this->tbs->VarRef['numero'] = $cliente->numero_exterior.$cliente->numero_interior;
@@ -164,7 +168,11 @@ class Administracion extends CI_Controller{
                 $datos['documento'] = $this->tbs->Source;
 
                 // Datos del cliente para guardarlos en la factura
-                $datos['nombre'] =  $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                if($cliente->tipo == 'moral'){
+                    $datos['nombre'] = $cliente->razon_social;
+                }else{
+                    $datos['nombre'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+                }
                 $datos['rfc'] =  $cliente->rfc;
                 $datos['calle'] =  $cliente->calle;
                 $datos['no_exterior'] =  $cliente->numero_exterior;
@@ -323,7 +331,11 @@ class Administracion extends CI_Controller{
             $cliente = $this->c->get_by_id($datos['id_cliente'])->row();
             unset($datos['id_cliente']);
             $datos['rfc'] = $cliente->rfc;
-            $datos['nombre'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            if($cliente->tipo == 'moral'){
+                $datos['nombre'] = $cliente->razon_social;
+            }else{
+                $datos['nombre'] = $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno;
+            }
             $datos['calle'] = $cliente->calle;
             $datos['no_exterior'] = $cliente->numero_exterior;
             $datos['no_interior'] = $cliente->numero_interior;

@@ -76,8 +76,8 @@ $(document).ready(function(){
                             objects.push(object.id + separador + object.nombre);
                             clientes[object.id] = object;
                         });
-                        process(objects);
                     }
+                    process(objects);
                 });
             },
             highlighter: function (item) {

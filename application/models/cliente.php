@@ -106,9 +106,10 @@ class Cliente extends CI_Model {
     * ***********************************************************************
     */
     function get_by_query($query) {
-        $sql = "SELECT id, IF(LENGTH(razon_social) > 0, razon_social, concat(nombre, ' ', apellido_paterno, ' ', apellido_materno)) as nombre 
+        $sql = "SELECT id, IF(tipo = 'moral', razon_social, concat(nombre, ' ', apellido_paterno, ' ', apellido_materno)) as nombre 
                 FROM Clientes 
-                WHERE concat(nombre, ' ', apellido_paterno, ' ', apellido_materno) like '%" . $query . "%' OR razon_social like '%" . $query . "%'";
+                WHERE concat(nombre, ' ', apellido_paterno, ' ', apellido_materno) like '%" . $query . "%' OR razon_social like '%" . $query . "%'
+                GROUP BY id";
         $query = $this->db->query($sql);
         $num = $query->num_rows();
         if ($num > 0) {
