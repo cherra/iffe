@@ -100,7 +100,7 @@ class Administracion extends CI_Controller{
                 // Si vienen dos o mas recibos es factura de Público en General
                 // el key 'id_recibo' es un Array de checkbox que viene del formulario de captura
                 if(sizeof($datos['id_recibo']) > 1){
-                    $cliente = (object)Array('rfc' => $this->configuracion->get_valor('clientes_varios_rfc'), 'nombre' => $this->configuracion->get_valor('clientes_varios_nombre'), 'apellido_paterno' => '', 'apellido_materno' => '', 'calle' => '', 'numero_exterior' => '', 'numero_interior' => '', 'colonia' => '', 'ciudad' => '', 'estado' => '');
+                    $cliente = (object)Array('rfc' => $this->configuracion->get_valor('clientes_varios_rfc'), 'razon_social' => $this->configuracion->get_valor('clientes_varios_nombre'), 'tipo' => 'moral', 'calle' => '', 'numero_exterior' => '', 'numero_interior' => '', 'colonia' => '', 'ciudad' => '', 'estado' => '');
                     $concepto = "Renta de espacios varios en la Feria de Todos los Santos Colima";
                 }
                 // Si es solo un recibo es factura para un solo cliente
