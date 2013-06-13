@@ -329,6 +329,7 @@ class Ferias extends CI_Controller{
         if( ($datos = $this->input->post()) ){
             $this->load->model('modulo', 'm');
             $datos['id_calle'] = $id_calle;
+            $datos['coordenadas'] = substr_replace($datos['coordenadas'] ,"]",-1); //quitar la ultima coma
             $this->m->save($datos);
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro exitoso</div>';
         }
@@ -362,11 +363,14 @@ class Ferias extends CI_Controller{
         $data['datos'] = $modulo;
         
         if ( ($datos = $this->input->post()) ) {
+            $datos['coordenadas'] = substr_replace($datos['coordenadas'] ,"]",-1); //quitar la ultima coma
             $this->m->update($id, $datos);
             $data['datos'] = (object)$datos;
             
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro modificado</div>';
         }
+        $data['plano'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano');
+        
         $this->load->view('catalogos/modulos/formulario', $data);
     }
     

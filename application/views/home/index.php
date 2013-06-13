@@ -1,31 +1,186 @@
-<div class="container-fluid">
-    <div class="row-fluid">
-      <h2><?php echo $this->config->item('nombre_proyecto'); ?> - plano</h2>
-      <!-- <div class="map-viewport">
-	<div id="map-1"> -->
-                <img src="<?php echo $plano; ?>" width="100%" />
-		<!-- <img src="<?php echo $plano75; ?>" width="1136" height="640" alt="" class="level" />
-                <img src="<?php echo $plano; ?>" width="1515" height="854" alt="" class="level" usemap="#map" /> 
-	<!-- </div>
-          <div id="selections" style="clear:both;"></div>
-	<map name="map">
-		<area title="City name" shape="poly" name="city" coords="55,65,355,295, 300,65" href="#goes" alt="" />
-		<area title="Train station" shape="rect" coords="70,65,120,90" href="#train-station" alt="" />
-                <area shape="poly" title="ply" name="redpepper" coords="412,156, 427,161, 429,163, 444,153, 453,155, 457,159, 452,168, 459,174, 455,178, 460,179, 463,193, 460,203, 441,214, 436,217, 458,238, 469,257, 479,267, 478,269, 479,285, 458,309, 436,310, 414,305, 410,323, 397,334, 379,313, 389,316, 401,320, 399,305, 382,300, 371,290, 367,296, 366,298, 338,274, 332,272, 300,239, 316,238, 316,234, 313,230, 328,225, 333,213, 338,196, 333,181, 337,166, 345,145" href="#">
-
-	</map>
-          
-
-      </div> -->
+<div class="row-fluid">
+    <div class="span12">
+        <!-- Contenedor del canvas generado por Kinetic -->
+        <div style="overflow: auto; width: 100%;">
+            <div id="container"></div>
+        </div>
     </div>
 </div>
-<script>
-$(document).ready(function(){
-    /*$("#map-1").mapz({
-        zoom: true,
-        createmaps: true,
-        mousewheel: true
-    });*/
+
+<script src="<?php echo asset_url(); ?>js/kinetic.min.js"></script>
+<script defer="defer">
+    // Kinetic
+    var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 1,
+        height: 1
+    });
     
-});
+    var layer = new Kinetic.Layer();
+    var messageLayer = new Kinetic.Layer();
+    
+    function writeMessage(messageLayer, message) {
+        var context = messageLayer.getContext();
+        messageLayer.clear();
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText(message, 10, 25);
+      }
+      
+    function dibuja(){
+        var c = <?php echo $coordenadas; ?>;
+        var coord = null;
+        var xy = [];
+        var color = '#eee';
+
+        /*if (c == null) {
+            return;
+        }*/
+        $.each(c, function(key, val){
+            coord = val.coordenadas;
+            
+            for (i in coord) {
+                xy.push(coord[i].x);
+                xy.push(coord[i].y);
+            }
+            if(val.disponible !== '1')
+            {
+                color = 'red';
+                var poly = new Kinetic.Polygon({
+                    points: xy,
+                    fill: color,
+                    stroke: color,
+                    strokeWidth: 1,
+                    opacity: 0.5,
+                    id_calle: val.id_calle,
+                    calle: val.calle,
+                    id: val.id,
+                    numero: val.numero,
+                    cliente: val.cliente,
+                    giro: val.giro,
+                    disponible: val.disponible
+                  });
+                // add the shape to the layer
+                layer.add(poly);
+            }
+            xy = [];
+        });
+        
+        var rect = new Kinetic.Rect({
+          x: imageObj.width / 2,
+          y: imageObj.height - 80,
+          width: 20,
+          height: 20,
+          fill: 'red',
+          stroke: 'black',
+          strokeWidth: 1
+        });
+
+        var nodisponibleText = new Kinetic.Text({
+          x: imageObj.width / 2 + 25,
+          y: imageObj.height - 75,
+          text: 'Rentado',
+          fontSize: 15,
+          fontFamily: 'Helvetica',
+          fill: 'black'
+        });
+
+        // add the shape to the layer
+        layer.add(nodisponibleText);
+        layer.add(rect);
+
+        // Tags para información de los módulos
+        label = new Kinetic.Label({
+            x: 150,
+            y: 100, 
+            draggable: true
+        });
+
+          // add a tag to the label
+        label.add(new Kinetic.Tag({
+            fill: 'yellow',
+            opacity: 0.8,
+            stroke: '#333',
+            strokeWidth: 1,
+            shadowColor: 'black',
+            shadowBlur: 10,
+            shadowOffset: [5, 5],
+            shadowOpacity: 0.5,
+            lineJoin: 'round',
+            pointerDirection: 'down',
+            pointerWidth: 15,
+            pointerHeight: 15,
+            cornerRadius: 10
+        }));
+
+        var info = new Kinetic.Text({
+            text: '',
+            fontSize: 12,
+            lineHeight: 1,
+            padding: 5,
+            fill: 'black',
+            fontFamily: 'Helvetica'
+        });
+          // add text to the label
+        label.add(info);
+        
+        stage.add(layer);
+        
+        // Evento cuando se pasa el mouse sobre algún poligono
+        var x,y;
+        var shapes = stage.get('Polygon');
+        shapes.on('mouseover', function(){
+            info.setText(this.getAttr('giro')+'\n'+this.getAttr('cliente')+'\n'+this.getAttr('calle')+' #'+this.getAttr('numero'));
+            
+            var mouseXY = stage.getMousePosition();
+            var canvasX = mouseXY.x;
+            var canvasY = mouseXY.y;
+            
+            label.setAttr('x',canvasX);
+            label.setAttr('y',canvasY);
+            //tag.set
+            this.setOpacity(0.9);
+            layer.add(label);
+            layer.draw();
+        });
+        shapes.on('mouseout', function(){
+            this.setOpacity(0.5);
+            label.remove();
+            layer.draw();
+        });
+        
+        // Al dar click en un polígono
+        shapes.on('click', function(){
+            /*if(this.getAttr('disponible') === '1'){
+                $('#apartar').removeAttr('disabled').attr('href','<?php echo site_url('ventas/ventas/apartados_add'); ?>'+'/'+this.getAttr('id_fraccionamiento')+'/'+this.getAttr('id_manzana')+'/'+this.getAttr('id_lote'));
+            }else{
+                $('#apartar').attr('disabled', 'disabled').attr('href','#');
+            }
+            $('#myModalLabel').html(this.getAttr('modelo'));
+            $('#foto1').attr('src',this.getAttr('foto'));
+            $('#myModal').modal('show');*/
+        });
+        //stage.add(messageLayer);
+    }
+
+    var imageObj = new Image();
+    imageObj.onload = function() {
+      var lotificacion = new Kinetic.Image({
+        x: 0,
+        y: 0,
+        image: imageObj,
+        width: imageObj.width,
+        height: imageObj.height
+      });
+
+      // add the shape to the layer
+      layer.add(lotificacion);
+
+      // add the layer to the stage
+      stage.setWidth (imageObj.width);
+      stage.setHeight (imageObj.height);
+      dibuja();
+    };
+    imageObj.src = '<?php echo $plano; ?>';
+
 </script>

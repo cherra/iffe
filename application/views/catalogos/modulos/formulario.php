@@ -64,14 +64,29 @@
                     <input type="text" id="descripcion" name="descripcion" value="<?php echo (isset($datos->descripcion) ? $datos->descripcion : ''); ?>" placeholder="Descripción">
                 </div>
             </div>
-            <div class="control-group">
+            <!-- <div class="control-group">
                 <label class="control-label hidden-phone" for="coordenadas">Coordenadas</label>
                 <div class="controls">
                     <input type="text" id="coordenadas" name="coordenadas" value="<?php echo (isset($datos->coordenadas) ? $datos->coordenadas : ''); ?>" placeholder="Coordenadas">
                 </div>
+            </div> -->
+            <div class="control-group">
+                <label class="control-labe1" for="imagen_fraccionamiento">Imagen fraccionamiento</label>
+                <div class="row">
+                    <div class="span11 text-right">
+                        <label for="borrar">
+                            <input type="button" class="btn btn-danger" id="borrar" value="Reiniciar dibujo" />
+                        </label>
+                    </div>
+                </div>
+                <div class="controls span11" style="overflow: auto; height: 700px;">
+                    <img id="imagen" style="display: none;" src="<?php echo $plano; ?>" />
+                    <canvas id="myCanvas"></canvas>
+                </div>
             </div>
             <div class="control-group">
                 <div class="controls">
+                    <input type='hidden' id="coordenadas" name="coordenadas" />
                     <button type="submit" id="guardar" class="btn btn-primary">Guardar</button>
                 </div>
             </div>
@@ -89,7 +104,123 @@
 $(function () {
    
     $('#numero').focus();
-    
+    $('#borrar').click(borrar);
 });
+
+</script>
+<script type="text/javascript">
+    function writeMessage(canvas, message) {
+        var context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.font = '18pt Calibri';
+        context.fillStyle = 'black';
+        context.fillText(message, 10, 25);
+    }
+    
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    }
+    
+    var canvas = document.getElementById('myCanvas');
+    var context = canvas.getContext('2d');
+    var imagen = document.getElementById('imagen');
+    var x = [];
+    var y = [];
+    var p = $('#coordenadas');
+    var json_inicio = 'coordenadas : [';
+    p.val(json_inicio);
+    
+    // coordenadas
+    <?php 
+    $coordenadas = 'null';
+    if(!empty($datos) && $datos->coordenadas != '' && $datos->coordenadas != 'coordenadas :  ]}')
+        $coordenadas = '{'.$datos->coordenadas.'}';
+    ?>
+    
+    var ancho;
+    var alto;
+    imagen.onload = function() {
+        ancho = imagen.width;
+        alto = imagen.height;
+
+        canvas.width = ancho;
+        canvas.height = alto;
+        context.drawImage(imagen, 0, 0, ancho, alto);
+        dibuja_coord();
+    };
+
+    function borrar(){
+        context.clearRect(0, 0, ancho, alto);
+        context.globalAlpha = 1;
+        x = [];
+        y = [];
+        context.drawImage(imagen, 0, 0, ancho, alto);
+        p.val(json_inicio);
+    }
+    
+    function borrar_dibujo(){
+        context.clearRect(0, 0, ancho, alto);
+        context.globalAlpha = 1;
+        context.drawImage(imagen, 0, 0, ancho, alto);
+    }
+    
+    function dibuja_coord() {
+        var c = <?php echo $coordenadas; ?>;
+        if (c == null) {
+            return;
+        }
+        
+        c = c.coordenadas;
+        var j = json_inicio;
+        for (i in c) {
+            x.push(c[i].x);
+            y.push(c[i].y);
+            j += "{ 'x' : '" + c[i].x + "' , 'y' : '" + c[i].y + "' },";
+        }
+        p.val(j);
+        dibuja();
+    }
+
+    function dibuja(){
+        context.beginPath();
+        var length = x.length;
+        for(var i = 0; i < length; i++){
+            if(i == 0)
+                context.moveTo(x[i],y[i]);
+            else
+                context.lineTo(x[i],y[i]);
+        }
+        context.globalAlpha = 0.5;
+        context.strokeStyle = "#000";
+        context.lineWidth = 2;
+        context.fillStyle = "#00D2FF";
+        context.stroke();
+        context.fill();
+    }
+
+    canvas.addEventListener('mousemove', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+    }, false);
+
+    canvas.addEventListener("click", function(evt){
+        var mousePos = getMousePos(canvas, evt);
+        var j = p.val() + "{ 'x' : '" + mousePos.x + "' , 'y' : '" + mousePos.y + "' },";
+        p.val(j);
+        x.push(mousePos.x);
+        y.push(mousePos.y);
+        // Borra el poligono antes de dibujar uno nuevo
+        borrar_dibujo();
+        dibuja();
+    
+    }, false);
+
+    dibuja_coord();
+
+</script>
 
 </script>

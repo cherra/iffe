@@ -3,10 +3,12 @@
 class Modulo extends CI_Model {
     
     private $tbl = 'Modulos'; 
-
+    private $periodo;
+    
     function __construct() {
     	parent::__construct();
         $this->load->database();
+        $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
     }
 
     /**
@@ -30,6 +32,18 @@ class Modulo extends CI_Model {
         return $this->db->get($this->tbl, $limit, $offset);
     }
     
+    function get_all(){
+        $this->db->select('m.*, c.id AS id_calle, c.nombre AS calle, IF(LENGTH(cl.razon_social) > 0, cl.razon_social, CONCAT(cl.nombre, " ", cl.apellido_paterno, " ", cl.apellido_materno)) AS cliente, g.nombre as giro, cm.id IS NULL AS disponible', FALSE);
+        $this->db->join('Calles c', 'm.id_calle = c.id');
+        $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
+        $this->db->join('Contratos co', 'cm.id_contrato = co.id AND co.id_periodo = '.$this->periodo->id,'left');
+        $this->db->join('Clientes cl', 'co.id_cliente = cl.id','left');
+        $this->db->join('Giros g', 'cl.id_giro = g.id', 'left');
+        $this->db->group_by('m.id');
+        $this->db->order_by('m.id_calle, m.numero');
+        return $this->db->get($this->tbl.' m');
+    }
+    
     /**
     * ***********************************************************************
     * Obtener todos los modulos disponibles por $id_calle
@@ -38,7 +52,7 @@ class Modulo extends CI_Model {
     function get_disponibles($id_calle){
         $this->db->select('m.*, cm.id_contrato AS contrato, c.estado as estado');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
-        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado")','left');
+        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
         $this->db->where('m.id_calle', $id_calle);
         //$this->db->where('c.id NOT IN (SELECT id FROM Contratos WHERE estado = "pendiente" OR estado = "autorizado")');
         $this->db->group_by('m.id');

@@ -12,9 +12,18 @@ class Home extends CI_Controller {
 	*
 	*/
 	public function index( $folder = null) {
-            $data['plano50'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano50');
-            $data['plano75'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano75');
             $data['plano'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano');
+            
+            // Se obtienen todos los módulos
+            $this->load->model('modulo','m');
+            $modulos = $this->m->get_all()->result();
+            $coordenadas = '';
+            foreach($modulos as $modulo){
+                // Si el módulo tiene coordenadas asignadas
+                if(!empty($modulo->coordenadas))
+                    $coordenadas .= '{'.$modulo->coordenadas.',numero: "'.$modulo->numero.'",id_calle: "'.$modulo->id_calle.'", calle: "'.$modulo->calle.'", id: "'.$modulo->id.'", cliente: "'. $modulo->cliente .'", giro: "'. $modulo->giro .'", disponible: "'.$modulo->disponible.'"},';
+            }
+            $data['coordenadas'] = '['.substr_replace($coordenadas ,"]",-1);
             $this->load->view('home/index', $data);
 	}
 
