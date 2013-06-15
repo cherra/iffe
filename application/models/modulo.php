@@ -61,6 +61,19 @@ class Modulo extends CI_Model {
         return $this->db->get($this->tbl.' m');
     }
     
+    function disponible( $id ){
+        $this->db->select('m.*, cm.id_contrato AS contrato, c.estado as estado');
+        $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
+        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
+        $this->db->where('m.id', $id);
+        $this->db->having('contrato IS NULL OR estado = "cancelado"');
+        $query = $this->db->get($this->tbl.' m');
+        if($query->num_rows() > 0)
+            return true;
+        else
+            return false;
+    }
+    
  
     /**
     * ***********************************************************************
@@ -70,6 +83,12 @@ class Modulo extends CI_Model {
     function get_by_id($id) {
         $this->db->where('id', $id);
         return $this->db->get($this->tbl);
+    }
+    
+    function get_by_calle_numero($id_calle, $numero){
+        $this->db->where('id_calle', $id_calle);
+        $this->db->where('numero', $numero);
+        return $this->db->get($this->tbl)->row();
     }
 
     /**

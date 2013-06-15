@@ -40,12 +40,13 @@
                 }
                 ?>
             </select>
+            <small>Precio base: <?php if(!empty($calle)) echo number_format($calle->precio_base * ( 1 + $this->configuracion->get_valor('iva') ),2); ?></small>
         </div>
     </div>
     <div class="control-group">
-        <label class="control-label" for="id_modulo">Módulo</label>
+        <label class="control-label" for="id_modulo">Módulos</label>
         <div class="controls">
-            <select id="id_modulo" name="id_modulo" class="required" <?php if(empty($calle)) echo "disabled"; ?>>
+            <!-- <select id="id_modulo" name="id_modulo" class="required" <?php if(empty($calle)) echo "disabled"; ?>>
                 <option value="0">Selecciona un módulo...</option>
                 <?php
                 foreach($modulos as $m){ ?>
@@ -53,10 +54,12 @@
                 <?php
                 }
                 ?>
-        </select>
+        </select> -->
+            <input type="text" name="modulos" id="modulos" placeholder="Módulos (ej. 1-3, 5, 7-10)" <?php if(empty($calle)) echo "disabled"; ?>/>
+            <small>Disp: <?php if(!empty($modulos)) echo $modulos; ?></small>
         </div>
     </div>
-    <div class="control-group">
+    <!-- <div class="control-group">
         <label class="control-label" for="precio">Precio</label>
         <div class="controls">
             <input type="hidden" name="subtotal" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio,2,'.',''); ?>" />
@@ -74,10 +77,10 @@
         <div class="controls">
             <input type="text" id="importe" value="<?php if(!empty($modulo) ) echo number_format($modulo->precio * (1 + $this->configuracion->get_valor('iva')),2,'.',','); ?>" disabled />
         </div>
-    </div>
+    </div> -->
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn btn-primary" <?php if(empty($modulo)) echo "disabled"; ?>>Agregar</button>
+            <button type="submit" class="btn btn-primary">Agregar</button>
         </div>
     </div>
 <?php echo form_close(); ?>
@@ -106,9 +109,6 @@ $(function () {
                 $(location).attr('href',url+'/'+$('#id_contrato').val()+'/'+$(this).val());
         });
         
-        $('#id_modulo').change(function(){
-            //if($(this).val() > 0)
-                $(location).attr('href',url+'/'+$('#id_contrato').val()+'/'+$('#id_calle').val()+'/'+$(this).val());
-        });
+        $('#modulos').focus();
 });
 </script>
