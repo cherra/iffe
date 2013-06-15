@@ -85,6 +85,11 @@ class Modulo extends CI_Model {
         return $this->db->get($this->tbl);
     }
     
+    function get_by_calle( $id_calle ){
+        $this->db->where('id_calle', $id_calle);
+        return $this->db->get($this->tbl);
+    }
+    
     function get_by_calle_numero($id_calle, $numero){
         $this->db->where('id_calle', $id_calle);
         $this->db->where('numero', $numero);

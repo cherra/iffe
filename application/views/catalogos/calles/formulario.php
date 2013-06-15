@@ -26,6 +26,14 @@
                     <input type="text" id="precio_base" name="precio_base" class="required number" value="<?php echo (isset($datos->precio_base) ? $datos->precio_base : ''); ?>" placeholder="Precio base">
                 </div>
             </div>
+            <?php if(isset($datos)){ ?>
+            <div class="control-group">
+                <label class="control-label hidden-phone" for="precios_modulos">Actualizar precios de módulos</label>
+                <div class="controls">
+                    <input type="checkbox" id="precios_modulos" name="precios_modulos" class="required" checked>
+                </div>
+            </div>
+            <?php } ?>
             <div class="control-group">
                 <div class="controls">
                     <button type="submit" id="guardar" class="btn btn-primary">Guardar</button>

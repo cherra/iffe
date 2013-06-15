@@ -222,12 +222,25 @@ class Ferias extends CI_Controller{
         $data['mensaje'] = '';
         $data['action'] = site_url('catalogos/ferias/calles_update') . '/' . $id;
         
-        $this->load->model('calle', 'm');
-        $registro = $this->m->get_by_id($id)->row();
+        $this->load->model('calle', 'c');
+        
+        $registro = $this->c->get_by_id($id)->row();
         $data['datos'] = $registro;
         
         if ( ($registro = $this->input->post()) ) {
-            $this->m->update($id, $registro);
+            // Actualiza los precios de todos los módulos de esta calle si el checkbox del formulario estaba seleccionado
+            if(isset($registro['precios_modulos'])){
+                unset($registro['precios_modulos']);
+                $this->load->model('modulo', 'm');
+                $modulos = $this->m->get_by_calle( $id )->result();
+                $datos['precio'] = $registro['precio_base'];
+                foreach( $modulos as $modulo ){
+                    $this->m->update( $modulo->id, $datos );
+                }
+            }
+            
+            $this->c->update($id, $registro);
+            
             $data['datos'] = (object)$registro;
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro modificado</div>';
         }    
