@@ -785,7 +785,8 @@ class Ventas extends CI_Controller{
         foreach($modulos as $modulo){
             // Si el módulo tiene coordenadas asignadas
             if(!empty($modulo->coordenadas))
-                $coordenadas .= '{'.$modulo->coordenadas.',numero: "'.$modulo->numero.'",id_calle: "'.$modulo->id_calle.'", calle: "'.$modulo->calle.'", id: "'.$modulo->id.'", cliente: "'. $modulo->cliente .'", giro: "'. $modulo->giro .'", disponible: "'.$modulo->disponible.'"},';
+                if(strpos($modulo->coordenadas,'x') && strpos($modulo->coordenadas,'y')) // Se valida que el campo coordenadas contenga los caracteres 'x' y 'y'
+                    $coordenadas .= '{'.$modulo->coordenadas.',numero: "'.$modulo->numero.'",id_calle: "'.$modulo->id_calle.'", calle: "'.$modulo->calle.'", id: "'.$modulo->id.'", cliente: "'. $modulo->cliente .'", giro: "'. $modulo->giro .'", disponible: "'.$modulo->disponible.'"},';
         }
         $data['coordenadas'] = '['.substr_replace($coordenadas ,"]",-1);
         $this->load->view('operacion/plano', $data);
