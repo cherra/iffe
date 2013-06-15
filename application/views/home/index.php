@@ -1,9 +1,7 @@
 <div class="row-fluid">
     <div class="span12">
         <!-- Contenedor del canvas generado por Kinetic -->
-        <div style="overflow: auto; width: 100%;">
-            <div id="container"></div>
-        </div>
+            <div id="container" style="width: 100%;"></div>
     </div>
 </div>
 
@@ -13,7 +11,8 @@
     var stage = new Kinetic.Stage({
         container: 'container',
         width: 1,
-        height: 1
+        height: 1,
+        draggable: true
     });
     
     var layer = new Kinetic.Layer();
@@ -133,8 +132,8 @@
             info.setText(this.getAttr('giro')+'\n'+this.getAttr('cliente')+'\n'+this.getAttr('calle')+' #'+this.getAttr('numero'));
             
             var mouseXY = stage.getMousePosition();
-            var canvasX = mouseXY.x;
-            var canvasY = mouseXY.y;
+            var canvasX = mouseXY.x - stage.getAttr('x');
+            var canvasY = mouseXY.y - stage.getAttr('y');
             
             label.setAttr('x',canvasX);
             label.setAttr('y',canvasY);
@@ -176,11 +175,14 @@
       // add the shape to the layer
       layer.add(lotificacion);
 
-      // add the layer to the stage
-      stage.setWidth (imageObj.width);
+      stage.setWidth ($('#container').width());
       stage.setHeight (imageObj.height);
       dibuja();
     };
     imageObj.src = '<?php echo $plano; ?>';
+    
+    window.onresize=function(){
+        stage.setWidth ($('#container').width());
+    };
 
 </script>
