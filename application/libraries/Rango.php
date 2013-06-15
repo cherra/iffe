@@ -7,12 +7,6 @@
  */
 class Rango {
     
-    private $CI;
-    
-    function __construct() {
-        $this->CI =& get_instance();
-    }
-    
     // Convierte un array de numeros a una cadena en forma de rango.
     // ej. array(1,2,3,4,7,9,10,11) => '1-4,7,9-11'
     public function array_to_rango( $rango = array() ){
@@ -45,7 +39,6 @@ class Rango {
             $primero = $ultimo = null;
             $input = explode(',', $rango);
             $output = array();
-            $cadena = '';
             foreach($input as $item){
                 if(($posicion = strpos($item, '-'))){
                     $primero = (int)strstr($item, '-', true);
