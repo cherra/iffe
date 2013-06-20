@@ -51,13 +51,14 @@ class Recibo extends CI_Model{
     */
     function get_paged_list($limit = null, $offset = 0, $filtro = null) {
         if(!empty($this->periodo)){
-            $this->db->select('r.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente, f.serie, f.folio, f.estatus AS estatus_factura', FALSE);
+            $this->db->select('r.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente, 
+                f.serie, f.folio, f.estatus AS estatus_factura', FALSE);
             $this->db->join('Contratos c','r.id_contrato = c.id');
             $this->db->join('Clientes cl','c.id_cliente = cl.id');
             $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
             $this->db->join('Modulos m','cm.id_modulo = m.id');
             $this->db->join('Calles ca','m.id_calle = ca.id');
-            $this->db->join('Facturas f','r.id_factura = f.id','left');
+            $this->db->join('Facturas f','r.id_factura = f.id AND f.estatus > 0','left');
             $this->db->where('c.id_periodo', $this->periodo->id);
             if(!empty($filtro)){
                 $filtro = explode(' ', $filtro);
@@ -107,6 +108,12 @@ class Recibo extends CI_Model{
         $this->db->where('r.estado = "vigente"');
         $this->db->order_by('r.numero','desc');
         return $this->db->get($this->tbl." r");
+    }
+    
+    function get_by_contrato( $id_contrato ){
+        $this->db->where('id_contrato', $id_contrato);
+        $this->db->order_by('fecha');
+        return $this->db->get($this->tbl);
     }
 
     /**

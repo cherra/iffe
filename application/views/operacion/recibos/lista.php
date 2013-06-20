@@ -39,7 +39,7 @@ $(document).ready(function(){
      * 
      */
     $('td').on('click','#cancelar', function(event){
-        var a = confirm("¿Seguro(a) que deseas cancelar el recibo?\nEsta acción no se puede deshacer.");
+        var a = confirm("¿Seguro(a) que deseas cancelar el recibo?\nEsta acción no se puede deshacer.\nNota: Se cancelará también la factura\nligada al mismo.");
         if(!a)
             event.preventDefault();
     });

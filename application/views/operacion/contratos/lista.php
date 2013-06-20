@@ -40,7 +40,7 @@ $(document).ready(function(){
      * 
      */
     $('td').on('click','#cancelar', function(event){
-        var a = confirm("¿Seguro(a) que deseas cancelar el contrato?\nEsta acción no se puede deshacer.");
+        var a = confirm("¿Seguro(a) que deseas cancelar el contrato?\nEsta acción no se puede deshacer.\nNota: Se cancelarán también las facturas y\nrecibos ligados al mismo.");
         if(!a)
             event.preventDefault();
     });

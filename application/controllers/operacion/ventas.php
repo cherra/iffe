@@ -52,6 +52,9 @@ class Ventas extends CI_Controller{
                 $modulos = $this->a->get_modulos($contrato->id);
                 $num_modulos = $modulos->num_rows();
                 $total = $this->a->get_importe($contrato->id);
+                $clase = '';
+                if($contrato->estado == 'cancelado')
+                    $clase = 'muted';
                 $this->table->add_row(
                     '<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-remove')).'"></i>',
                     $contrato->numero,
@@ -64,6 +67,7 @@ class Ventas extends CI_Controller{
                     array('data' => (($contrato->estado == 'pendiente' && $num_modulos > 0) ? anchor('operacion/ventas/contratos_autorizar/'.$contrato->id,'<i class="icon-ok"></i>', array('class' => 'btn btn-small', 'title' => 'Autorizar', 'id' => 'autorizar')) : '<a class="btn btn-small disabled"><i class="icon-ok"></i></a>'), 'class' => 'hidden-phone'),
                     array('data' => ($contrato->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-remove"></i></a>' : anchor('operacion/ventas/contratos_cancelar/'.$contrato->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
                 );
+                $this->table->add_row_class($clase);
             }
             $data['link_add'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }else{
@@ -237,7 +241,17 @@ class Ventas extends CI_Controller{
         
         if(!empty($id)){
             $this->load->model('contrato', 'c');
+            $this->load->model('factura', 'f');
+            $this->load->model('recibo','r');
+            
+            $recibos = $this->r->get_by_contrato( $id )->result();
+            $this->db->trans_start();
+            foreach($recibos as $r){
+                $this->r->cancelar($r->id);
+                $this->f->cancelar($r->id_factura);
+            }
             $this->c->cancelar($id);
+            $this->db->trans_complete();
         }
         redirect(site_url('operacion/ventas/contratos/'));
     }
@@ -455,7 +469,7 @@ class Ventas extends CI_Controller{
                     number_format($recibo->total,2,'.',','),
                     array('data' => ($recibo->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-print"></i></a>' : anchor_popup('operacion/ventas/recibos_documento/' . $recibo->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir'))), 'class' => 'hidden-phone'),
                     array('data' => (($recibo->estado == 'cancelado' || (!empty($recibo->id_factura) && $recibo->estatus_factura == 1)) ? '<a class="btn btn-small disabled"><i class="icon-qrcode"></i></a>' : anchor('operacion/administracion/facturas_add/' . $recibo->id, '<i class="icon-qrcode"></i>', array('class' => 'btn btn-small', 'title' => 'Facturar'))), 'class' => 'hidden-phone'),
-                    array('data' => (($recibo->estado == 'cancelado' || $recibo->estatus_factura == 1) ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
+                    array('data' => (($recibo->estado == 'cancelado') ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/ventas/recibos_cancelar/'.$recibo->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
                 );
                 $this->table->add_row_class($clase);
             }
@@ -581,7 +595,12 @@ class Ventas extends CI_Controller{
         
         if(!empty($id)){
             $this->load->model('recibo', 'r');
+            $this->load->model('factura', 'f');
+            $recibo = $this->r->get_by_id($id)->row();
+            $this->db->trans_start();
+            $this->f->cancelar($recibo->id_factura);
             $this->r->cancelar($id);
+            $this->db->trans_complete();
         }
         redirect(site_url('operacion/ventas/recibos/'));
     }

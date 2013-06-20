@@ -225,49 +225,6 @@ class Contrato extends CI_Model{
         $this->db->where('id', $id);
         $this->db->update($this->tbl, array('estado' => 'cancelado'));
     }
-    
-    /*
-     * Adjuntos del contrato
-     */
-    function get_paged_list_adjuntos($id_contrato = null, $limit = null, $offset = 0){
-        $this->db->join('Adjuntos',$this->tbl_adjuntos_contrato.'.id_adjunto = Adjuntos.id_adjunto');
-        $this->db->where($this->tbl_adjuntos_contrato.'.id_contrato', $id_contrato);
-        return $this->db->get('ContratoAdjuntos', $limit, $offset);
-    }
-    
-    function get_by_id_adjunto( $id_adjunto ){
-        $this->db->join('Adjuntos',$this->tbl_adjuntos_contrato.'.id_adjunto = Adjuntos.id_adjunto');
-        $this->db->where($this->tbl_adjuntos_contrato.'.id_adjunto', $id_adjunto);
-        return $this->db->get('ContratoAdjuntos');
-    }
-    
-    function count_all_adjuntos( $id_contrato ) {
-        $this->db->where('id_contrato', $id_contrato);
-        return $this->db->count_all_results($this->tbl_adjuntos_contrato);
-    }
-    
-    function save_adjunto( $adjunto, $id_contrato ){
-        $this->db->insert('Adjuntos', $adjunto);
-        $id_adjunto = $this->db->insert_id();
-        $this->db->insert($this->tbl_adjuntos_contrato, array('id_adjunto' => $id_adjunto, 'id_contrato' => $id_contrato));
-        return $this->db->insert_id();
-    }
-    
-    function update_adjunto( $adjunto, $id_adjunto ) {
-        $this->db->where('id_adjunto', $id_adjunto);
-        $this->db->update($this->tbl_adjuntos, $adjunto);
-    }
-    
-    function delete_adjunto( $id_adjunto, $id_contrato ){
-        $this->db->trans_start();
-        $this->db->delete('Adjuntos', array('id_adjunto' => $id_adjunto));
-        $this->db->delete('ContratoAdjuntos', array('id_contrato' => $id_contrato, 'id_adjunto' => $id_adjunto));
-        $this->db->trans_complete();
-        if( $this->db->trans_status() === FALSE )
-            return false;
-        else
-            return true;
-    }
 
 }
 
