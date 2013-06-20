@@ -12,8 +12,10 @@ class Busqueda {
     function index(){
         $this->CI =& get_instance();
         
-        if($this->CI->input->post('filtro')){
-            $this->CI->session->set_userdata('filtro', $this->CI->input->post('filtro'));
+        $busqueda = $this->CI->input->post('filtro');
+        
+        if($busqueda !== false){
+            $this->CI->session->set_userdata('filtro', $busqueda);
             $this->CI->session->set_userdata('filtro_metodo', $this->CI->uri->segment(2).'/'.$this->CI->uri->segment(3));
         }
         
