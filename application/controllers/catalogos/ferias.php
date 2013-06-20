@@ -58,7 +58,7 @@ class Ferias extends CI_Controller{
         }
 
         $data['table'] = $this->table->generate();
-        $data['link_add'] = anchor('catalogos/ferias/periodos_add/','<i class="icon-plus"></i> Agregar período', array('class' => 'btn'));
+        $data['link_add'] = anchor('catalogos/ferias/periodos_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         $data['titulo'] = 'Períodos <small>Listado</small>';
         $this->load->view('catalogos/periodos/lista', $data);
     }
@@ -152,12 +152,19 @@ class Ferias extends CI_Controller{
         $this->config->load("pagination");
         $this->load->model('calle', 'm');
         $page_limit = $this->config->item("per_page");
-        $lista = $this->m->get_paged_list($page_limit, $offset)->result();
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        $data['action'] = 'catalogos/ferias/calles';
+        
+        $lista = $this->m->get_paged_list($page_limit, $offset, $filtro)->result();
 
         // generar paginacion
         $this->load->library('pagination');
         $config['base_url'] = site_url('catalogos/ferias/calles');
-        $config['total_rows'] = $this->m->count_all();
+        $config['total_rows'] = $this->m->count_all( $filtro );
         $config['uri_segment'] = 4;
         $this->pagination->initialize($config);
         $data['pagination'] = $this->pagination->create_links();
@@ -181,7 +188,7 @@ class Ferias extends CI_Controller{
         }
 
         $data['table'] = $this->table->generate();
-        $data['link_add'] = anchor('catalogos/ferias/calles_add/','<i class="icon-plus"></i> Agregar calle', array('class' => 'btn'));
+        $data['link_add'] = anchor('catalogos/ferias/calles_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         $data['titulo'] = 'Calles <small>Listado</small>';
         $this->load->view('catalogos/calles/lista', $data);
     }
@@ -313,9 +320,8 @@ class Ferias extends CI_Controller{
             }
 
             $data['table'] = $this->table->generate();
-            $data['link_add'] = anchor('catalogos/ferias/modulos_add/' . $id_calle,'<i class="icon-plus"></i> Agregar lote', array('class' => 'btn'));
+            $data['link_add'] = anchor('catalogos/ferias/modulos_add/' . $id_calle,'<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }
-        $data['link_back'] = anchor('catalogos/ferias/calles','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['titulo'] = 'Módulos <small>Listado</small>';
         $this->load->view('catalogos/modulos/lista', $data);
     }

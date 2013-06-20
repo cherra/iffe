@@ -25,7 +25,14 @@ class Giro extends CI_Model{
      * *******************************************************************
      */
     
-    function get_paged_list($limit = null, $offset = 0) {
+    function get_paged_list($limit = null, $offset = 0, $filtros = null) {
+        if(!empty($filtros)){
+            $filtros = explode(' ', $filtros);
+            foreach($filtros as $filtro){
+                $this->db->or_like('nombre',$filtro);
+                $this->db->or_like('descripcion',$filtro);
+            }
+        }
         $this->db->order_by('nombre','asc');
         return $this->db->get($this->tbl, $limit, $offset);
     }
@@ -45,8 +52,16 @@ class Giro extends CI_Model{
     * Cantidad de registros
     * ***********************************************************************
     */
-    function count_all() {
-        return $this->db->count_all($this->tbl);
+    function count_all( $filtros = null ) {
+        if(!empty($filtros)){
+            $filtros = explode(' ', $filtros);
+            foreach($filtros as $filtro){
+                $this->db->or_like('nombre',$filtro);
+                $this->db->or_like('descripcion',$filtro);
+            }
+        }
+        $query =  $this->db->get($this->tbl);
+        return $query->num_rows();
     }
     
     /**

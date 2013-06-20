@@ -23,19 +23,18 @@ class Clientes extends CI_Controller {
     	
     	$page_limit = $this->config->item("per_page");
         
-        //
-        //   FILTROS SIN TERMINAR !!!!
-        // (ver modelo cliente.php)
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
         
-        $filtros = $this->input->post();  // Filtros de busqueda
-        
-    	$clientes = $this->f->get_paged_list($page_limit, $offset, $filtros['filtro'])->result();
+    	$clientes = $this->f->get_paged_list($page_limit, $offset, $filtro)->result();
     	//echo $this->db->last_query();
         //die();
     	// generar paginacion
     	$this->load->library('pagination');
     	$config['base_url'] = site_url('catalogos/clientes/lista');
-    	$config['total_rows'] = $this->f->count_all($filtros['filtro']);
+    	$config['total_rows'] = $this->f->count_all($filtro);
     	$config['per_page'] = $page_limit;
     	$config['uri_segment'] = 4;
     	$this->pagination->initialize($config);
@@ -59,7 +58,7 @@ class Clientes extends CI_Controller {
     	}
     	$data['table'] = $this->table->generate();
     	$data['titulo'] = 'Clientes <small>Lista</small>';
-    	$data['link_add'] = anchor('catalogos/clientes/add','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+    	$data['link_add'] = anchor('catalogos/clientes/add','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
     	$data['action'] = 'catalogos/clientes/lista';
     	$this->load->view('catalogos/clientes/lista', $data);
     }
@@ -178,12 +177,20 @@ class Clientes extends CI_Controller {
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
-    	$registros = $this->f->get_paged_list($page_limit, $offset)->result();
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        
+        $data['action'] = 'catalogos/clientes/giros_lista';
+        
+    	$registros = $this->f->get_paged_list($page_limit, $offset, $filtro)->result();
     	
     	// generar paginacion
     	$this->load->library('pagination');
     	$config['base_url'] = site_url('catalogos/clientes/giros_lista');
-    	$config['total_rows'] = $this->f->count_all();
+    	$config['total_rows'] = $this->f->count_all( $filtro );
     	$config['per_page'] = $page_limit;
     	$config['uri_segment'] = 4;
     	$this->pagination->initialize($config);
@@ -205,7 +212,7 @@ class Clientes extends CI_Controller {
     	}
     	$data['table'] = $this->table->generate();
     	$data['titulo'] = 'Giros <small>Lista</small>';
-    	$data['link_add'] = anchor('catalogos/clientes/giros_add','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+    	$data['link_add'] = anchor('catalogos/clientes/giros_add','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
     	
     	$this->load->view('catalogos/giros/lista', $data);
     }
@@ -291,12 +298,20 @@ class Clientes extends CI_Controller {
     	$this->config->load("pagination");
     	
     	$page_limit = $this->config->item("per_page");
-    	$registros = $this->f->get_paged_list($page_limit, $offset)->result();
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        
+        $data['action'] = 'catalogos/clientes/concesiones_lista';
+        
+    	$registros = $this->f->get_paged_list($page_limit, $offset, $filtro)->result();
     	
     	// generar paginacion
     	$this->load->library('pagination');
     	$config['base_url'] = site_url('catalogos/clientes/concesiones_lista');
-    	$config['total_rows'] = $this->f->count_all();
+    	$config['total_rows'] = $this->f->count_all( $filtro );
     	$config['per_page'] = $page_limit;
     	$config['uri_segment'] = 4;
     	$this->pagination->initialize($config);
@@ -318,7 +333,7 @@ class Clientes extends CI_Controller {
     	}
     	$data['table'] = $this->table->generate();
     	$data['titulo'] = 'Concesiones <small>Lista</small>';
-    	$data['link_add'] = anchor('catalogos/clientes/concesiones_add','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+    	$data['link_add'] = anchor('catalogos/clientes/concesiones_add','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
     	
     	$this->load->view('catalogos/concesiones/lista', $data);
     }

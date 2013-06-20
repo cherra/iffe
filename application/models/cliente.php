@@ -9,18 +9,15 @@ class Cliente extends CI_Model {
  	* Cantidad de registros
  	* ***********************************************************************
  	*/
-    
-    //
-    //   FILTROS SIN TERMINAR !!!!
-    //
-    function count_all($filtros = null) {
-        if(!empty($filtros)){
-            $filtros = explode(' ', $filtros);
-            foreach($filtros as $filtro){
-                $this->db->or_like('apellido_paterno',$filtro);
-                $this->db->or_like('apellido_materno',$filtro);
-                $this->db->or_like('nombre',$filtro);
-                $this->db->or_like('razon_social',$filtro);
+   
+    function count_all($filtro = null) {
+        if(!empty($filtro)){
+            $filtro = explode(' ', $filtro);
+            foreach($filtro as $f){
+                $this->db->or_like('apellido_paterno',$f);
+                $this->db->or_like('apellido_materno',$f);
+                $this->db->or_like('nombre',$f);
+                $this->db->or_like('razon_social',$f);
             }
         }
         $query = $this->db->get($this->tbl_clientes);
@@ -33,17 +30,14 @@ class Cliente extends CI_Model {
  	* ***********************************************************************
  	*/
     
-    //
-    //   FILTROS SIN TERMINAR !!!!
-    //
-    function get_paged_list($limit = null, $offset = 0, $filtros = null) {
-        if(!empty($filtros)){
-            $filtros = explode(' ', $filtros);
-            foreach($filtros as $filtro){
-                $this->db->or_like('apellido_paterno',$filtro);
-                $this->db->or_like('apellido_materno',$filtro);
-                $this->db->or_like('nombre',$filtro);
-                $this->db->or_like('razon_social',$filtro);
+    function get_paged_list($limit = null, $offset = 0, $filtro = null) {
+        if(!empty($filtro)){
+            $filtro = explode(' ', $filtro);
+            foreach($filtro as $f){
+                $this->db->or_like('apellido_paterno',$f);
+                $this->db->or_like('apellido_materno',$f);
+                $this->db->or_like('nombre',$f);
+                $this->db->or_like('razon_social',$f);
             }
         }
         $this->db->order_by('razon_social, apellido_paterno, apellido_materno, nombre','asc');

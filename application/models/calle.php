@@ -14,8 +14,19 @@ class Calle extends CI_Model {
  	* Cantidad de registros
  	* ***********************************************************************
  	*/
-    function count_all() {
-        return $this->db->count_all_results($this->tbl);
+    function count_all( $filtro = null ) {
+        if(!empty($filtro)){
+            $filtro = explode(' ', $filtro);
+            foreach($filtro as $f){
+                $this->db->or_like('c.nombre',$f);
+                $this->db->or_like('c.descripcion',$f);
+            }
+        }
+        $this->db->select('c.*, COUNT(m.id) as modulos');
+        $this->db->join('Modulos m','c.id = m.id_calle','left');
+        $this->db->group_by('c.id');
+        $query = $this->db->get($this->tbl.' c');
+        return $query->num_rows();
     }
 
     /**
@@ -23,7 +34,14 @@ class Calle extends CI_Model {
     * Cantidad de registros por pagina
     * ***********************************************************************
     */
-    function get_paged_list($limit = null, $offset = 0) {
+    function get_paged_list($limit = null, $offset = 0, $filtro = null) {
+        if(!empty($filtro)){
+            $filtro = explode(' ', $filtro);
+            foreach($filtro as $f){
+                $this->db->or_like('c.nombre',$f);
+                $this->db->or_like('c.descripcion',$f);
+            }
+        }
         $this->db->select('c.*, COUNT(m.id) as modulos');
         $this->db->join('Modulos m','c.id = m.id_calle','left');
         $this->db->group_by('c.id');
