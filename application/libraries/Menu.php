@@ -10,7 +10,7 @@
  *
  * @author cherra
  */
-class menu {
+class Menu {
     
     var $ci;
     var $routing;
@@ -21,7 +21,7 @@ class menu {
         //$this->ci->load->model('menu');
     }
     
-    function getMetodos( $folder ){
+    function get_metodos( $folder ){
         $this->ci->db->where('folder', $folder);
         $this->ci->db->where('menu', '1');
         $this->ci->db->order_by('class, method');
@@ -29,7 +29,7 @@ class menu {
         return  $query->result();
     }
     
-    function getClases( $folder ){
+    function get_clases( $folder ){
         $this->ci->db->where('LENGTH(folder) > 0');
         $this->ci->db->where('menu', '1');
         $this->ci->db->where('folder', $folder);
@@ -39,7 +39,7 @@ class menu {
         return  $query->result_array();
     }
     
-    function getFolders(){
+    function get_folders(){
         $this->ci->db->select('folder');
         $this->ci->db->where('LENGTH(folder) > 0');
         $this->ci->db->where('menu', '1');
@@ -49,7 +49,7 @@ class menu {
         return  $query->result();
     }
         
-    function menuOptions(){
+    /*function menuOptions(){
         
         $folders = $this->getFolders();
 
@@ -63,7 +63,7 @@ class menu {
         // submenu -> leftbar
         $this->ci->session->set_userdata('folders',$folders);
         $this->ci->session->set_userdata('submenu', $submenu );
-    }
+    }*/
 }
 
 ?>

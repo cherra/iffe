@@ -101,7 +101,7 @@
         <ul class="nav">
             <?php
             // Se obtienen los folders de los métodos para mostrarlos en la barra superior.
-            $folders = $this->session->userdata('folders');
+            $folders = $this->menu->get_folders();
             foreach($folders as $folder){ ?>
             <li><?php 
             // Temporalmente se pone uri_string() para redireccionar a donde mismo

@@ -22,14 +22,6 @@ class Login extends CI_Controller {
             $msg = 'Usuario o contraseña inválidos.';
             $this->index($msg);
         }else{
-            
-            $this->load->model('menu');
-            // Se obtienen las carpetas dentro "controllers"
-            $folders = $this->menu->getFolders();
-            // Se registran las carpetas en la sesión del usuario
-            // De ésta forma el menú superior solo se carga una vez al momento de logearse.
-            $this->session->set_userdata('folders',$folders);
-            // Si el usuario valida, lo redireccionamos al home
             redirect('home');
         }       
     }
