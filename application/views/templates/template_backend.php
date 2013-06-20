@@ -147,7 +147,7 @@
 <div class="container-fluid contenedor-principal">
   <div class="row-fluid">
       <!-- Menú lateral para tablets y escritorio -->
-    <div class="span3 hidden-phone">
+    <div class="span2 hidden-phone">
       <div class="well sidebar-nav">
         <ul class="nav nav-list">
             <?php
@@ -175,12 +175,12 @@
         </ul>
       </div>
     </div>
-    <div class="span9">
+    <div class="span10">
       <!-- contenido --------------------------------------------------------------- -->
       {contenido_vista}
     </div>
       <!-- Menú inferior para mobiles -->
-    <div class="span3 visible-phone">
+    <div class="span2 visible-phone">
         <button type="button" class="btn btn-block btn-info" data-toggle="collapse" data-target="#collapse_sidemenu"><i class="icon-plus icon-white"></i> Menú de opciones</button>
         <div id="collapse_sidemenu" class="collapse">
             <div class="well sidebar-nav">
