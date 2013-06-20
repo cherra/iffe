@@ -22,12 +22,19 @@ class Administracion extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        $data['action'] = 'operacion/administracion/facturas';
+        
+        $resultado = $this->a->get_paged_list($page_limit, $offset, $filtro);
         if($resultado)
             $facturas = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/administracion/facturas/');
-        $config['total_rows'] = $this->a->count_all();
+        $config['total_rows'] = $this->a->count_all( $filtro );
         $config['uri_segment'] = 4;
         $config['per_page'] = $page_limit;
         $this->pagination->initialize($config);
@@ -56,9 +63,9 @@ class Administracion extends CI_Controller{
                 );
                 $this->table->add_row_class($clase);
             }
-            $data['add_link'] = anchor('operacion/administracion/facturas_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+            $data['link_add'] = anchor('operacion/administracion/facturas_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }else{
-            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
+            $data['link_add'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();
@@ -265,12 +272,19 @@ class Administracion extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        $data['action'] = 'operacion/administracion/notas_credito';
+        
+        $resultado = $this->a->get_paged_list($page_limit, $offset, $filtro);
         if($resultado)
             $notas = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/administracion/facturas/');
-        $config['total_rows'] = $this->a->count_all();
+        $config['total_rows'] = $this->a->count_all( $filtro );
         $config['uri_segment'] = 4;
         $config['per_page'] = $page_limit;
         $this->pagination->initialize($config);
@@ -303,9 +317,9 @@ class Administracion extends CI_Controller{
                 );
                 $this->table->add_row_class($clase);
             }
-            $data['add_link'] = anchor('operacion/administracion/notas_credito_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+            $data['link_add'] = anchor('operacion/administracion/notas_credito_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }else{
-            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
+            $data['link_add'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();

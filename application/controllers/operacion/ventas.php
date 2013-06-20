@@ -24,12 +24,19 @@ class Ventas extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        $data['action'] = 'operacion/ventas/contratos';
+        
+        $resultado = $this->a->get_paged_list($page_limit, $offset, $filtro);
         if($resultado)
             $contratos = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/ventas/contratos/');
-        $config['total_rows'] = $this->a->count_all();
+        $config['total_rows'] = $this->a->count_all( $filtro );
         $config['uri_segment'] = 4;
         $config['per_page'] = $page_limit;
         $this->pagination->initialize($config);
@@ -42,23 +49,6 @@ class Ventas extends CI_Controller{
         $this->table->set_heading('Estado', 'No.', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
         if(isset($contratos)){
             foreach ($contratos as $contrato) {
-                /*$modulos = $this->a->get_modulos($contrato->id)->result();
-                $calle = '';
-                $mods = '';
-                $total = 0;
-                $i=0;
-                foreach ($modulos as $m){
-                    if($m->calle != $calle){
-                        if($calle != '')
-                            $mods .= '<br/>';
-                        $mods .= $m->calle.': ';
-                        $calle = $m->calle;
-                        $i=0;
-                    }else
-                        $mods.=', ';
-                    $mods .= $m->modulo;
-                    $total += $m->importe;                
-                }*/
                 $modulos = $this->a->get_modulos($contrato->id);
                 $num_modulos = $modulos->num_rows();
                 $total = $this->a->get_importe($contrato->id);
@@ -75,9 +65,9 @@ class Ventas extends CI_Controller{
                     array('data' => ($contrato->estado == 'cancelado' ? '<a class="btn btn-small disabled"><i class="icon-remove"></i></a>' : anchor('operacion/ventas/contratos_cancelar/'.$contrato->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
                 );
             }
-            $data['add_link'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+            $data['link_add'] = anchor('operacion/ventas/contratos_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }else{
-            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> Para agregar un contrato es necesario un período activo</div>';
+            $data['link_add'] = '<div class="alert"><strong>Aviso:</strong> Para agregar un contrato es necesario un período activo</div>';
         }
         $data['table'] = $this->table->generate();
         $data['pagination'] = $this->pagination->create_links();
@@ -409,162 +399,6 @@ class Ventas extends CI_Controller{
             }
         }
     }
-    
-    /*
-    public function contratos_adjuntos($id_contrato = null, $offset = 0){
-        $this->load->model('contrato', 'c');
-        $data['contratos'] = $this->c->get_paged_list()->result();
-        
-        if (!empty($id_contrato)) {
-            $id_contrato = floatval($id_contrato);
-            $data['contrato'] = (object)$this->c->get_by_id($id_contrato)->row();
-            
-            // obtener datos
-            $this->config->load("pagination");
-            //$this->load->model('fraccionamientos/manzana', 'm');
-            $page_limit = $this->config->item("per_page");
-            $adjuntos = $this->c->get_paged_list_adjuntos($id_contrato, $page_limit, $offset)->result();
-
-            // generar paginacion
-            $this->load->library('pagination');
-            $config['base_url'] = site_url('operacion/ventas/contratos_adjunto/' . $id_contrato);
-            $config['total_rows'] = $this->c->count_all_adjuntos($id_contrato);
-            $config['uri_segment'] = 5;
-            $this->pagination->initialize($config);
-            $data['pagination'] = $this->pagination->create_links();
-
-            // generar tabla
-            $this->load->library('table');
-            $this->table->set_empty('&nbsp;');
-            $tmpl = array ( 'table_open' => '<table class="' . $this->config->item('tabla_css') . '">' );
-            $this->table->set_template($tmpl);
-            $this->table->set_heading('Descripcion', array('data' => 'Observaciones', 'class' => 'hidden-phone'), 'Archivo');
-            foreach ($adjuntos as $adjunto) {
-                $this->table->add_row(
-                    $adjunto->descripcion,
-                    array('data' => $adjunto->observaciones, 'class' => 'hidden-phone'),
-                    $adjunto->file_name,
-                    '<a href="#" path="'.base_url().$adjunto->path . $id_contrato . '/' . $adjunto->file_name.'" class="btn btn-small" title="Ver" preview_link><i class="icon-eye-open"></i></a>',
-                    array('data' => '<a href="'.base_url().$adjunto->path . $id_contrato . '/' . $adjunto->file_name.'" class="btn btn-small" title="Descargar"><i class="icon-download"></i></a>', 'class' => 'hidden-phone'),
-                    array('data' => anchor('operacion/ventas/contratos_adjuntos_update/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-edit"></i>', array('class' => 'btn btn-small', 'title' => 'Modificar')), 'class' => 'hidden-phone'),
-                    array('data' => anchor('operacion/ventas/contratos_adjuntos_delete/' . $adjunto->id_adjunto . '/' . $adjunto->id_contrato, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Borrar')), 'class' => 'hidden-phone')
-                );
-            }
-
-            $data['table'] = $this->table->generate();
-            $data['link_add'] = anchor('operacion/ventas/contratos_adjuntos_add/' . $id_contrato,'<i class="icon-plus"></i> Agregar adjunto', array('class' => 'btn'));
-        }
-        
-        $data['link_back'] = anchor('operacion/ventas/contratos','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
-        $data['titulo'] = 'Contrato <small>Adjuntos</small>';
-        $this->load->view('operacion/contratos/lista_adjuntos', $data);
-    }
-    
-    public function contratos_adjuntos_add($id_contrato = null) {
-        if (!empty($id_contrato)) {
-            $this->load->model('contrato', 'c');
-            $data['contrato'] = (object)$this->c->get_by_id($id_contrato)->row();
-        }
-        else {
-            redirect(site_url('operacion/ventas/contratos_adjuntos/') . '/' . $id_contrato);
-        }
-
-        $data['titulo'] = 'Adjuntos de Contrato <small>Agregar</small>';
-        $data['link_back'] = anchor('operacion/ventas/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
-        $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ventas/contratos_adjuntos_add/' . $id_contrato);
-	
-        if ( $this->input->post() ) {
-            // Se define la ruta donde se va a guardar el archivo y se valida si existe y es escribible.
-            $path = $this->upload_path.$id_contrato.'/';
-            if(!file_exists($path)){
-                mkdir($path, 0777, true);
-            }elseif(!is_writable($path)){
-                chmod($path, 0777);
-            }
-
-            $this->config->load('upload', TRUE); // Se carga el archivo de configuracion upload.php 
-            $config = $this->config->item('upload'); // Se almacenan los parametros de configuracion en $config
-            $config['upload_path'] = $path; // Se agrega la ruta donde se va a guardar el archivo.
-            
-            $this->load->library('upload', $config);
-
-            if ( ! $this->upload->do_upload('path') )
-            {
-                $error = $this->upload->display_errors();
-                $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>'.$error.'</div>';
-            }
-            else
-            {
-                $archivo = array('upload_data' => $this->upload->data());
-
-                $adjunto = array(
-                    'path' => $this->upload_path,
-                    'file_name' => $archivo['upload_data']['file_name'],
-                    'observaciones' => $this->input->post('observaciones'),
-                    'descripcion' => $this->input->post('descripcion')
-                );
-
-                $this->c->save_adjunto($adjunto, $id_contrato);
-                $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Adjunto subido correctamente</div>';
-            }
-        }
-        $this->load->view('operacion/contratos/formulario_adjuntos', $data);
-    }
-    
-    public function contratos_adjuntos_update($id_adjunto = null, $id_contrato = null) {
-        if (!empty($id_contrato) && !empty($id_adjunto)) {
-            $this->load->model('contrato', 'c');
-            $data['contrato'] = $this->c->get_by_id($id_contrato)->row();
-            $data['adjunto'] = $this->c->get_by_id_adjunto($id_adjunto)->row();
-        }
-        else {
-            redirect(site_url('operacion/ventas/contratos_adjuntos/') . '/' . $id_contrato);
-        }
-
-        $data['titulo'] = 'Adjuntos de Contrato <small>Modificar</small>';
-        $data['link_back'] = anchor('operacion/ventas/contratos_adjuntos/' . $id_contrato,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
-        $data['mensaje'] = '';
-        $data['action'] = site_url('operacion/ventas/contratos_adjuntos_update/' . $id_adjunto.'/'.$id_contrato);
-	
-        if ( $this->input->post() ) {
-            $adjunto = array(
-                'observaciones' => $this->input->post('observaciones'),
-                'descripcion' => $this->input->post('descripcion')
-            );
-
-            $this->c->update_adjunto($adjunto, $id_adjunto);
-            $data['adjunto'] = $this->c->get_by_id_adjunto($id_adjunto)->row();
-            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Adjunto actualizado correctamente</div>';
-        }
-        $this->load->view('operacion/contratos/formulario_adjuntos', $data);
-    }
-    
-    public function contratos_adjuntos_delete( $id_adjunto = null, $id_contrato = null ) {
-        $this->load->model('contrato', 'c');
-        
-        if(!empty($id_contrato) && !empty($id_adjunto)){
-            $adjunto = $this->c->get_by_id_adjunto($id_adjunto)->row();
-            if( !empty($adjunto) ){
-
-                //
-                //  FALTA ENVIAR UN MENSAJE AL USUARIO CUANDO OCURRE UN ERROR
-                //
-                
-                if( $this->c->delete_adjunto($id_adjunto, $id_contrato) ){
-                    if( unlink( $adjunto->path.$id_contrato.'/'.$adjunto->file_name ) ){
-                        redirect(site_url('operacion/ventas/contratos_adjuntos/'.$id_contrato));
-                    }else{
-                        die("Error al borrar el archivo");
-                    }
-                }else{
-                    die("Error al borrar los registros de la base de datos");
-                }
-            }
-            redirect(site_url('operacion/ventas/contratos_adjuntos/'.$id_contrato));
-        }
-    }
-    */
 
     /**
      * ----------------------------------------------------
@@ -581,12 +415,19 @@ class Ventas extends CI_Controller{
         // generar paginacion
         $this->config->load("pagination");
         $page_limit = $this->config->item("per_page");
-        $resultado = $this->a->get_paged_list($page_limit, $offset);
+        
+        // Filtro de busqueda (se almacenan en la sesión a través de un hook)
+        $filtro = $this->session->userdata('filtro');
+        if($filtro)
+            $data['filtro'] = $filtro;
+        $data['action'] = 'operacion/ventas/recibos';
+        
+        $resultado = $this->a->get_paged_list($page_limit, $offset, $filtro);
         if($resultado)
             $recibos = $resultado->result();
         $this->load->library('pagination');
         $config['base_url'] = site_url('operacion/ventas/recibos/');
-        $config['total_rows'] = $this->a->count_all();
+        $config['total_rows'] = $this->a->count_all( $filtro );
         $config['uri_segment'] = 4;
         $config['per_page'] = $page_limit;
         $this->pagination->initialize($config);
@@ -618,9 +459,9 @@ class Ventas extends CI_Controller{
                 );
                 $this->table->add_row_class($clase);
             }
-            $data['add_link'] = anchor('operacion/ventas/recibos_add/','<i class="icon-plus"></i> Agregar', array('class' => 'btn'));
+            $data['link_add'] = anchor('operacion/ventas/recibos_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
         }else{
-            $data['add_link'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
+            $data['link_add'] = '<div class="alert"><strong>Aviso:</strong> No hay período activo.</div>';
         }
         
         $data['pagination'] = $this->pagination->create_links();

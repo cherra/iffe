@@ -19,11 +19,25 @@ class Recibo extends CI_Model{
     * Cantidad de registros
     * ***********************************************************************
     */
-    function count_all() {
+    function count_all( $filtro = null ) {
         if(!empty($this->periodo)){
             $this->db->join('Contratos c','r.id_contrato = c.id');
             $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
+            $this->db->join('Modulos m','cm.id_modulo = m.id');
+            $this->db->join('Calles ca','m.id_calle = ca.id');
+            $this->db->join('Facturas f','r.id_factura = f.id','left');
             $this->db->where('c.id_periodo', $this->periodo->id);
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" 
+                        OR ca.nombre LIKE "%'.$f.'%"
+                        OR r.numero = "'.$f.'")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('r.id');
             return $this->db->get($this->tbl.' r')->num_rows();
         }else{
             return 0;
@@ -35,13 +49,26 @@ class Recibo extends CI_Model{
     * Cantidad de registros por pagina
     * ***********************************************************************
     */
-    function get_paged_list($limit = null, $offset = 0) {
+    function get_paged_list($limit = null, $offset = 0, $filtro = null) {
         if(!empty($this->periodo)){
             $this->db->select('r.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente, f.serie, f.folio, f.estatus AS estatus_factura', FALSE);
             $this->db->join('Contratos c','r.id_contrato = c.id');
             $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
+            $this->db->join('Modulos m','cm.id_modulo = m.id');
+            $this->db->join('Calles ca','m.id_calle = ca.id');
             $this->db->join('Facturas f','r.id_factura = f.id','left');
             $this->db->where('c.id_periodo', $this->periodo->id);
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" 
+                        OR ca.nombre LIKE "%'.$f.'%"
+                        OR r.numero = "'.$f.'")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('r.id');
             $this->db->order_by('r.numero','desc');
             return $this->db->get($this->tbl.' r',$limit, $offset);
         }else{

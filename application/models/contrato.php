@@ -22,10 +22,21 @@ class Contrato extends CI_Model{
     * Cantidad de registros
     * ***********************************************************************
     */
-    function count_all() {
+    function count_all( $filtro = null ) {
         if(!empty($this->periodo)){
             $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
+            $this->db->join('Modulos m','cm.id_modulo = m.id','left');
+            $this->db->join('Calles ca','m.id_calle = ca.id','left');
             $this->db->where('c.id_periodo', $this->periodo->id);
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" OR ca.nombre LIKE "%'.$f.'%")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('c.id');
             return $this->db->get($this->tbl.' c')->num_rows();
         }else{
             return 0;
@@ -37,11 +48,22 @@ class Contrato extends CI_Model{
     * Cantidad de registros por pagina
     * ***********************************************************************
     */
-    function get_paged_list($limit = null, $offset = 0) {
+    function get_paged_list($limit = null, $offset = 0, $filtro = null) {
         if(!empty($this->periodo)){
             $this->db->select('c.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente', FALSE);
             $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
+            $this->db->join('Modulos m','cm.id_modulo = m.id','left');
+            $this->db->join('Calles ca','m.id_calle = ca.id','left');
             $this->db->where('c.id_periodo', $this->periodo->id);
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" OR ca.nombre LIKE "%'.$f.'%")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('c.id');
             $this->db->order_by('numero','desc');
             return $this->db->get($this->tbl.' c',$limit, $offset);
         }else {
