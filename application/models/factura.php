@@ -74,6 +74,33 @@ class Factura extends CI_Model{
         }
     }
     
+    function get_by_fecha( $desde, $hasta, $filtro = null ){
+        if(!empty($this->periodo)){
+            $this->db->select('f.*');
+            $this->db->join('Recibos r','f.id = r.id_factura');
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
+            $this->db->join('Modulos m','cm.id_modulo = m.id');
+            $this->db->join('Calles ca','m.id_calle = ca.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->where('f.fecha BETWEEN "'.$desde.'" AND "'.$hasta.'"');
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(f.nombre LIKE "%'.$f.'%" 
+                        OR ca.nombre LIKE "%'.$f.'%"
+                        OR r.numero = "'.$f.'")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('f.id');
+            $this->db->order_by('f.serie, f.folio','asc');
+            return $this->db->get($this->tbl.' f');
+        }else{
+            return false;
+        }
+    }
+    
     /**
     * ***********************************************************************
     * Obtener recibo por id
