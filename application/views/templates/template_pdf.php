@@ -14,6 +14,10 @@ Template para PDFs
                 color: #000000;
             }
             
+            .formulario{
+                display: none;
+            }
+            
             @page{
                 margin-left: 15mm;
                 margin-right: 12mm;
