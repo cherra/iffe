@@ -96,6 +96,7 @@ class Ventas extends CI_Controller{
 
         $this->load->library('tbs');
         $this->load->library('numero_letras');
+        $this->load->library('rango');
 
         // Nombres de meses en español (config/sitio.php)
         $meses = $this->config->item('meses');
@@ -148,6 +149,8 @@ class Ventas extends CI_Controller{
             $modulos[$key]['importe'] = '$'.number_format($modulos[$key]['importe'],2,'.',',');
             $modulos[$key]['total'] = '$'.number_format($modulos[$key]['total'],2,'.',',');
             $modulos[$key]['categoria'] = ucfirst($modulos[$key]['categoria']);
+            $arreglo = explode(', ',$modulos[$key]['modulo']);
+            $modulos[$key]['modulo'] = $this->rango->array_to_rango($arreglo);
         }
         $this->tbs->MergeBlock('modulos', $modulos);
         // Render sin desplegar en navegador

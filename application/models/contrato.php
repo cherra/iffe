@@ -129,7 +129,7 @@ class Contrato extends CI_Model{
         $this->db->join('Modulos m','cm.id_modulo = m.id');
         $this->db->join('Calles c','m.id_calle = c.id');
         $this->db->where('cm.id_contrato',$id);
-        $this->db->group_by('c.id');
+        $this->db->group_by('c.id, cm.importe');
         $this->db->order_by('c.nombre, m.numero');
         return $this->db->get($this->tbl_contrato_modulos.' cm', $limit, $offset);
     }
