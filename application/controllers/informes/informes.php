@@ -389,7 +389,7 @@ class Informes extends CI_Controller{
             
             $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
             $this->table->set_template($tmpl);
-            $this->table->set_heading('Cliente', 'Calle', 'Módulos', 'Contrato', 'Fecha', array('data' => 'Cargos', 'style' => 'text-align: right;'), array('data' => 'Abonos', 'style' => 'text-align: right;'), array('data' => 'Saldo', 'style' => 'text-align: right;'));
+            $this->table->set_heading('Cliente', 'Calle', 'Módulos', 'Contrato', 'Fecha', 'Recibo', array('data' => 'Cargos', 'style' => 'text-align: right;'), array('data' => 'Abonos', 'style' => 'text-align: right;'), array('data' => 'Saldo', 'style' => 'text-align: right;'));
             $contrato = '';
             $total = 0;
             foreach ($contratos as $c){
@@ -417,15 +417,18 @@ class Informes extends CI_Controller{
                         $modulos,
                         $c->numero.'/'.$c->sufijo,
                         date_format($fecha,'d/m/Y'),
+                        '',
                         array('data' => number_format($importe,2), 'style' => 'text-align: right;'),
                         '', ''
                 );
                 
+                // Abonos
                 $recibos = $this->r->get_by_contrato($c->id)->result();
                 foreach($recibos as $r){
                     $fecha_recibo = date_create($r->fecha);
                     $this->table->add_row('','','','',
                             date_format($fecha_recibo,'d/m/Y'),
+                            array('data' => $r->numero, 'style' => 'text-align: center;'),
                             '',
                             array('data' => number_format($r->total,2), 'style' => 'text-align: right;'),
                             ''
@@ -435,14 +438,14 @@ class Informes extends CI_Controller{
                 $abonos = $this->c->get_abonos($c->id);
                 $saldo = $importe - $abonos;
                 // Saldo
-                $this->table->add_row('','','','','','','', array('data' => '<strong>'.number_format($saldo,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row('','','','','','','', '', array('data' => '<strong>'.number_format($saldo,2).'</strong>', 'style' => 'text-align: right;'));
                 
                 $contrato = $c->id;
                 $total += $saldo;
             }
             
             // Total
-            $this->table->add_row( '', '', '', '', '', array('data' => '<h5>TOTAL</h5>', 'colspan' => '2' ), array('data' => '<h5>'.number_format($total,2).'</h5>', 'style' => 'text-align: right;'));
+            $this->table->add_row( '', '', '', '', '', '', array('data' => '<h5>TOTAL</h5>', 'colspan' => '2' ), array('data' => '<h5>'.number_format($total,2).'</h5>', 'style' => 'text-align: right;'));
             
             $tabla = $this->table->generate();
             
