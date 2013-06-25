@@ -94,6 +94,12 @@ class Informes extends CI_Controller{
                 $total += $f->total;
             }
             
+            if($estatus == 1){
+                // Total de facturas vigentes
+                $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row_class($clase);
+            }
+            
             // Total de facturas canceladas
             $this->table->add_row( '', '', '', 'Total canceladas', array('data' => number_format($total_canceladas,2), 'style' => 'text-align: right;'));
             $this->table->add_row_class('info text-error');
@@ -196,7 +202,11 @@ class Informes extends CI_Controller{
                 
                 $total += $r->total;
             }
-            
+            if($estatus == 'vigente'){
+                // Total de recibos vigentes
+                $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row_class($clase);
+            }
             // Total de facturas canceladas
             $this->table->add_row( '', '', '', 'Total cancelados', array('data' => number_format($total_canceladas,2), 'style' => 'text-align: right;'));
             $this->table->add_row_class('info text-error');
@@ -325,6 +335,12 @@ class Informes extends CI_Controller{
                 $this->table->add_row_class($clase);
                 
                 $total += $importe;
+            }
+            
+            if($estatus == 'autorizado'){
+                // Total de recibos vigentes
+                $this->table->add_row( '', '', '', array('data' => '<strong>Total vigentes</strong>', 'colspan' => '2'), array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row_class($clase);
             }
             
             // Total de facturas canceladas
