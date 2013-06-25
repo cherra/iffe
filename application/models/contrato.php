@@ -103,11 +103,18 @@ class Contrato extends CI_Model{
         $this->db->select('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) AS total',FALSE);
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
         $this->db->join('Recibos r','c.id = r.id_contrato','left');
+        $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
+        $this->db->join('Modulos m','cm.id_modulo = m.id','left');
+        $this->db->join('Calles ca','m.id_calle = ca.id','left');
         $this->db->where('c.estado','autorizado');
         $this->db->where('(r.estado = "vigente" OR r.estado IS NULL)');
         $this->db->where('c.id_periodo', $this->periodo->id);
-        if(!empty($query))
-            $this->db->where("(concat(cl.nombre, ' ', cl.apellido_paterno, ' ', cl.apellido_materno) like '%" . $query . "%' OR c.numero = '".$query."' OR cl.razon_social like '%".$query."%')");
+        if(!empty($query)){
+            $this->db->where("(concat(cl.nombre, ' ', cl.apellido_paterno, ' ', cl.apellido_materno) like '%" . $query . "%' 
+                OR c.numero = '".$query."' 
+                OR cl.razon_social like '%".$query."%'
+                OR ca.nombre like '%".$query."%')");
+        }
         $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL OR abonos = 0');
         $this->db->group_by('c.id');
         $this->db->order_by('numero','desc');

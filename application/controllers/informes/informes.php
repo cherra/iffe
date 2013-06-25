@@ -49,7 +49,7 @@ class Informes extends CI_Controller{
                 }
                 if($estatus != $f->estatus){
                     // Total de facturas vigentes
-                    $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                    $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                     $this->table->add_row_class($clase);
                     $estatus = $f->estatus;
                     
@@ -74,7 +74,7 @@ class Informes extends CI_Controller{
             
             if($estatus == 1){
                 // Total de facturas vigentes
-                $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                 $this->table->add_row_class($clase);
             }
             
@@ -159,7 +159,7 @@ class Informes extends CI_Controller{
                 }
                 if($estatus != $r->estado){
                     // Total de recibos vigentes
-                    $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                    $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                     $this->table->add_row_class($clase);
                     $estatus = $r->estado;
                     
@@ -183,7 +183,7 @@ class Informes extends CI_Controller{
             }
             if($estatus == 'vigente'){
                 // Total de recibos vigentes
-                $this->table->add_row( '', '', '', '<strong>Total vigentes</strong>', array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                 $this->table->add_row_class($clase);
             }
             // Total de facturas canceladas
@@ -269,7 +269,7 @@ class Informes extends CI_Controller{
                 }
                 if($estatus != $c->estado){
                     // Total de recibos vigentes
-                    $this->table->add_row( '', '', '', array('data' => '<strong>Total vigentes</strong>', 'colspan' => '2'), array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                    $this->table->add_row( '', '', '', array('data' => '<h5>Total</h5>', 'colspan' => '2'), array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                     $this->table->add_row_class($clase);
                     $estatus = $c->estado;
                     
@@ -319,7 +319,7 @@ class Informes extends CI_Controller{
             
             if($estatus == 'autorizado'){
                 // Total de recibos vigentes
-                $this->table->add_row( '', '', '', array('data' => '<strong>Total vigentes</strong>', 'colspan' => '2'), array('data' => '<strong>'.number_format($total_vigentes,2).'</strong>', 'style' => 'text-align: right;'));
+                $this->table->add_row( '', '', '', array('data' => '<h5>Total</h5>', 'colspan' => '2'), array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
                 $this->table->add_row_class($clase);
             }
             
@@ -369,6 +369,115 @@ class Informes extends CI_Controller{
         }
         $data['titulo'] = 'Informe de contratos <small>Listado</small>';
         $this->load->view('informes/listado', $data);
+    }
+    
+    public function saldos_clientes(){
+        $data['reporte'] = '';
+        if( ($post = $this->input->post()) ){
+            
+            $data['filtro'] = $post['filtro'];
+            
+            $this->load->model('contrato','c');
+            $this->load->model('recibo', 'r');
+            $this->load->library('rango');
+
+            $contratos = $this->c->get_con_adeudo( $post['filtro'] )->result();
+            
+            // generar tabla
+            $this->load->library('table');
+            $this->table->set_empty('&nbsp;');
+            
+            $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+            $this->table->set_template($tmpl);
+            $this->table->set_heading('Cliente', 'Calle', 'Módulos', 'Contrato', 'Fecha', array('data' => 'Cargos', 'style' => 'text-align: right;'), array('data' => 'Abonos', 'style' => 'text-align: right;'), array('data' => 'Saldo', 'style' => 'text-align: right;'));
+            $contrato = '';
+            $total = 0;
+            foreach ($contratos as $c){
+                $importe = $this->c->get_importe($c->id);
+                $fecha = date_create($c->fecha);
+                $modulos_contrato = $this->c->get_modulos_agrupados($c->id)->result();
+                $calles = '';
+                $modulos = '';
+                $i = 0;
+                foreach($modulos_contrato as $m){
+                    if($i > 0){
+                        $calles .= '<br>';
+                        $modulos .= '<br>';
+                    }
+                    $calles .= $m->calle;
+                    $arreglo = explode(', ',$m->modulo);
+                    $modulos .= $this->rango->array_to_rango($arreglo);
+                    $i++;
+                }
+                
+                // Contrato
+                $this->table->add_row(
+                        $c->cliente,
+                        $calles,
+                        $modulos,
+                        $c->numero.'/'.$c->sufijo,
+                        date_format($fecha,'d/m/Y'),
+                        array('data' => number_format($importe,2), 'style' => 'text-align: right;'),
+                        '', ''
+                );
+                
+                $recibos = $this->r->get_by_contrato($c->id)->result();
+                foreach($recibos as $r){
+                    $fecha_recibo = date_create($r->fecha);
+                    $this->table->add_row('','','','',
+                            date_format($fecha_recibo,'d/m/Y'),
+                            '',
+                            array('data' => number_format($r->total,2), 'style' => 'text-align: right;'),
+                            ''
+                    );
+                }
+                
+                $abonos = $this->c->get_abonos($c->id);
+                $saldo = $importe - $abonos;
+                // Saldo
+                $this->table->add_row('','','','','','','', array('data' => '<strong>'.number_format($saldo,2).'</strong>', 'style' => 'text-align: right;'));
+                
+                $contrato = $c->id;
+                $total += $saldo;
+            }
+            
+            // Total
+            $this->table->add_row( '', '', '', '', '', array('data' => '<h5>TOTAL</h5>', 'colspan' => '2' ), array('data' => '<h5>'.number_format($total,2).'</h5>', 'style' => 'text-align: right;'));
+            
+            $tabla = $this->table->generate();
+            
+            //$tabla.= '</tbody></table>';
+            $this->load->library('tbs');
+            $this->load->library('pdf');
+            
+            // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['titulo'] = 'Saldos de clientes';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+            $this->tbs->VarRef['subtitulo'] = '';
+            $this->tbs->VarRef['contenido'] = $tabla;
+            
+            $this->tbs->Show(TBS_NOTHING);
+            
+            // Se regresa el render
+            $output = $this->tbs->Source;
+            
+            $view = str_replace("{contenido_vista}", $output, $this->template);
+            
+            // PDF
+            $pdf = $this->pdf->render($view,'Letter',null,true);
+            //$pdf = $view;
+            
+            $fp = fopen($this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('tmp_path').'saldos_clientes.pdf','w');
+            fwrite($fp, $pdf);
+            fclose($fp);
+            $data['reporte'] = 'saldos_clientes.pdf';
+        }
+        $data['titulo'] = 'Saldos de clientes';
+        $this->load->view('informes/listado_sin_fechas', $data);
     }
 }
 

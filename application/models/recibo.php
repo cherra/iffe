@@ -142,6 +142,7 @@ class Recibo extends CI_Model{
     
     function get_by_contrato( $id_contrato ){
         $this->db->where('id_contrato', $id_contrato);
+        $this->db->where('estado','vigente');
         $this->db->order_by('fecha');
         return $this->db->get($this->tbl);
     }

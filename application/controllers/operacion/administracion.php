@@ -280,7 +280,7 @@ class Administracion extends CI_Controller{
 
                     $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
                     $this->table->set_template($tmpl);
-                    $this->table->set_heading('Recibo', 'Fecha', 'Importe', 'Cliente', 'Giro', 'Concesión');
+                    $this->table->set_heading('Recibo', 'Fecha', 'Cliente', 'Giro', 'Concesión', 'Importe');
                     $total = 0;
                     foreach ($recibos as $r){
                         $fecha = date_create($r->fecha);
@@ -291,15 +291,15 @@ class Administracion extends CI_Controller{
                         $this->table->add_row(
                             $r->numero,
                             date_format($fecha,'d/m/Y'),
-                            array('data' => number_format($r->total,2),'style' => 'text-align: right;'),
                             $cliente->tipo == 'moral' ? $cliente->razon_social : $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno,
                             $giro->nombre,
-                            $concesion->nombre
+                            $concesion->nombre,
+                            array('data' => number_format($r->total,2),'style' => 'text-align: right;')
                         );
                         $total += $r->total;
                     }
                     // Total
-                    $this->table->add_row( array('data' => '<strong>TOTAL</strong>', 'colspan' => '2'), array('data' => '<strong>'.number_format($total,2).'</strong>', 'style' => 'text-align: right;'), '', '', '');
+                    $this->table->add_row('', '', '', '', '<h5>TOTAL</h5>', array('data' => '<h5>'.number_format($total,2).'</h5>', 'style' => 'text-align: right;'));
                     
                     $tabla = $this->table->generate();
             
