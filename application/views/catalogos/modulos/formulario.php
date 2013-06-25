@@ -218,6 +218,6 @@ $(document).ready(function(){
     
     }, false);
 
-    dibuja_coord();
+    //dibuja_coord();
 });
 </script>
