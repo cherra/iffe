@@ -100,15 +100,11 @@
 </div>
 
 <script type="text/javascript">
+$(document).ready(function(){
     
-$(function () {
-   
     $('#numero').focus();
     $('#borrar').click(borrar);
-});
 
-</script>
-<script type="text/javascript">
     function writeMessage(canvas, message) {
         var context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -223,7 +219,5 @@ $(function () {
     }, false);
 
     dibuja_coord();
-
-</script>
-
+});
 </script>
