@@ -145,6 +145,14 @@ class Recibo extends CI_Model{
         $this->db->order_by('fecha');
         return $this->db->get($this->tbl);
     }
+    
+    function get_by_factura ( $id_factura ){
+        $this->db->select('r.*');
+        $this->db->join('Facturas f','f.id = r.id_factura');
+        $this->db->where('f.id', $id_factura);
+        $this->db->order_by('r.numero');
+        return $this->db->get($this->tbl.' r');
+    }
 
     /**
     * ***********************************************************************

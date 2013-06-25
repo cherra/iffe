@@ -18,28 +18,6 @@ class Informes extends CI_Controller{
         $this->load->view('informes/informes');
     }
     
-    public function imprimir( ){
-        if($this->session->flashdata('pdf')){
-            $this->layout = 'template_pdf';
-            $this->load->library('tbs');
-
-            // Nombres de meses en español (config/sitio.php)
-            $meses = $this->config->item('meses');
-
-            // Se carga el template predefinido para los recibos (tabla Configuracion)
-            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'));
-
-            // Se sustituyen los campos en el template
-            $this->tbs->VarRef['titulo'] = 'Informe';
-            $this->tbs->VarRef['titulo'] = 'Informe';
-            $this->tbs->VarRef['titulo'] = 'Informe';
-            $this->tbs->VarRef['titulo'] = 'Informe';
-        }else{
-            $this->session->set_flashdata('pdf', true);
-            redirect('informes/informes/imprimir');
-        }
-    }
-    
     public function facturas_listado(){
         $data['reporte'] = '';
         if( ($post = $this->input->post()) ){
@@ -121,7 +99,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de facturas';
-            $this->tbs->VarRef['fecha'] = date('d/m/Y');
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
             $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
@@ -228,7 +206,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de recibos';
-            $this->tbs->VarRef['fecha'] = date('d/m/Y');
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
             $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
@@ -364,7 +342,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de contratos';
-            $this->tbs->VarRef['fecha'] = date('d/m/Y');
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
             $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');

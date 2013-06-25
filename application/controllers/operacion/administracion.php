@@ -59,6 +59,7 @@ class Administracion extends CI_Controller{
                     $factura->nombre, 
                     array('data' => number_format($factura->total,2,'.',','), 'class' => 'hidden-phone'),
                     array('data' => anchor_popup('operacion/administracion/facturas_documento/' . $factura->id, '<i class="icon-print"></i>', array('class' => 'btn btn-small', 'title' => 'Imprimir')), 'class' => 'hidden-phone'),
+                    array('data' => anchor_popup('operacion/administracion/facturas_recibos/' . $factura->id, '<i class="icon-th-list"></i>', array('class' => 'btn btn-small', 'title' => 'Recibos')), 'class' => 'hidden-phone'),
                     array('data' => ($factura->estatus == '0' ? '<a class="btn btn-small disabled"><i class="icon-ban-circle"></i></a>' : anchor('operacion/administracion/facturas_cancelar/'.$factura->id,'<i class="icon-ban-circle"></i>', array('class' => 'btn btn-small', 'title' => 'Cancelar', 'id' => 'cancelar'))), 'class' => 'hidden-phone')
                 );
                 $this->table->add_row_class($clase);
@@ -259,6 +260,77 @@ class Administracion extends CI_Controller{
         }
     }
     
+    public function facturas_recibos( $id = null ){
+        if(!empty($id)){
+            $this->layout = "template_pdf";
+            $this->load->model('factura','f');
+            $this->load->model('recibo', 'r');
+            $this->load->model('contrato', 'c');
+            $this->load->model('cliente', 'cl');
+            $this->load->model('giro', 'g');
+            $this->load->model('concesion', 'co');
+            
+            $factura = $this->f->get_by_id( $id )->row();
+            $recibos = $this->r->get_by_factura( $id )->result();
+            if( $this->session->flashdata('pdf') ){
+                if($recibos){
+                    // generar tabla
+                    $this->load->library('table');
+                    $this->table->set_empty('&nbsp;');
+
+                    $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+                    $this->table->set_template($tmpl);
+                    $this->table->set_heading('Recibo', 'Fecha', 'Importe', 'Cliente', 'Giro', 'Concesión');
+                    $total = 0;
+                    foreach ($recibos as $r){
+                        $fecha = date_create($r->fecha);
+                        $contrato = $this->c->get_by_id($r->id_contrato)->row();
+                        $cliente = $this->cl->get_by_id( $contrato->id_cliente )->row();
+                        $giro = $this->g->get_by_id($cliente->id_giro)->row();
+                        $concesion = $this->co->get_by_id($cliente->id_concesion)->row();
+                        $this->table->add_row(
+                            $r->numero,
+                            date_format($fecha,'d/m/Y'),
+                            array('data' => number_format($r->total,2),'style' => 'text-align: right;'),
+                            $cliente->tipo == 'moral' ? $cliente->razon_social : $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno,
+                            $giro->nombre,
+                            $concesion->nombre
+                        );
+                        $total += $r->total;
+                    }
+                    // Total
+                    $this->table->add_row( array('data' => '<strong>TOTAL</strong>', 'colspan' => '2'), array('data' => '<strong>'.number_format($total,2).'</strong>', 'style' => 'text-align: right;'), '', '', '');
+                    
+                    $tabla = $this->table->generate();
+            
+                    $this->load->library('tbs');
+
+                    // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+                    $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+                    // Se sustituyen los campos en el template
+                    $this->tbs->VarRef['titulo'] = 'Recibos por factura';
+                    $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+                    $this->tbs->VarRef['subtitulo'] = 'Factura: <strong>'.$factura->serie.' - '.$factura->folio.'</strong>';
+                    $this->tbs->VarRef['contenido'] = $tabla;
+
+                    $this->tbs->Show(TBS_NOTHING);
+
+                    $data['contenido'] = $this->tbs->Source;
+                    $this->load->view('documento', $data);
+                }else{
+                    redirect('operacion/administracion/facturas');
+                }
+            }else{
+                $this->session->set_flashdata('pdf', true);
+                redirect('operacion/administracion/facturas_recibos/'.$id); // Se recarga el método para imprimirlo como PDF
+            }
+        }else{
+            redirect('operacion/administracion/facturas');
+        }
+    }
+
+
     /***************************************************
      * NOTAS DE CREDITO
      ***************************************************/
