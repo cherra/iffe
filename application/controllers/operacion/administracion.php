@@ -310,6 +310,7 @@ class Administracion extends CI_Controller{
 
                     // Se sustituyen los campos en el template
                     $this->tbs->VarRef['titulo'] = 'Recibos por factura';
+                    date_default_timezone_set('America/Mexico_City'); // Zona horaria
                     $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
                     $this->tbs->VarRef['subtitulo'] = 'Factura: <strong>'.$factura->serie.' - '.$factura->folio.'</strong>';
                     $this->tbs->VarRef['contenido'] = $tabla;

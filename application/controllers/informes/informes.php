@@ -99,6 +99,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de facturas';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
             $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
@@ -206,6 +207,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de recibos';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
             $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
@@ -342,6 +344,7 @@ class Informes extends CI_Controller{
 
             // Se sustituyen los campos en el template
             $this->tbs->VarRef['titulo'] = 'Listado de contratos';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
             $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
             $desde = date_create($post['desde']);
             $hasta = date_create($post['hasta']);
