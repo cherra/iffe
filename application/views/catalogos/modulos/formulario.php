@@ -131,7 +131,7 @@ $(function () {
     var x = [];
     var y = [];
     var p = $('#coordenadas');
-    var json_inicio = 'coordenadas : [';
+    var json_inicio = '';
     p.val(json_inicio);
     
     // coordenadas
@@ -209,7 +209,10 @@ $(function () {
 
     canvas.addEventListener("click", function(evt){
         var mousePos = getMousePos(canvas, evt);
-        var j = p.val() + "{ 'x' : '" + mousePos.x + "' , 'y' : '" + mousePos.y + "' },";
+        var j = p.val();
+        if(j.length > 0)
+            j = j + ',';
+        j = j + "{ 'x' : '" + mousePos.x + "' , 'y' : '" + mousePos.y + "' }";
         p.val(j);
         x.push(mousePos.x);
         y.push(mousePos.y);
