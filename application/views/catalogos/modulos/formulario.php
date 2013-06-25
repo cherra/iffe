@@ -71,7 +71,7 @@
                 </div>
             </div> -->
             <div class="control-group">
-                <label class="control-labe1" for="imagen_fraccionamiento">Imagen fraccionamiento</label>
+                <label class="control-labe1" for="plano">Plano</label>
                 <div class="row">
                     <div class="span11 text-right">
                         <label for="borrar">
