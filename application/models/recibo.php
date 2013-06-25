@@ -77,6 +77,36 @@ class Recibo extends CI_Model{
         }
     }
     
+    function get_by_fecha( $desde, $hasta, $filtro = null ){
+        if(!empty($this->periodo)){
+            $this->db->select('r.*, CONCAT(c.numero," /",c.sufijo) AS contrato, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre, " ", cl.apellido_paterno, " ", cl.apellido_materno)) AS cliente', false);
+            $this->db->join('Facturas f','f.id = r.id_factura','left');
+            $this->db->join('Contratos c','r.id_contrato = c.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato');
+            $this->db->join('Modulos m','cm.id_modulo = m.id');
+            $this->db->join('Calles ca','m.id_calle = ca.id');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->where('r.fecha BETWEEN "'.$desde.'" AND "'.$hasta.'"');
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno) LIKE "%'.$f.'%" 
+                        OR cl.razon_social LIKE "%'.$f.'%"
+                        OR ca.nombre LIKE "%'.$f.'%"
+                        OR r.numero = "'.$f.'")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('r.id');
+            $this->db->order_by('r.estado', 'asc');
+            $this->db->order_by('r.numero','asc');
+            return $this->db->get($this->tbl.' r');
+        }else{
+            return false;
+        }
+    }
+    
     /**
     * ***********************************************************************
     * Obtener recibo por id

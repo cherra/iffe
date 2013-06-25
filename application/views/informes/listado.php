@@ -5,7 +5,7 @@
 </div>
 <!-- La clase formulario se oculta en el template de para PDFs  -->
 <div class="row-fluid formulario">
-    <div class="span10">
+    <div class="span12">
     <?php echo form_open('', array('class' => 'form-horizontal', 'name' => 'form', 'id' => 'form')) ?>
         <div class="control-group">
             <label class="control-label hidden-phone" for="desde">Desde</label>
@@ -31,11 +31,6 @@
             </div>
         </div>
     <?php echo form_close(); ?>
-    </div>
-    <div class="span2">
-        <?php if(!empty($desde) && !empty($hasta)){ ?>
-        <p class="text-right"><?php echo anchor_popup('informes/informes/facturas_listado/'.$desde.'/'.$hasta.'/'.$filtro.'/1', '<i class="icon-print"></i> Imprimir', array('class' => 'btn', 'title' => 'Imprimir')) ?></p>
-        <?php } ?>
     </div>
 </div>
 <!-- PDF generado  -->

@@ -94,6 +94,7 @@ class Factura extends CI_Model{
                 }
             }
             $this->db->group_by('f.id');
+            $this->db->order_by('f.estatus', 'desc');
             $this->db->order_by('f.serie, f.folio','asc');
             return $this->db->get($this->tbl.' f');
         }else{

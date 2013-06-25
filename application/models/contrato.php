@@ -71,6 +71,31 @@ class Contrato extends CI_Model{
         }
     }
     
+    function get_by_fecha($desde, $hasta, $filtro = null) {
+        if(!empty($this->periodo)){
+            $this->db->select('c.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente', FALSE);
+            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
+            $this->db->join('Modulos m','cm.id_modulo = m.id','left');
+            $this->db->join('Calles ca','m.id_calle = ca.id','left');
+            $this->db->where('c.id_periodo', $this->periodo->id);
+            $this->db->where('c.estado != "pendiente"');
+            $this->db->where('c.fecha BETWEEN "'.$desde.'" AND "'.$hasta.'"');
+            if(!empty($filtro)){
+                $filtro = explode(' ', $filtro);
+                foreach($filtro as $f){
+                    $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" OR ca.nombre LIKE "%'.$f.'%")';
+                    $this->db->where($like);
+                }
+            }
+            $this->db->group_by('c.id');
+            $this->db->order_by('c.estado, c.numero','asc');
+            return $this->db->get($this->tbl.' c');
+        }else {
+            return false;
+        }
+    }
+    
     function get_con_adeudo( $query = null ) {
         $this->db->select('c.id, c.id_periodo, c.id_cliente, c.id_usuario, c.sufijo, c.numero, c.fecha, c.fecha_inicio, c.fecha_vencimiento, c.testigo1, c.testigo2, c.observaciones, c.estado');
         $this->db->select('IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente', FALSE);

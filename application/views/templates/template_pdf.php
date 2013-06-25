@@ -6,7 +6,7 @@ Template para PDFs
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap.css" rel="stylesheet">
-        <script src="<?php echo asset_url(); ?>bootstrap/js/bootstrap.min.js"></script>
+        <!-- <script src="<?php echo asset_url(); ?>bootstrap/js/bootstrap.min.js"></script> -->
         <style>
             body{
                 font-size: 11px; 
@@ -14,8 +14,14 @@ Template para PDFs
                 color: #000000;
             }
             
-            .formulario{
-                display: none;
+            .page-header{
+                margin-bottom: 1em;
+                padding-bottom: 0.1em;
+            }
+            
+            .cancelado{
+                color: gray;
+                
             }
             
             @page{
@@ -23,6 +29,8 @@ Template para PDFs
                 margin-right: 12mm;
                 margin-top: 12mm;
                 margin-bottom: 12mm;
+                margin-footer: 5mm;
+                margin-header: 5mm;
             }
             
         </style>
