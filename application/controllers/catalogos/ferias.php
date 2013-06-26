@@ -315,6 +315,7 @@ class Ferias extends CI_Controller{
                     ucfirst($r->categoria),
                     ucfirst($r->tipo),
                     anchor('catalogos/ferias/modulos_update/' . $r->id_calle . '/' . $r->id, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
+                    anchor('catalogos/ferias/modulos_plano/' . $r->id_calle . '/' . $r->id, '<i class="icon-map-marker"></i>', array('class' => 'btn btn-small')),
                     array('data' => anchor('catalogos/ferias/modulos_delete/' . $r->id_calle . '/' . $r->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small')), 'class' => 'hidden-phone')
                 );
             }
@@ -393,6 +394,37 @@ class Ferias extends CI_Controller{
         $data['plano'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano');
         
         $this->load->view('catalogos/modulos/formulario', $data);
+    }
+    
+    public function modulos_plano( $id_calle = null, $id = null ){
+        if ( empty($id_calle) || empty($id) ) {
+            redirect('catalogos/ferias/modulos/');
+        }
+        
+        $data['titulo'] = 'Módulos <small>Plano</small>';
+        $data['link_back'] = anchor('catalogos/ferias/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+        $data['mensaje'] = '';
+        $data['action'] = site_url('catalogos/ferias/modulos_plano/') . '/' . $id_calle . '/' . $id;
+        
+        $this->load->model('calle', 'c');
+        $calle = $this->c->get_by_id($id_calle)->row();
+        $data['calle'] = $calle;
+        
+        $this->load->model('modulo', 'm');
+        
+        if ( ($datos = $this->input->post()) ) {
+            $datos['coordenadas'] = 'coordenadas : ['.$datos['coordenadas'].']'; 
+            $this->m->update($id, $datos);
+            //$data['datos'] = (object)$datos;
+            
+            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Plano modificado</div>';
+        }
+        
+        $modulo = $this->m->get_by_id($id)->row();
+        $data['datos'] = $modulo;
+        $data['plano'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano');
+        
+        $this->load->view('catalogos/modulos/formulario_plano', $data);
     }
     
     /**

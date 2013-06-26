@@ -97,7 +97,7 @@
 
           // add a tag to the label
         label.add(new Kinetic.Tag({
-            fill: 'yellow',
+            fill: 'lightgray',
             opacity: 0.8,
             stroke: '#333',
             strokeWidth: 1,

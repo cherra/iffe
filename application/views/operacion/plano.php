@@ -45,14 +45,14 @@
                 xy.push(coord[i].y);
             }
             if(val.disponible === '1')
-                color = '#eee';
+                color = 'lightblue';
             else
                 color = 'red';
             var poly = new Kinetic.Polygon({
                 points: xy,
                 fill: color,
                 stroke: color,
-                strokeWidth: 1,
+                strokeWidth: 0,
                 opacity: 0.4,
                 id_calle: val.id_calle,
                 calle: val.calle,
@@ -81,7 +81,7 @@
         var nodisponibleText = new Kinetic.Text({
           x: imageObj.width / 2 + 25,
           y: imageObj.height - 75,
-          text: 'Vendido',
+          text: 'Rentado',
           fontSize: 15,
           fontFamily: 'Helvetica',
           fill: 'black'
@@ -98,8 +98,7 @@
             draggable: true
         });
 
-          // add a tag to the label
-        label.add(new Kinetic.Tag({
+        var popup = new Kinetic.Tag({
             fill: 'yellow',
             opacity: 0.8,
             stroke: '#333',
@@ -113,7 +112,9 @@
             pointerWidth: 15,
             pointerHeight: 15,
             cornerRadius: 10
-        }));
+        });
+          // add a tag to the label
+        label.add(popup);
 
         var info = new Kinetic.Text({
             text: '',
@@ -133,10 +134,14 @@
         shapes.on('mouseover', function(){
             var texto = '';
             // Si el módulo está diponible se cambia el cursor a "manita"
-            if(this.getAttr('disponible') === '1')
-                document.body.style.cursor = 'pointer';
-            else
+            if(this.getAttr('disponible') === '0'){
                 texto = this.getAttr('giro')+'\n'+this.getAttr('cliente')+'\n';
+                popup.setFill('lightgray');
+            }
+            else{
+                //document.body.style.cursor = 'pointer';
+                popup.setFill('lightblue');
+            }
             texto += this.getAttr('calle')+' #'+this.getAttr('numero');
             info.setText(texto);
             
