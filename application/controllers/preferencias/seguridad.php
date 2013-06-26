@@ -492,6 +492,34 @@ class Seguridad extends CI_Controller{
         $this->load->view('preferencias/seguridad/usuarios/permisos', $data);
 
     }
+    
+    public function usuario_password( ) {
+
+        $this->load->model('usuario','u');
+        $this->titulo = "Usuarios";
+        
+        $id = $this->session->userdata('userid');
+
+        if (empty($id)) {
+            redirect(site_url('preferencias/preferencias'));
+        }
+
+        $data['titulo'] = $this->titulo . ' <small>Cambiar contraseña</small>';
+        $data['atributos_form'] = array('id' => 'form', 'class' => 'form-horizontal');
+        $data['link_back'] = anchor('preferencias/preferencias','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
+
+        $data['mensaje'] = '';
+        $data['action'] = site_url('preferencias/seguridad/usuario_password') . '/' . $id;
+
+        if ( $this->input->post() ) {
+            $usuario = array('password' => sha1($this->input->post('password')));
+            $this->u->update($id, $usuario);
+            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Constraseña actualizada</div>';
+        }
+
+        $data['usuario'] = $this->u->get_by_id($id)->row();
+        $this->load->view('preferencias/seguridad/usuarios/formulario_password', $data);
+    }
 }
 
 ?>
