@@ -52,13 +52,14 @@ class Preferencias extends CI_Controller{
         }
         $data['table'] = $this->table->generate();
 
-        $data['titulo'] = $this->titulo . ' - Lista';
+        $data['link_add'] = anchor('preferencias/preferencias/configuracion_add/','<i class="icon-plus icon-white"></i> Agregar', array('class' => 'btn btn-inverse'));
+        $data['titulo'] = $this->titulo . ' <small>Lista</small>';
 
         $this->load->view('preferencias/configuracion/lista', $data);
     }
     
     public function configuracion_add(){
-        $data['titulo'] = 'Configuración - Agregar';
+        $data['titulo'] = 'Configuración <small>Agregar</small>';
         $data['link_back'] = anchor('preferencias/preferencias/configuracion_lista/','<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
         $data['action'] = site_url('preferencias/preferencias/configuracion_add');
