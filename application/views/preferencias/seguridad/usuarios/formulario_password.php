@@ -1,7 +1,10 @@
 <div class="row-fluid">
-  <h3><?php echo $titulo; ?></h3> <?php echo $link_back; ?>
-  <br/>
-  <br/>
+    <div class="page-header">
+        <h2><?php echo $titulo; ?></h2>
+        <?php echo $link_back; ?>
+    </div>
+</div>
+<div class="row-fluid">
   <div class="span12">
     <form name="form" id="form" action="<?php echo $action; ?>" class="form-horizontal" method="post">
       <div class="control-group">

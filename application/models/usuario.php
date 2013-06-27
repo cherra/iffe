@@ -14,6 +14,7 @@ class Usuario extends CI_Model {
     
     private $tbl = "Usuarios";
     private $tbl_permisos = "PermisosUsuario";
+    private $tbl_roles = "RolesUsuario";
     
     function count_all() {
         return $this->db->count_all($this->tbl);
@@ -84,6 +85,24 @@ class Usuario extends CI_Model {
         if(!empty($permisos)){
             $this->db->delete($this->tbl_permisos, array('id_usuario' => $id));
             $this->db->insert_batch($this->tbl_permisos, $permisos);
+        }
+    }
+    
+    /**
+    * ***********************************************************************
+    * Obtener roles del usuario por id
+    * ***********************************************************************
+    */
+    function get_rol_by_id($id_rol, $id_usuario) {
+        $this->db->where('id_usuario', $id_usuario);
+        $this->db->where('id_rol', $id_rol);
+        return $this->db->get($this->tbl_roles);
+    }
+    
+    function update_roles( $id, $roles ){
+        if(!empty($roles)){
+            $this->db->delete($this->tbl_roles, array('id_usuario' => $id));
+            $this->db->insert_batch($this->tbl_roles, $roles);
         }
     }
 

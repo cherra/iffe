@@ -19,6 +19,10 @@ class Rol extends CI_Model {
         return $this->db->count_all($this->tbl);
     }
     
+    function get_all(){
+        return $this->db->get($this->tbl);
+    }
+    
     /**
     * ***********************************************************************
     * Cantidad de registros por pagina
