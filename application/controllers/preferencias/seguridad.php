@@ -157,8 +157,8 @@ class Seguridad extends CI_Controller{
         $this->table->set_heading('Nombre', 'Descripción', '', '', '');
         foreach ($roles as $rol) {
                 $this->table->add_row(
-                        strtoupper($rol->nombre), 
-                        strtoupper($rol->descripcion),
+                        $rol->nombre,
+                        $rol->descripcion,
                         anchor('preferencias/seguridad/rol_permisos/' . $rol->id_rol, '<i class="icon-lock"></i>', array('class' => 'btn btn-small')),
                         anchor('preferencias/seguridad/rol_update/' . $rol->id_rol, '<i class="icon-edit"></i>', array('class' => 'btn btn-small')),
                         anchor('preferencias/seguridad/rol_delete/' . $rol->id_rol, '<i class="icon-remove"></i>', array('class' => 'btn btn-small'))
@@ -333,8 +333,8 @@ class Seguridad extends CI_Controller{
         $i = 0 + $offset;
         foreach ($usuarios as $usuario) {
                 $this->table->add_row(
-                        strtoupper($usuario->nombre), 
-                        strtoupper($usuario->username),
+                        $usuario->nombre,
+                        $usuario->username,
                         $usuario->activo == 's' ? '<i class="icon-ok"></i>' : '',
                         anchor('preferencias/seguridad/usuario_permisos/' . $usuario->id_usuario, '<i class="icon-lock"></i>', array('class' => 'btn btn-small')),
                         anchor('preferencias/seguridad/usuario_roles/' . $usuario->id_usuario, '<i class="icon-user"></i>', array('class' => 'btn btn-small')),
