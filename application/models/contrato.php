@@ -51,7 +51,7 @@ class Contrato extends CI_Model{
     function get_paged_list($limit = null, $offset = 0, $filtro = null) {
         if(!empty($this->periodo)){
             $this->db->select('c.*, IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente', FALSE);
-            $this->db->join('Clientes cl','c.id_cliente = cl.id');
+            $this->db->join('Clientes cl','c.id_cliente = cl.id','left');
             $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
             $this->db->join('Modulos m','cm.id_modulo = m.id','left');
             $this->db->join('Calles ca','m.id_calle = ca.id','left');
