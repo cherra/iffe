@@ -17,7 +17,7 @@
             <?php if(!empty($contrato)): ?>
             <tr>
                 <td><?php echo $contrato->numero; ?></td>
-                <td><?php echo $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno; ?></td>
+                <td><?php echo (!empty($cliente)) ? $cliente->nombre.' '.$cliente->apellido_paterno.' '.$cliente->apellido_materno : '-'; ?></td>
                 <td><?php echo $contrato->fecha_inicio; ?></td>
                 <td><?php echo $contrato->fecha_vencimiento; ?></td>
             </tr>
