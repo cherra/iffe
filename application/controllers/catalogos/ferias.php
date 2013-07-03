@@ -349,7 +349,6 @@ class Ferias extends CI_Controller{
         if( ($datos = $this->input->post()) ){
             $this->load->model('modulo', 'm');
             $datos['id_calle'] = $id_calle;
-            $datos['coordenadas'] = 'coordenadas : ['.$datos['coordenadas'].']'; 
             $this->m->save($datos);
             $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Registro exitoso</div>';
         }
@@ -385,7 +384,6 @@ class Ferias extends CI_Controller{
         $data['datos'] = $modulo;
         
         if ( ($datos = $this->input->post()) ) {
-            $datos['coordenadas'] = 'coordenadas : ['.$datos['coordenadas'].']'; 
             $this->m->update($id, $datos);
             $data['datos'] = (object)$datos;
             
