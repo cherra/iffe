@@ -33,7 +33,7 @@ class Modulo extends CI_Model {
     }
     
     function get_all(){
-        $this->db->select('m.*, c.id AS id_calle, c.nombre AS calle, IF(LENGTH(cl.razon_social) > 0, cl.razon_social, CONCAT(cl.nombre, " ", cl.apellido_paterno, " ", cl.apellido_materno)) AS cliente, g.nombre as giro, cm.id IS NULL AS disponible', FALSE);
+        $this->db->select('m.*, c.id AS id_calle, c.nombre AS calle, IF(LENGTH(cl.razon_social) > 0, cl.razon_social, CONCAT(cl.nombre, " ", cl.apellido_paterno, " ", cl.apellido_materno)) AS cliente, g.nombre as giro', FALSE);
         $this->db->join('Calles c', 'm.id_calle = c.id');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
         $this->db->join('Contratos co', 'cm.id_contrato = co.id AND co.id_periodo = '.$this->periodo->id,'left');
