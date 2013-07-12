@@ -22,6 +22,16 @@
         </table>
     </div>
 <div class="row-fluid">
+    <div class="span12">
+        <form id="zoom-form" class="form-inline">
+                <label class="control-label" for="zoom">Zoom:</label>
+                <input type="text" class="input-mini number" name="zoom" id="zoom" value="<?php if(isset($zoom)) echo $zoom; ?>" />
+                &nbsp;<button type="submit" class="btn"><i class="icon-zoom-in"></i></button>
+                <span class="help-inline">Número de aumentos</span>
+        </form>
+    </div>
+</div>
+<div class="row-fluid">
     <div class="span12" id="plano" style="overflow: auto;">
         <img id="imagen" style="display: none;" src="<?php echo $plano; ?>" />
         <canvas id="myCanvas"></canvas>
@@ -50,11 +60,33 @@
 <script type="text/javascript">
 $(document).ready(function(){
     
-    $('#numero').focus();
+    $('#zoom').focus();
     $('#borrar').click(function(event){
         event.preventDefault();
         borrar();
     });
+    
+    $('#zoom-form').validate({
+        rules:{
+            zoom:{
+                max: 12,
+                min: 1
+            }
+        },
+        highlight: function(element, errorClass) {
+            $(element).fadeOut(function() {
+              $(element).fadeIn();
+            });
+        },
+        submitHandler: function(){
+            var zoom = $('#zoom').val();
+            window.location = "<?php echo site_url('catalogos/ferias/modulos_plano/'.$calle->id.'/'.$datos->id); ?>/"+zoom;
+        }
+    });
+    /*$('#zoom-form').submit(function(event){
+        event.preventDefault();
+        
+    });*/
 
     function writeMessage(canvas, message) {
         var context = canvas.getContext('2d');
@@ -93,17 +125,21 @@ $(document).ready(function(){
     var altoBody = window.innerHeight;
     var plano = document.getElementById('plano');
     
-    plano.style.height = altoBody - 320 + "px";
+    var zoom = new Number(<?php echo $zoom; ?>); // Zoom
+    if(zoom < 1){
+        zoom = 1;
+    }
+    plano.style.height = altoBody - 340 + "px";
     
     window.onresize = function(){
         altoBody = window.innerHeight;
-        plano.style.height = altoBody - 320 + "px";
+        plano.style.height = altoBody - 340 + "px";
         dibuja_coord();
     };
     
     imagen.onload = function() {
-        imagen.width = imagen.width * 3;
-        imagen.height = imagen.height * 3;
+        imagen.width = imagen.width * zoom;
+        imagen.height = imagen.height * zoom;
         ancho = imagen.width;
         alto = imagen.height;
 
@@ -145,13 +181,13 @@ $(document).ready(function(){
         var j = json_inicio;
         var count = 0;
         for (i in c) {
-            x.push(c[i].x * 3);
-            y.push(c[i].y * 3);
+            x.push(c[i].x * zoom);
+            y.push(c[i].y * zoom);
             j += "{ 'x' : '" + c[i].x + "' , 'y' : '" + c[i].y + "' },";
             
             // Sumatoria de las coordenadas x y y.
-            xProm = xProm + Number(c[i].x) * 3;
-            yProm = yProm + Number(c[i].y) * 3;
+            xProm = xProm + Number(c[i].x) * zoom;  // * 4 por el zoom 4x
+            yProm = yProm + Number(c[i].y) * zoom;
             count++; // Cantidad de puntos
         }
         
@@ -191,8 +227,8 @@ $(document).ready(function(){
 
     canvas.addEventListener("click", function(evt){
         var mousePos = getMousePos(canvas, evt);
-        var posXReal = mousePos.x / 3;
-        var posYReal = mousePos.y / 3;
+        var posXReal = mousePos.x / zoom;
+        var posYReal = mousePos.y / zoom;
         var j = p.val();
         if(j.length > 0)
             j = j + ',';

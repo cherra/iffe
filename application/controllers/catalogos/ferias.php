@@ -394,7 +394,7 @@ class Ferias extends CI_Controller{
         $this->load->view('catalogos/modulos/formulario', $data);
     }
     
-    public function modulos_plano( $id_calle = null, $id = null ){
+    public function modulos_plano( $id_calle = null, $id = null, $zoom = 3 ){
         if ( empty($id_calle) || empty($id) ) {
             redirect('catalogos/ferias/modulos/');
         }
@@ -402,15 +402,16 @@ class Ferias extends CI_Controller{
         $data['titulo'] = 'Módulos <small>Plano</small>';
         $data['link_back'] = anchor('catalogos/ferias/modulos/' . $id_calle,'<i class="icon-arrow-left"></i> Regresar',array('class'=>'btn'));
         $data['mensaje'] = '';
-        $data['action'] = site_url('catalogos/ferias/modulos_plano/') . '/' . $id_calle . '/' . $id;
+        $data['action'] = site_url('catalogos/ferias/modulos_plano/') . '/' . $id_calle . '/' . $id . '/' . $zoom;
         
         $this->load->model('calle', 'c');
         $calle = $this->c->get_by_id($id_calle)->row();
         $data['calle'] = $calle;
         
         $this->load->model('modulo', 'm');
-        
-        if ( ($datos = $this->input->post()) ) {
+        if($this->input->post('zoom')){
+            $zoom = $this->input->post('zoom');
+        }else if ( ($datos = $this->input->post()) ) {
             $datos['coordenadas'] = 'coordenadas : ['.$datos['coordenadas'].']'; 
             $this->m->update($id, $datos);
             //$data['datos'] = (object)$datos;
@@ -421,6 +422,7 @@ class Ferias extends CI_Controller{
         $modulo = $this->m->get_by_id($id)->row();
         $data['datos'] = $modulo;
         $data['plano'] = base_url().$this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('imagenes').$this->configuracion->get_valor('plano');
+        $data['zoom'] = $zoom;
         
         $this->load->view('catalogos/modulos/formulario_plano', $data);
     }
