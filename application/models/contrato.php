@@ -102,12 +102,12 @@ class Contrato extends CI_Model{
         $this->db->select('IFNULL((SELECT IFNULL(SUM(ncc.importe),0) FROM NotaCreditoContratos ncc JOIN NotasCredito nc ON ncc.id_nota_credito = nc.id WHERE ncc.id_contrato = c.id AND nc.estatus = "autorizada" GROUP BY ncc.id_contrato),0) + SUM(r.total) as abonos',FALSE);
         $this->db->select('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) AS total',FALSE);
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
-        $this->db->join('Recibos r','c.id = r.id_contrato','left');
+        $this->db->join('Recibos r','c.id = r.id_contrato AND r.estado = "vigente"','left');
         $this->db->join('ContratoModulos cm', 'c.id = cm.id_contrato','left');
         $this->db->join('Modulos m','cm.id_modulo = m.id','left');
         $this->db->join('Calles ca','m.id_calle = ca.id','left');
         $this->db->where('c.estado','autorizado');
-        $this->db->where('(r.estado = "vigente" OR r.estado IS NULL)');
+        //$this->db->where('(r.estado = "vigente" OR r.estado IS NULL)');
         $this->db->where('c.id_periodo', $this->periodo->id);
         if(!empty($query)){
             $this->db->where("(concat(cl.nombre, ' ', cl.apellido_paterno, ' ', cl.apellido_materno) like '%" . $query . "%' 

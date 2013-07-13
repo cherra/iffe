@@ -5,7 +5,7 @@ Template para PDFs
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap.css" rel="stylesheet">
+        <link href="<?php echo asset_url(); ?>bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <!-- <script src="<?php echo asset_url(); ?>bootstrap/js/bootstrap.min.js"></script> -->
         <style>
             body{
