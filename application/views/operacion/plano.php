@@ -134,7 +134,7 @@
         shapes.on('mouseover', function(){
             var texto = '';
             // Si el módulo está diponible se cambia el cursor a "manita"
-            if(this.getAttr('disponible') === '0'){
+            if(this.getAttr('disponible') !== '1'){
                 texto = this.getAttr('giro')+'\n'+this.getAttr('cliente')+'\n';
                 popup.setFill('lightgray');
             }
