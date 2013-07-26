@@ -16,7 +16,7 @@ class Home extends CI_Controller {
             
             // Se obtienen todos los módulos
             $this->load->model('modulo','m');
-            $modulos = $this->m->get_all()->result();
+            $modulos = $this->m->get_all_vigentes()->result();
             $coordenadas = '';
             foreach($modulos as $modulo){
                 // Se obtiene la disponiblidad del módulo
