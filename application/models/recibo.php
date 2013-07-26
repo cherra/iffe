@@ -134,8 +134,8 @@ class Recibo extends CI_Model{
         $this->db->join('Contratos co','r.id_contrato = co.id');
         $this->db->join('Clientes c','co.id_cliente = c.id');
         $this->db->join('Facturas f','r.id_factura = f.id','left');
-        $this->db->where('id_factura IS NULL OR f.estatus = 0');
-        $this->db->where('r.estado = "vigente"');
+        $this->db->where('(id_factura IS NULL OR f.estatus = 0)');
+        $this->db->where('r.estado','vigente');
         $this->db->order_by('r.numero','desc');
         return $this->db->get($this->tbl." r");
     }

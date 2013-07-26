@@ -9,7 +9,7 @@
     <form name="form" id="form" action="<?php echo $action; ?>" class="form-horizontal" method="post">
       <div class="control-group">
         <label class="control-label" for="id_recibo[]">Recibo(s)</label>
-        <div class="controls" style="height: 75px; overflow-y: auto;">
+        <div class="controls" style="height: 125px; overflow-y: auto;">
             <?php
             foreach($recibos as $r){ ?>
                 <label class="checkbox">
