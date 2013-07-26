@@ -643,7 +643,10 @@ class Ventas extends CI_Controller{
             
         // Se obtienen todos los módulos
         $this->load->model('modulo','m');
-        $modulos = $this->m->get_all()->result();
+        $modulos = $this->m->get_all_vigentes()->result();
+        //echo $this->db->last_query();
+        //die();
+        
         $coordenadas = '';
         foreach($modulos as $modulo){
             // Se obtiene la disponiblidad del módulo
