@@ -50,13 +50,11 @@ class Modulo extends CI_Model {
             g.nombre as giro,
             co.estado AS estado', FALSE);
         $this->db->join('Calles c', 'm.id_calle = c.id');
-        $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
-        //$this->db->join('Contratos co', 'cm.id_contrato = co.id AND co.estado != "cancelado" AND co.id_periodo = '.$this->periodo->id,'left');
-        $this->db->join('Contratos co', 'cm.id_contrato = co.id AND co.id_periodo = '.$this->periodo->id,'left');
+        $this->db->join('(ContratoModulos cm JOIN Contratos co)','m.id = cm.id_modulo AND cm.id_contrato = co.id AND co.estado != "cancelado" AND co.id_periodo = 1','left');
         $this->db->join('Clientes cl', 'co.id_cliente = cl.id','left');
         $this->db->join('Giros g', 'cl.id_giro = g.id', 'left');
         //$this->db->group_by('m.id');
-        $this->db->having('estado != "cancelado" OR estado IS NULL');
+        //$this->db->having('estado != "cancelado" OR estado IS NULL');
         $this->db->order_by('m.id_calle, m.numero');
         return $this->db->get($this->tbl.' m');
     }
