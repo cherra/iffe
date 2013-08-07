@@ -139,6 +139,9 @@ class Ventas extends CI_Controller{
         $this->tbs->VarRef['mes_vencimiento'] = $meses[date_format($fecha_vencimiento,'n')-1];
         $this->tbs->VarRef['ano_vencimiento'] = date_format($fecha_vencimiento,'Y');
 
+        $intervalo = date_diff($fecha_inicio, $fecha_vencimiento);
+        $this->tbs->VarRef['dias'] = $intervalo->format('%a')+1;
+        
         $fecha = date_create($contrato->fecha);
         $this->tbs->VarRef['fecha'] = date_format($fecha,'d/m/Y');
         $this->tbs->VarRef['dia'] = date_format($fecha,'d');
