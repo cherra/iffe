@@ -204,7 +204,7 @@ class Ventas extends CI_Controller{
         if( $this->input->post() ) {
             $contrato = array(
                 'id_cliente' => $this->input->post('id_cliente'),
-                'fecha' => $this->input->post('fecha'),
+                'fecha' => date('Y-m-d H:i:s'),
                 'fecha_vencimiento' => $this->input->post('fecha_vencimiento'),
                 'testigo1' => $this->input->post('testigo1'),
                 'testigo2' => $this->input->post('testigo2'),
