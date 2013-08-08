@@ -8,7 +8,7 @@
         <fieldset>
             <label>Haz click en el botón para descargar un respaldo de la base de datos.</label>
             <input type="hidden" name="respaldo" value="1" />
-            <button type="submit" class="btn btn-success" >Respaldo</button>
+            <button type="submit" class="btn btn-success" ><i class="icon-download-alt icon-white"></i> Respaldar</button>
         </fieldset>
     <?php echo form_close(); ?>
 </div>
