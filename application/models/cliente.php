@@ -2,7 +2,13 @@
 
 class Cliente extends CI_Model {
     
-    private $tbl_clientes = 'Clientes'; 
+    private $tbl_clientes = 'Clientes';
+    private $periodo = '';
+    
+    function __construct() {
+        parent::__construct();
+        $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
+    }
 
  	/**
  	* ***********************************************************************
@@ -62,6 +68,15 @@ class Cliente extends CI_Model {
     function get_all() {
         $this->db->order_by('apellido_paterno, apellido_materno, nombre');
         return $this->db->get($this->tbl_clientes);
+    }
+    
+    function get_all_contrato(){
+        $this->db->select('cl.*');
+        $this->db->join('Contratos c','cl.id = c.id_cliente');
+        $this->db->where('c.id_periodo', $this->periodo->id);
+        $this->db->where('c.estado', 'autorizado');
+        $this->db->order_by('cl.apellido_paterno, cl.apellido_materno, cl.nombre');
+        return $this->db->get($this->tbl_clientes.' cl');
     }
 
     /**

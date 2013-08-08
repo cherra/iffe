@@ -32,7 +32,7 @@
     $(document).ready(function(){
         /*$('#form').submit(function(event){
             event.preventDefault();
-            window.location = "<?php echo site_url('informes/informes/facturas_listado'); ?>"+"/"+$('#desde').val()+"/"+$('#hasta').val()+"/"+$('#filtro').val();
+            window.location = "<?php echo site_url($action); ?>"+"/"+$('#desde').val()+"/"+$('#hasta').val()+"/"+$('#filtro').val();
         });*/
         
         $('#informe_view').media({ width: '100%', height: 600, autoplay: true });

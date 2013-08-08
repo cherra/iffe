@@ -482,6 +482,87 @@ class Informes extends CI_Controller{
         $data['titulo'] = 'Saldos de clientes';
         $this->load->view('informes/listado_sin_fechas', $data);
     }
+    
+    public function clientes_contrato_listado(){
+        $data['reporte'] = '';
+        if( ($post = $this->input->post()) ){
+            
+            //$data['desde'] = $post['desde'];
+            //$data['hasta'] = $post['hasta'];
+            $data['filtro'] = $post['filtro'];
+            
+            $this->load->model('cliente','cl');
+            $this->load->model('contrato','c');
+            $this->load->model('giro','g');
+            
+            $clientes = $this->cl->get_all_contrato()->result();
+            
+            // generar tabla
+            $this->load->library('table');
+            $this->table->set_empty('&nbsp;');
+            
+            $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+            $this->table->set_template($tmpl);
+            $this->table->set_heading('Nombre', 'Domicilio', 'Ciudad', 'Teléfono', 'Giro', 'Contrato');
+            $registros = 0;
+            foreach ($clientes as $c){
+                // Clientes con contrato
+                $contrato = $this->c->get_by_id_cliente($c->id)->row();
+                //echo var_dump($contrato);
+                //die();
+                $giro = $this->g->get_by_id($c->id_giro)->row();
+                $this->table->add_row( 
+                        ($c->tipo == 'fisica' ? $c->apellido_paterno.' '.$c->apellido_materno.' '.$c->nombre : $c->razon_social),
+                        $c->calle.' '.$c->numero_exterior.' '.$c->numero_interior,
+                        $c->ciudad.', '.$c->estado,
+                        $c->telefono,
+                        $giro->nombre,
+                        array('data' => $contrato->numero.'/'.$contrato->sufijo, 'style' => 'text-align: right;')
+                        );
+                $registros++;
+            }
+            
+            $this->table->add_row( '<strong>Total registros</strong>', '<strong>'.$registros.'</strong>', '','','','');
+            
+            $tabla = $this->table->generate();
+            
+            $this->load->library('tbs');
+            $this->load->library('pdf');
+            
+            // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['titulo'] = 'Listado de clientes con contrato';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+            //$desde = date_create($post['desde']);
+            //$hasta = date_create($post['hasta']);
+            //$this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
+            $this->tbs->VarRef['subtitulo'] = '';
+            $this->tbs->VarRef['contenido'] = $tabla;
+            
+            $this->tbs->Show(TBS_NOTHING);
+            
+            // Se regresa el render
+            $output = $this->tbs->Source;
+            
+            $view = str_replace("{contenido_vista}", $output, $this->template);
+            
+            // PDF
+            $this->pdf->pagenumSuffix = '/';
+            $this->pdf->SetHeader('{PAGENO}{nbpg}');
+            $pdf = $this->pdf->render($view);
+            //$pdf = $view;
+            
+            $fp = fopen($this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('tmp_path').'clientes_listado.pdf','w');
+            fwrite($fp, $pdf);
+            fclose($fp);
+            $data['reporte'] = 'clientes_listado.pdf';
+        }
+        $data['titulo'] = 'Clientes con contrato <small>Listado</small>';
+        $this->load->view('informes/listado_sin_fechas', $data);
+    }
 }
 
 ?>

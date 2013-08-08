@@ -17,6 +17,17 @@ class Contrato extends CI_Model{
         $this->periodo = $this->session->userdata('periodo'); // Período activo de la feria
     }
     
+    function get_all(){
+        $this->db->where('id_periodo', $this->periodo->id);
+        return $this->db->get($this->tbl);
+    }
+    
+    function get_all_autorizados(){
+        $this->db->where('estado','autorizado');
+        $this->db->where('id_periodo', $this->periodo->id);
+        return $this->db->get($this->tbl);
+    }
+    
     /**
     * ***********************************************************************
     * Cantidad de registros
@@ -197,6 +208,11 @@ class Contrato extends CI_Model{
     */
     function get_by_id($id) {
         $this->db->where('id', $id);
+        return $this->db->get($this->tbl);
+    }
+    
+    function get_by_id_cliente($id) {
+        $this->db->where('id_cliente', $id);
         return $this->db->get($this->tbl);
     }
     
