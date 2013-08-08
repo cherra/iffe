@@ -99,7 +99,9 @@ class Contrato extends CI_Model{
     function get_con_adeudo( $query = null ) {
         $this->db->select('c.id, c.id_periodo, c.id_cliente, c.id_usuario, c.sufijo, c.numero, c.fecha, c.fecha_inicio, c.fecha_vencimiento, c.testigo1, c.testigo2, c.observaciones, c.estado');
         $this->db->select('IF(cl.tipo = "moral", cl.razon_social, CONCAT(cl.nombre," ",cl.apellido_paterno," ",cl.apellido_materno)) AS cliente', FALSE);
-        $this->db->select('IFNULL((SELECT IFNULL(SUM(ncc.importe),0) FROM NotaCreditoContratos ncc JOIN NotasCredito nc ON ncc.id_nota_credito = nc.id WHERE ncc.id_contrato = c.id AND nc.estatus = "autorizada" GROUP BY ncc.id_contrato),0) + SUM(r.total) as abonos',FALSE);
+        $this->db->select('IFNULL(
+            (SELECT IFNULL(SUM(ncc.importe),0) FROM NotaCreditoContratos ncc JOIN NotasCredito nc ON ncc.id_nota_credito = nc.id WHERE ncc.id_contrato = c.id AND nc.estatus = "autorizada" GROUP BY ncc.id_contrato),0)
+            + (SELECT SUM(total) FROM Recibos WHERE id_contrato = c.id)  as abonos',FALSE);
         $this->db->select('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) AS total',FALSE);
         $this->db->join('Clientes cl','c.id_cliente = cl.id');
         $this->db->join('Recibos r','c.id = r.id_contrato AND r.estado = "vigente"','left');
@@ -115,7 +117,7 @@ class Contrato extends CI_Model{
                 OR cl.razon_social like '%".$query."%'
                 OR ca.nombre like '%".$query."%')");
         }
-        $this->db->having('(SELECT SUM(cm.importe) FROM ContratoModulos cm WHERE cm.id_contrato = c.id GROUP BY cm.id_contrato) > abonos OR abonos IS NULL OR abonos = 0');
+        $this->db->having('(SELECT SUM(importe) FROM ContratoModulos WHERE id_contrato = c.id GROUP BY id_contrato) > abonos OR abonos IS NULL OR abonos = 0');
         $this->db->group_by('c.id');
         $this->db->order_by('numero','desc');
         
