@@ -125,7 +125,7 @@
       <div class="control-group">
         <label class="control-label hidden-phone" for="email">E-mail</label>
         <div class="controls">
-          <input type="text" name="email" placeholder="e-mail" value="<?php echo (isset($datos->celular) ? $datos->celular : ''); ?>">
+          <input type="text" name="email" placeholder="e-mail" value="<?php echo (isset($datos->email) ? $datos->email : ''); ?>">
         </div>
       </div>
       <div class="control-group">
