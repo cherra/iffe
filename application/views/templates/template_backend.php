@@ -245,7 +245,7 @@
  Se activa con Javascript de la siguiente forma:
 $('#loadingModal').modal();
 -->
-<div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
      <div class="modal-header">
         <h4 class="text-center">Cargando...</h4>
     </div>
