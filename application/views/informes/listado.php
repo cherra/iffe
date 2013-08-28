@@ -42,10 +42,9 @@
 
 <script>
     $(document).ready(function(){
-        /*$('#form').submit(function(event){
-            event.preventDefault();
-            window.location = "<?php echo site_url('informes/informes/facturas_listado'); ?>"+"/"+$('#desde').val()+"/"+$('#hasta').val()+"/"+$('#filtro').val();
-        });*/
+        $('#form').submit(function(event){
+            $('#loadingModal').modal();
+        });
         
         $('#informe_view').media({ width: '100%', height: 600, autoplay: true });
     });

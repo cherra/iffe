@@ -11,6 +11,12 @@
           padding-top: 50px;
       }
       
+      /*#loading-indicator {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+      }*/
+      
        @media (max-width: 980px) {
         .pagination{
             margin: 5px 0;
@@ -233,6 +239,22 @@
 </div>
 <div id="loader" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-body" style="text-align: center;"><span class="mensaje">cargando</span><br /><img src="<?php echo asset_url(); ?>img/loader.gif" /></div>
+</div>
+
+<!-- Modal para mostrar el mensaje de "Cargando..."
+ Se activa con Javascript de la siguiente forma:
+$('#loadingModal').modal();
+-->
+<div id="loadingModal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+     <div class="modal-header">
+        <h4 class="text-center">Cargando...</h4>
+    </div>
+    <div class="modal-body">
+        <p class="text-center"><img src="<?php echo asset_url(); ?>img/loading.gif" id="loading-indicator"/></p>
+    </div>
+    <!-- <div class="modal-footer">
+        <p class="text-center">Generando vista</p>
+    </div> -->
 </div>
 
 <script>
