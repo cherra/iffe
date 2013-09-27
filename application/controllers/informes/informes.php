@@ -371,6 +371,97 @@ class Informes extends CI_Controller{
         $this->load->view('informes/listado', $data);
     }
     
+    
+    public function contratos_calle_listado(){
+        $data['reporte'] = '';
+        $this->load->model('calle', 'ca');
+        $data['calles'] = $this->ca->get_all()->result();
+        if( ($post = $this->input->post()) ){
+            
+            $data['desde'] = $post['desde'];
+            $data['hasta'] = $post['hasta'];
+            $data['id_calle'] = $post['id_calle'];
+            $data['filtro'] = $post['filtro'];
+            
+            $this->load->model('contrato','c');
+            $this->load->library('rango');
+
+            $contratos = $this->c->get_autorizados_by_fecha( $post['desde'].' 00:00:00', $post['hasta'].' 23:59:59', $post['filtro'], $post['id_calle'] )->result();
+            
+            // generar tabla
+            $this->load->library('table');
+            $this->table->set_empty('&nbsp;');
+            
+            $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+            $this->table->set_template($tmpl);
+            $this->table->set_heading('Número', 'Fecha', 'Cliente', 'Calle', 'Módulos', array('data' => 'Total', 'style' => 'text-align: right;'));
+            $total = 0;
+            $contrato = '';
+            foreach ($contratos as $c){
+                $fecha = date_create($c->fecha);
+                $modulos_contrato = $this->c->get_modulos_agrupados_by_calle($c->id, $post['id_calle'])->result();
+                $modulos = '';
+                $importe = 0;
+                foreach($modulos_contrato as $m){
+                    $calle = $m->calle;
+                    $arreglo = explode(', ',$m->modulo);
+                    $modulos .= $this->rango->array_to_rango($arreglo);
+                    $importe += $m->importe;
+                }
+                
+                // Se agregan las filas al reporte
+                $this->table->add_row(
+                    $c->numero.'/'.$c->sufijo,
+                    date_format($fecha,'d/m/Y'),
+                    $c->cliente,
+                    $calle,
+                    $modulos,
+                    array('data' => number_format($importe,2), 'style' => 'text-align: right;')
+                );
+                $contrato = $c->id;
+                
+                $total += $importe;
+            }
+            
+            $this->table->add_row( '', '', '', array('data' => '<h5>Total</h5>', 'colspan' => '2'), array('data' => '<h5>'.number_format($total,2).'</h5>', 'style' => 'text-align: right;'));
+            
+            $tabla = $this->table->generate();
+            
+            $this->load->library('tbs');
+            $this->load->library('pdf');
+            
+            // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['titulo'] = 'Listado de contratos por calle <br><small>'.$calle.'</small>';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+            $desde = date_create($post['desde']);
+            $hasta = date_create($post['hasta']);
+            $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
+            $this->tbs->VarRef['contenido'] = $tabla;
+            
+            $this->tbs->Show(TBS_NOTHING);
+            
+            // Se regresa el render
+            $output = $this->tbs->Source;
+            
+            $view = str_replace("{contenido_vista}", $output, $this->template);
+            
+            // PDF
+            $pdf = $this->pdf->render($view,'Letter',null,true);
+            //$pdf = $view;
+            
+            $fp = fopen($this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('tmp_path').'contratos_listado.pdf','w');
+            fwrite($fp, $pdf);
+            fclose($fp);
+            $data['reporte'] = 'contratos_listado.pdf';
+        }
+        $data['titulo'] = 'Informe de contratos por calle <small>Listado</small>';
+        $this->load->view('informes/listado_contratos_calle', $data);
+    }
+    
     public function saldos_clientes(){
         $data['reporte'] = '';
         if( ($post = $this->input->post()) ){
