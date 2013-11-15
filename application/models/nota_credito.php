@@ -108,6 +108,14 @@ class Nota_credito extends CI_Model{
         return $this->db->get($this->tbl);
     }
     
+    function get_by_contrato( $id ){
+        $this->db->select('nc.*, ncc.*');
+        $this->db->join($this->tbl_nt_contratos.' ncc', 'nc.id = ncc.id_nota_credito');
+        $this->db->join($this->tbl_contratos.' c', 'ncc.id_contrato = c.id');
+        $this->db->where('c.id', $id);
+        return $this->db->get($this->tbl.' nc');
+    }
+    
     function get_last(){
         $this->db->order_by('id', 'desc');
         return $this->db->get($this->tbl, 1);

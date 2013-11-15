@@ -470,6 +470,7 @@ class Informes extends CI_Controller{
             
             $this->load->model('contrato','c');
             $this->load->model('recibo', 'r');
+            $this->load->model('nota_credito', 'n');
             $this->load->library('rango');
 
             $contratos = $this->c->get_con_adeudo( $post['filtro'] )->result();
@@ -480,7 +481,7 @@ class Informes extends CI_Controller{
             
             $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
             $this->table->set_template($tmpl);
-            $this->table->set_heading('Cliente', 'Calle', 'Módulos', 'Contrato', 'Fecha', 'Recibo', array('data' => 'Cargos', 'style' => 'text-align: right;'), array('data' => 'Abonos', 'style' => 'text-align: right;'), array('data' => 'Saldo', 'style' => 'text-align: right;'));
+            $this->table->set_heading('Cliente', 'Calle', 'Módulos', 'Contrato', 'Fecha', 'Recibo/Nota', array('data' => 'Cargos', 'style' => 'text-align: right;'), array('data' => 'Abonos', 'style' => 'text-align: right;'), array('data' => 'Saldo', 'style' => 'text-align: right;'));
             $contrato = '';
             $total = 0;
             foreach ($contratos as $c){
@@ -526,8 +527,23 @@ class Informes extends CI_Controller{
                     );
                 }
                 
+                // Notas de crédito
+                $notas = $this->n->get_by_contrato($c->id)->result();
+                foreach($notas as $n){
+                    $fecha_nota = date_create($n->fecha);
+                    $this->table->add_row('','','','',
+                            date_format($fecha_nota,'d/m/Y'),
+                            array('data' => $n->serie.$n->folio, 'style' => 'text-align: center;'),
+                            '',
+                            array('data' => number_format($n->importe,2), 'style' => 'text-align: right;'),
+                            ''
+                    );
+                }
+                
                 $abonos = $this->c->get_abonos($c->id);
-                $saldo = $importe - $abonos;
+                $notas = $this->c->get_notas($c->id);
+                
+                $saldo = $importe - $abonos - $notas;
                 // Saldo
                 $this->table->add_row('','','','','','','', '', array('data' => '<strong>'.number_format($saldo,2).'</strong>', 'style' => 'text-align: right;'));
                 
