@@ -33,6 +33,7 @@ class Recibo extends CI_Model{
                 foreach($filtro as $f){
                     $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" 
                         OR ca.nombre LIKE "%'.$f.'%"
+                        OR c.numero = "'.$f.'"
                         OR r.numero = "'.$f.'")';
                     $this->db->where($like);
                 }
@@ -65,6 +66,7 @@ class Recibo extends CI_Model{
                 foreach($filtro as $f){
                     $like = '(cl.nombre LIKE "%'.$f.'%" OR cl.apellido_paterno LIKE "%'.$f.'%" OR cl.apellido_materno LIKE "%'.$f.'%" OR cl.razon_social LIKE "%'.$f.'%" 
                         OR ca.nombre LIKE "%'.$f.'%"
+                        OR c.numero = "'.$f.'"
                         OR r.numero = "'.$f.'")';
                     $this->db->where($like);
                 }
