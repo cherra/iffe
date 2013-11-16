@@ -12,6 +12,8 @@ class Informes extends CI_Controller{
     function __construct() {
         parent::__construct();
         $this->template = $this->load->file(APPPATH . 'views/templates/template_pdf.php', true);
+        
+        ini_set('memory_limit', '-1');
     }
     
     public function index(){
@@ -540,10 +542,9 @@ class Informes extends CI_Controller{
                     );
                 }
                 
-                $abonos = $this->c->get_abonos($c->id);
-                $notas = $this->c->get_notas($c->id);
+                $abonos = $this->c->get_abonos($c->id) + $this->c->get_notas($c->id);
                 
-                $saldo = $importe - $abonos - $notas;
+                $saldo = $importe - $abonos;
                 // Saldo
                 $this->table->add_row('','','','','','','', '', array('data' => '<strong>'.number_format($saldo,2).'</strong>', 'style' => 'text-align: right;'));
                 
