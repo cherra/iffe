@@ -113,6 +113,7 @@ class Nota_credito extends CI_Model{
         $this->db->join($this->tbl_nt_contratos.' ncc', 'nc.id = ncc.id_nota_credito');
         $this->db->join($this->tbl_contratos.' c', 'ncc.id_contrato = c.id');
         $this->db->where('c.id', $id);
+        $this->db->where('nc.estatus', 'autorizada');
         return $this->db->get($this->tbl.' nc');
     }
     
