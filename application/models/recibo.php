@@ -132,14 +132,18 @@ class Recibo extends CI_Model{
      * **********************************************************************
      */
     function get_sin_factura(){
-        $this->db->select('r.*, IF(c.tipo = "moral", c.razon_social, CONCAT( c.nombre, " ", c.apellido_paterno," ",c.apellido_materno )) AS cliente', FALSE);
-        $this->db->join('Contratos co','r.id_contrato = co.id');
-        $this->db->join('Clientes c','co.id_cliente = c.id');
-        $this->db->join('Facturas f','r.id_factura = f.id','left');
-        $this->db->where('(id_factura IS NULL OR f.estatus = 0)');
-        $this->db->where('r.estado','vigente');
-        $this->db->order_by('r.numero','desc');
-        return $this->db->get($this->tbl." r");
+        if(!empty($this->periodo)){
+            $this->db->select('r.*, IF(c.tipo = "moral", c.razon_social, CONCAT( c.nombre, " ", c.apellido_paterno," ",c.apellido_materno )) AS cliente', FALSE);
+            $this->db->join('Contratos co','r.id_contrato = co.id AND co.id_periodo = '.$this->periodo->id);
+            $this->db->join('Clientes c','co.id_cliente = c.id');
+            $this->db->join('Facturas f','r.id_factura = f.id','left');
+            $this->db->where('(id_factura IS NULL OR f.estatus = 0)');
+            $this->db->where('r.estado','vigente');
+            $this->db->order_by('r.numero','desc');
+            return $this->db->get($this->tbl." r");
+        }else{
+            return false;
+        }
     }
     
     function get_by_contrato( $id_contrato ){
