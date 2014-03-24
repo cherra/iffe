@@ -65,7 +65,7 @@ class Modulo extends CI_Model {
     * ***********************************************************************
     */
     function get_disponibles($id_calle){
-        $this->db->select('m.*, cm.id_contrato AS contrato, c.estado as estado');
+        $this->db->select('m.*, c.id AS contrato, c.estado as estado');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
         $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
         $this->db->where('m.id_calle', $id_calle);
@@ -77,7 +77,7 @@ class Modulo extends CI_Model {
     }
     
     function disponible( $id ){
-        $this->db->select('m.*, cm.id_contrato AS contrato, c.estado as estado');
+        $this->db->select('m.*, c.id AS contrato, c.estado as estado');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
         $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
         $this->db->where('m.id', $id);
