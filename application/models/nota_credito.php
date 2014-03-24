@@ -22,6 +22,7 @@ class Nota_credito extends CI_Model{
     */
     function count_all( $filtro = null ) {
         if(!empty($this->periodo)){
+            $this->db->select('nt.*, c.id AS contrato');
             $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
             $this->db->join('Contratos c','ntc.id_contrato = c.id AND c.id_periodo ='. $this->periodo->id,'left');
             $this->db->join('Clientes cl','c.id_cliente = cl.id','left');
@@ -39,6 +40,7 @@ class Nota_credito extends CI_Model{
                 }
             }
             $this->db->group_by('nt.id');
+            $this->db->having('contrato IS NOT NULL');
             $query = $this->db->get($this->tbl.' nt');
             return $query->num_rows();
         }else{
@@ -53,7 +55,7 @@ class Nota_credito extends CI_Model{
     */
     function get_paged_list($limit = null, $offset = 0, $filtro = null) {
         if(!empty($this->periodo)){
-            $this->db->select('nt.*');
+            $this->db->select('nt.*, c.id AS contrato');
             $this->db->join('NotaCreditoContratos ntc','nt.id = ntc.id_nota_credito','left');
             $this->db->join('Contratos c','ntc.id_contrato = c.id AND c.id_periodo ='. $this->periodo->id,'left');
             $this->db->join('Clientes cl','c.id_cliente = cl.id','left');
@@ -71,6 +73,7 @@ class Nota_credito extends CI_Model{
                 }
             }
             $this->db->group_by('nt.id');
+            $this->db->having('contrato IS NOT NULL');
             $this->db->order_by('nt.serie, nt.folio','desc');
             return $this->db->get($this->tbl.' nt',$limit, $offset);
         }else{
