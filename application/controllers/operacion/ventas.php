@@ -46,7 +46,7 @@ class Ventas extends CI_Controller{
         $this->table->set_empty('-');
         $tmpl = array ('table_open'  => '<table class="' . $this->config->item('tabla_css') . '" >' );
         $this->table->set_template($tmpl);
-        $this->table->set_heading('Estado', 'No.', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
+        $this->table->set_heading('Estado', 'No.', 'Fecha', 'Cliente', array('data' => 'Importe','class' => 'hidden-phone'), '','','', '');
         if(isset($contratos)){
             foreach ($contratos as $contrato) {
                 $modulos = $this->a->get_modulos($contrato->id);
@@ -58,6 +58,7 @@ class Ventas extends CI_Controller{
                 $this->table->add_row(
                     '<i class="'.($contrato->estado == 'pendiente' ? 'icon-time' : ($contrato->estado == 'autorizado' ? 'icon-ok' : 'icon-remove')).'"></i>',
                     $contrato->numero,
+                    $contrato->fecha,
                     $contrato->cliente,
                     array('data' => number_format($total,2,'.',','), 'class' => 'hidden-phone'),
                     //$mods,
