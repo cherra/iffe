@@ -493,6 +493,120 @@ class Informes extends CI_Controller{
         $this->load->view('informes/listado', $data);
     }
     
+    public function contratos_giro_listado(){
+        $data['reporte'] = '';
+        if( ($post = $this->input->post()) ){
+            
+            $data['desde'] = $post['desde'];
+            $data['hasta'] = $post['hasta'];
+            $data['filtro'] = $post['filtro'];
+            
+            $this->load->model('contrato','c');
+            $this->load->model('cliente','cl');
+            $this->load->model('giro','g');
+            $this->load->library('rango');
+
+            $contratos = $this->c->get_by_fecha( $post['desde'].' 00:00:00', $post['hasta'].' 23:59:59', $post['filtro'] )->result();
+            
+            // generar tabla
+            $this->load->library('table');
+            $this->table->set_empty('&nbsp;');
+            
+            $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+            $this->table->set_template($tmpl);
+            $this->table->set_heading('Número', 'Fecha', 'Cliente', 'Calle', 'Módulos', 'Giro');
+            $estatus = 'autorizado';
+            $clase = '';
+            $contrato = '';
+            foreach ($contratos as $c){
+                if($c->estado == 'cancelado'){
+                    $clase = 'cancelado';
+                }else{
+                    $clase = '';
+                }
+                if($estatus != $c->estado){
+                    $estatus = $c->estado;
+                    
+                    $this->table->add_row( array('data' => '', 'colspan' => '6'));
+                    $this->table->add_row_class($clase);
+                    $this->table->add_row( array('data' => 'CANCELADOS', 'colspan' => '6'));
+                    $this->table->add_row_class($clase);
+                }
+                $fecha = date_create($c->fecha);
+                $modulos_contrato = $this->c->get_modulos_agrupados($c->id)->result();
+                $calles = '';
+                $modulos = '';
+                $i = 0;
+                foreach($modulos_contrato as $m){
+                    if($i > 0){
+                        $calles .= '<br>';
+                        $modulos .= '<br>';
+                    }
+                    $calles .= $m->calle;
+                    $arreglo = explode(', ',$m->modulo);
+                    $modulos .= $this->rango->array_to_rango($arreglo);
+                    $i++;
+                }
+                
+                $cliente = $this->cl->get_by_id($c->id_cliente)->row();
+                $giro = $this->g->get_by_id($cliente->id_giro)->row();
+                
+                $this->table->add_row(
+                    array('data' => $c->numero.'/'.$c->sufijo,'class' => $clase),
+                    array('data' => date_format($fecha,'d/m/Y'),'class' => $clase),
+                    array('data' => $c->cliente,'class' => $clase),
+                    array('data' => $calles,'class' => $clase),
+                    array('data' => $modulos,'class' => $clase),
+                    array('data' => $giro->nombre, 'class' => $clase)
+                );
+                
+                $contrato = $c->id;
+                $this->table->add_row_class($clase);
+                
+            }
+            
+            
+            $this->table->add_row( array('data' => '', 'colspan' => '6'));
+            $this->table->add_row_class($clase);
+            
+            $tabla = $this->table->generate();
+            
+            //$tabla.= '</tbody></table>';
+            $this->load->library('tbs');
+            $this->load->library('pdf');
+            
+            // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['titulo'] = 'Listado de contratos con giro';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+            $desde = date_create($post['desde']);
+            $hasta = date_create($post['hasta']);
+            $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
+            $this->tbs->VarRef['contenido'] = $tabla;
+            
+            $this->tbs->Show(TBS_NOTHING);
+            
+            // Se regresa el render
+            $output = $this->tbs->Source;
+            
+            $view = str_replace("{contenido_vista}", $output, $this->template);
+            
+            // PDF
+            $pdf = $this->pdf->render($view,'Letter',null,true);
+            //$pdf = $view;
+            
+            $fp = fopen($this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('tmp_path').'contratos_giro_listado.pdf','w');
+            fwrite($fp, $pdf);
+            fclose($fp);
+            $data['reporte'] = 'contratos_giro_listado.pdf';
+        }
+        $data['titulo'] = 'Informe de contratos con giro <small>Listado</small>';
+        $this->load->view('informes/listado', $data);
+    }
+    
     
     public function contratos_calle_listado(){
         $data['reporte'] = '';
