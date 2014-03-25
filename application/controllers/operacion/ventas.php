@@ -292,23 +292,25 @@ class Ventas extends CI_Controller{
         if ( ($datos = $this->input->post()) ) {
             //$datos['iva'] = $datos['subtotal'] * $this->configuracion->get_valor('iva');
             //$datos['importe'] = $datos['subtotal'] + $datos['iva'];
-            
-            $modulos_array = $this->rango->rango_to_array($datos['modulos']);
-            unset($datos['modulos']);
-            foreach($modulos_array as $item){
-                $modulo = $this->m->get_by_calle_numero($id_calle, $item);
-                if($modulo){
-                    if( $this->m->disponible($modulo->id) ){
-                        $datos['subtotal'] = $modulo->precio;
-                        $datos['iva'] = $modulo->precio * $this->configuracion->get_valor('iva');
-                        $datos['importe'] = $modulo->precio + $datos['iva'];
-                        $datos['id_modulo'] = $modulo->id;
 
-                        $result = $this->co->save_modulo( $datos );
-                        if($result > 0){
-                            $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Módulo(s) agregado(s) correctamente</div>';
-                        }else{
-                            $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Error al agregar el(los) módulo(s)</div>';
+            if(!empty($datos['modulos'])){
+                $modulos_array = $this->rango->rango_to_array($datos['modulos']);
+                unset($datos['modulos']);
+                foreach($modulos_array as $item){
+                    $modulo = $this->m->get_by_calle_numero($id_calle, $item);
+                    if($modulo){
+                        if( $this->m->disponible($modulo->id) ){
+                            $datos['subtotal'] = $modulo->precio;
+                            $datos['iva'] = $modulo->precio * $this->configuracion->get_valor('iva');
+                            $datos['importe'] = $modulo->precio + $datos['iva'];
+                            $datos['id_modulo'] = $modulo->id;
+
+                            $result = $this->co->save_modulo( $datos );
+                            if($result > 0){
+                                $data['mensaje'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Módulo(s) agregado(s) correctamente</div>';
+                            }else{
+                                $data['mensaje'] = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Error al agregar el(los) módulo(s)</div>';
+                            }
                         }
                     }
                 }

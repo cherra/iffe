@@ -65,13 +65,15 @@ class Modulo extends CI_Model {
     * ***********************************************************************
     */
     function get_disponibles($id_calle){
-        $this->db->select('m.*, c.id AS contrato, c.estado as estado');
-        $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
-        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
+        //$this->db->select('m.*, c.id AS contrato, c.estado as estado');
+        $this->db->select('m.*');
+        //$this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
+        //$this->db->join('Contratos c','cm.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id.' AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id.' where estado = "pendiente" or estado = "autorizado")','left');
+        $this->db->where('m.id NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id.' where estado = "pendiente" or estado = "autorizado")');
         $this->db->where('m.id_calle', $id_calle);
         //$this->db->where('c.id NOT IN (SELECT id FROM Contratos WHERE estado = "pendiente" OR estado = "autorizado")');
         $this->db->group_by('m.id');
-        $this->db->having('contrato IS NULL OR estado = "cancelado"');
+        //$this->db->having('contrato IS NULL OR estado = "cancelado"');
         $this->db->order_by('m.numero');
         return $this->db->get($this->tbl.' m');
     }
@@ -79,14 +81,14 @@ class Modulo extends CI_Model {
     function disponible( $id ){
         $this->db->select('m.*, c.id AS contrato, c.estado as estado');
         $this->db->join('ContratoModulos cm','m.id = cm.id_modulo','left');
-        $this->db->join('Contratos c','cm.id_contrato = c.id AND cm.id_modulo NOT IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id where estado = "pendiente" or estado = "autorizado") AND c.id_periodo = '.$this->periodo->id,'left');
+        $this->db->join('Contratos c','cm.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id.' AND cm.id_modulo IN (SELECT m.id from Modulos m JOIN ContratoModulos cm ON m.id = cm.id_modulo join Contratos c on cm.id_contrato = c.id AND c.id_periodo = '.$this->periodo->id.' where estado = "pendiente" or estado = "autorizado")','left');
         $this->db->where('m.id', $id);
-        $this->db->having('contrato IS NULL OR estado = "cancelado"');
+        $this->db->having('contrato IS NOT NULL OR estado != "cancelado"');
         $query = $this->db->get($this->tbl.' m');
         if($query->num_rows() > 0)
-            return true;
-        else
             return false;
+        else
+            return true;
     }
     
  
