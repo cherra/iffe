@@ -351,7 +351,7 @@ class Ventas extends CI_Controller{
                 array('data' => ucfirst($m->categoria), 'class' => 'hidden-phone'),
                 array('data' => ucfirst($m->tipo), 'class' => 'hidden-phone'),
                 number_format($m->importe,2,'.',','),
-                array('data' => anchor('operacion/ventas/contratos_delete_modulo/' . $id.'/'.$m->id_calle.'/'.$m->id_modulo, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Quitar')), 'class' => 'hidden-phone')
+                array('data' => anchor('operacion/ventas/contratos_delete_modulo/' . $id.'/'.$m->id_calle.'/'.$m->id, '<i class="icon-remove"></i>', array('class' => 'btn btn-small', 'title' => 'Quitar')), 'class' => 'hidden-phone')
             );
         }
         $data['table'] = $this->table->generate();
@@ -361,13 +361,13 @@ class Ventas extends CI_Controller{
 
     }
     
-    public function contratos_delete_modulo( $id = null, $id_calle = null, $id_modulo = null ){
-        if(empty($id_modulo) or empty($id) or empty($id_calle)){
+    public function contratos_delete_modulo( $id_contrato = null, $id_calle = null, $id = null ){
+        if(empty($id) or empty($id_contrato) or empty($id_calle)){
             redirect('operacion/ventas/contratos_modulos/');
         }
         $this->load->model('contrato','co');
-        $this->co->delete_modulo($id_modulo);
-        redirect('operacion/ventas/contratos_modulos/'.$id.'/'.$id_calle);
+        $this->co->delete_modulo($id);
+        redirect('operacion/ventas/contratos_modulos/'.$id_contrato.'/'.$id_calle);
     }
     
     /********************

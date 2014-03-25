@@ -164,7 +164,7 @@ class Contrato extends CI_Model{
     }
     
     function get_modulos( $id, $limit = null, $offset = 0 ){
-        $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe, m.id_calle');
+        $this->db->select('c.nombre as calle, m.id as id_modulo, m.numero as modulo, m.categoria, m.tipo, cm.importe, m.id_calle, cm.id');
         $this->db->join('Modulos m','cm.id_modulo = m.id');
         $this->db->join('Calles c','m.id_calle = c.id');
         $this->db->where('cm.id_contrato',$id);
@@ -279,8 +279,14 @@ class Contrato extends CI_Model{
             return false;
     }
     
-    function delete_modulo($id_modulo){
-        $this->db->delete($this->tbl_contrato_modulos, array('id_modulo' => $id_modulo));
+    function delete_modulo($id){
+//        $this->db->select('cm.id');
+//        $this->db->join('Contrato c','c.id = cm.id_contrato');
+//        $this->db->where('c.id_periodo', $this->periodo->id);
+//        $this->db->where('cm.id_modulo', $id_modulo);
+//        $result = $this->db->get($this->tbl_contrato_modulos.' cm');
+        
+        $this->db->delete($this->tbl_contrato_modulos, array('id' => $id));
     }
 
     /**
