@@ -130,6 +130,126 @@ class Informes extends CI_Controller{
         $this->load->view('informes/listado', $data);
     }
     
+    public function notas_credito_listado(){
+        $data['reporte'] = '';
+        if( ($post = $this->input->post()) ){
+            
+            $data['desde'] = $post['desde'];
+            $data['hasta'] = $post['hasta'];
+            $data['filtro'] = $post['filtro'];
+            
+            $this->load->model('nota_credito','nc');
+            $notas = $this->nc->get_by_fecha( $post['desde'], $post['hasta'], $post['filtro'] )->result();
+            
+            // generar tabla
+            $this->load->library('table');
+            $this->table->set_empty('&nbsp;');
+            
+            $tmpl = array ( 'table_open' => '<table class="table table-condensed" >' );
+            $this->table->set_template($tmpl);
+            $this->table->set_heading('Serie', 'Folio', 'Fecha', 'Nombre', 'Importe');
+            $total = $total_vigentes = $total_canceladas = $total_pendientes = $total_revisadas = 0;
+            $estatus = 'pendiente';
+            $clase = '';
+            $this->table->add_row( array('data' => 'PENDIENTES', 'colspan' => '5'));
+            $this->table->add_row_class($clase);
+            foreach ($notas as $f){
+                if($f->estatus == 'cancelada'){
+                    $clase = 'cancelado';
+                    $total_canceladas += $f->total;
+                }elseif($f->estatus == 'autorizada'){
+                    $clase = '';
+                    $total_vigentes += $f->total;
+                }elseif($f->estatus == 'pendiente'){
+                    $clase = '';
+                    $total_pendientes += $f->total;
+                }elseif($f->estatus == 'revisada'){
+                    $clase = '';
+                    $total_revisadas += $f->total;
+                }
+                if($estatus != $f->estatus){
+                    
+                    $this->table->add_row( array('data' => '', 'colspan' => '5'));
+                    $this->table->add_row_class($clase);
+                    if($estatus == 'autorizada'){
+                        if($total_vigentes > 0){
+                            $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_vigentes,2).'</h5>', 'style' => 'text-align: right;'));
+                            $this->table->add_row_class($clase);
+                        }
+                        $this->table->add_row( array('data' => 'CANCELADAS', 'colspan' => '5'));
+                    }elseif($estatus == 'pendiente'){
+                        if($total_pendientes > 0){
+                            $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_pendientes,2).'</h5>', 'style' => 'text-align: right;'));
+                            $this->table->add_row_class($clase);
+                        }
+                        $this->table->add_row( array('data' => 'AUTORIZADAS', 'colspan' => '5'));
+                    }
+                    $this->table->add_row_class($clase);
+                    $estatus = $f->estatus;
+                }
+                $fecha = date_create($f->fecha);
+                $this->table->add_row(
+                    array('data' => $f->serie,'class' => $clase),
+                    array('data' => $f->folio,'class' => $clase),
+                    array('data' => date_format($fecha,'d/m/Y'),'class' => $clase),
+                    array('data' => $f->nombre,'class' => $clase),
+                    array('data' => number_format($f->total,2), 'style' => 'text-align: right;', 'class' => $clase)
+    		);
+                
+                $this->table->add_row_class($clase);
+                
+                $total += $f->total;
+            }
+            
+            if($estatus != ''){
+                // Total de notas revisadas
+                if($total_revisadas > 0){
+                    $this->table->add_row( '', '', '', '<h5>Total</h5>', array('data' => '<h5>'.number_format($total_canceladas,2).'</h5>', 'style' => 'text-align: right;'));
+                    $this->table->add_row_class($clase);
+                }
+            }
+            
+            
+            $tabla = $this->table->generate();
+            
+            //$tabla.= '</tbody></table>';
+            $this->load->library('tbs');
+            $this->load->library('pdf');
+            
+            // Se obtiene la plantilla (2° parametro se pone false para evitar que haga conversión de caractéres con htmlspecialchars() )
+            $this->tbs->LoadTemplate($this->configuracion->get_valor('template_path').$this->configuracion->get_valor('template_informes'), false);
+
+            // Se sustituyen los campos en el template
+            $this->tbs->VarRef['titulo'] = 'Listado de notas de crédito';
+            date_default_timezone_set('America/Mexico_City'); // Zona horaria
+            $this->tbs->VarRef['fecha'] = date('d/m/Y H:i:s');
+            $desde = date_create($post['desde']);
+            $hasta = date_create($post['hasta']);
+            $this->tbs->VarRef['subtitulo'] = 'Del '.date_format($desde, 'd/m/Y').' al '.date_format($hasta, 'd/m/Y');
+            $this->tbs->VarRef['contenido'] = $tabla;
+            
+            $this->tbs->Show(TBS_NOTHING);
+            
+            // Se regresa el render
+            $output = $this->tbs->Source;
+            
+            $view = str_replace("{contenido_vista}", $output, $this->template);
+            
+            // PDF
+            $this->pdf->pagenumSuffix = '/';
+            $this->pdf->SetHeader('{PAGENO}{nbpg}');
+            $pdf = $this->pdf->render($view);
+            //$pdf = $view;
+            
+            $fp = fopen($this->configuracion->get_valor('asset_path').$this->configuracion->get_valor('tmp_path').'notas_credito_listado.pdf','w');
+            fwrite($fp, $pdf);
+            fclose($fp);
+            $data['reporte'] = 'notas_credito_listado.pdf';
+        }
+        $data['titulo'] = 'Informe de notas de crédito <small>Listado</small>';
+        $this->load->view('informes/listado', $data);
+    }
+    
     public function recibos_listado(){
         $data['reporte'] = '';
         if( ($post = $this->input->post()) ){
